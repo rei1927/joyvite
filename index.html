@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- =========================== -->
+    <!-- SEO & META TAGS SETTINGS    -->
+    <!-- =========================== -->
+    <title>Dashboard - Joyvite</title>
+    <meta name="description" content="Joyvite Online Invitation Dashboard. Platform mudah dan cepat untuk membuat undangan pernikahan digital eksklusif.">
+    <meta name="keywords" content="undangan online, wedding invitation, joyvite, desain undangan, website pernikahan">
+    <meta name="author" content="Joyvite">
+    <meta name="robots" content="index, follow">
+    
+    <!-- Open Graph for Social Media -->
+    <meta property="og:title" content="Dashboard - Joyvite Online Invitation">
+    <meta property="og:description" content="Buat undangan pernikahan digital impianmu dengan Joyvite.">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://joyvite.id">
+    <!-- <meta property="og:image" content="https://joyvite.id/assets/og-image.jpg"> -->
+
+    <!-- =========================== -->
+    <!-- ANALYTICS & TAG MANAGER     -->
+    <!-- =========================== -->
+    
+    <!-- Google Tag Manager -->
+    <script>
+      (function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+      new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+      j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+      'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+      })(window,document,'script','dataLayer','GTM-XXXXXXX'); // REPLACE WITH YOUR GTM ID
+    </script>
+    <!-- End Google Tag Manager -->
+
+    <!-- Google Analytics (GA4) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-XXXXXXXXXX'); // REPLACE WITH YOUR GA4 MEASUREMENT ID
+    </script>
+    
+    <!-- Google reCAPTCHA v3 -->
+    <script src="https://www.google.com/recaptcha/api.js?render=RECAPTCHA_SITE_KEY"></script>
+    <script>
+      // Example of reCAPTCHA usage for later:
+      // grecaptcha.ready(function() {
+      //   grecaptcha.execute('RECAPTCHA_SITE_KEY', {action: 'homepage'}).then(function(token) {
+      //      // pass token to your backend
+      //   });
+      // });
+    </script>
+
+    <!-- =========================== -->
+    <!-- LIBRARIES (NODE_MODULES)    -->
+    <!-- =========================== -->
+    <!-- Bootstrap 5 CSS -->
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-XXXXXXX" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="#"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-envelope me-3"></i> Buku Tamu <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-image me-3"></i> Galeri Foto <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-credit-card me-3"></i> Atur Rekening</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-comment-dots me-3"></i> Kirim Masukan</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User">
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SETTINGS HEADER -->
+        <div class="settings-header">
+            <div class="link-info">
+                <h2>&amp;</h2>
+                <a href="#" class="link-url" id="weddingUrl"><i class="fa-solid fa-link"></i> https://wedding-adjo-arista.joyvite.id</a>
+                <div class="btn-group-custom mt-2">
+                    <button class="btn-custom btn-primary-custom"><i class="fa-regular fa-pen-to-square"></i> Ubah</button>
+                    <button class="btn-custom btn-outline-custom" id="copyLinkBtn"><i class="fa-regular fa-copy"></i> Salin link</button>
+                </div>
+            </div>
+            
+            <div class="settings-status">
+                <div class="status-row">
+                    <span><i class="fa-solid fa-cube"></i> Paket Aktif</span>
+                    <span class="badge-diamond">Paket Diamond</span>
+                </div>
+                <div class="status-row">
+                    <span><i class="fa-regular fa-eye"></i> Publikasikan</span>
+                    <div class="form-check form-switch m-0 pb-1">
+                        <input class="form-check-input m-0" type="checkbox" checked>
+                    </div>
+                </div>
+                <div class="status-row">
+                    <span><i class="fa-solid fa-user-group"></i> Pengunjung</span>
+                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 py-1 d-flex align-items-center gap-1" id="resetVisitorBtn" style="font-size: 0.75rem;">
+                        <i class="fa-solid fa-arrows-rotate m-0"></i> Reset
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARDS GRID -->
+        <div class="cards-container">
+            <div class="row g-4">
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="mempelai.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-ring"></i>
+                            <span class="title">Mempelai</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="lokasi.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-regular fa-calendar"></i>
+                            <div class="title-wrapper"><span class="title">Lokasi & Waktu</span><span class="badge-new">Baru</span></div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="desain.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-regular fa-window-maximize"></i>
+                            <span class="title">Desain</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="judul.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-align-justify"></i>
+                            <span class="title">Judul</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="musik.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-music"></i>
+                            <span class="title">Musik</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="#" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-shield-virus"></i>
+                            <span class="title">Prokes</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="quotes.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-quote-left"></i>
+                            <span class="title">Quotes</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="livestream.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-video"></i>
+                            <span class="title">Live Streaming</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="popup.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-regular fa-envelope-open"></i>
+                            <div class="title-wrapper"><span class="title">Invitation Popup</span><span class="badge-new">Baru</span></div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="sesi.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-regular fa-clock"></i>
+                            <div class="title-wrapper"><span class="title">Sesi Undangan</span><span class="badge-new">Baru</span></div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="bukutamu.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-clipboard-list"></i>
+                            <div class="title-wrapper"><span class="title">Buku Tamu</span><span class="badge-new">Baru</span></div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="galeri.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-regular fa-images"></i>
+                            <div class="title-wrapper"><span class="title">Galeri</span><span class="badge-new">Baru</span></div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-4 col-lg-3">
+                    <a href="amplop.html" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                        <div class="setting-card">
+                            <i class="fa-solid fa-gift"></i>
+                            <div class="title-wrapper"><span class="title">Amplop Digital</span><span class="badge-new">Baru</span></div>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- WHATSAPP WIDGET -->
+    <a href="#" class="wa-float">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+    
+    <!-- Tawk.to Live Chat (Placeholder) -->
+    <!-- 
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/YOUR_PROPERTY_ID/default';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    -->
+
+    <!-- =========================== -->
+    <!-- LOCAL NPM SCRIPTS           -->
+    <!-- =========================== -->
+    <!-- Core JS -->
+    <script src="node_modules/core-js/client/core.min.js"></script>
+    
+    <!-- jQuery -->
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    
+    <!-- Popper.js -->
+    <script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
+    
+    <!-- Bootstrap Bundle with Popper fallback -->
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+
+    <!-- Hammer.js -->
+    <script src="node_modules/hammerjs/hammer.min.js"></script>
+
+    <!-- Chart.js -->
+    <script src="node_modules/chart.js/dist/chart.umd.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="js/script.js"></script>
+</body>
+</html>

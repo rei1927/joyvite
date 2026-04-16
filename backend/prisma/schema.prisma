@@ -1,0 +1,28 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model WeddingConfig {
+  id        String   @id @default(uuid())
+  slug      String   @unique // e.g., "reiza-wedding"
+  
+  // JSONB block to cleanly store all dynamic forms (design colors, quotes, titles, livestream links)
+  settings  Json?    
+  
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Guest {
+  id        String   @id @default(uuid())
+  name      String
+  status    String   // "Hadir", "Tidak Hadir", "Belum Konfirmasi"
+  guests    Int      @default(0)
+  message   String?
+  createdAt DateTime @default(now())
+}

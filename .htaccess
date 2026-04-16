@@ -1,0 +1,30 @@
+# ==========================================
+# JOYVITE SECURITY & INFRASTRUCTURE CONFIG #
+# ==========================================
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # 1. Force SSL / Force HTTPS (Jika dipasang di AWS/Cloudflare ini mungkin otomatis dari panel)
+    RewriteCond %{HTTPS} off
+    RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+</IfModule>
+
+<IfModule mod_headers.c>
+    # 2. HSTS (HTTP Strict Transport Security)
+    # Memaksa browser hanya mengakses via HTTPS untuk 1 tahun ke depan (31536000 detik)
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+
+    # X-Frame-Options against Clickjacking
+    Header always set X-Frame-Options "SAMEORIGIN"
+    
+    # X-XSS-Protection
+    Header always set X-XSS-Protection "1; mode=block"
+    
+    # X-Content-Type-Options
+    Header always set X-Content-Type-Options "nosniff"
+</IfModule>
+
+# Catatan Tambahan:
+# HTTP/3, TLS/SSL Certificates Authorities (CA) biasanya diatur melalui Nginx (nginx.conf) 
+# atau langsung di panel Cloudflare Anda dengan mengaktifkan fitur "HTTP/3 (with QUIC)" dan "Full/Strict SSL".

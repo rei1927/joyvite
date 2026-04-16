@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Informasi Mempelai - Joyvite</title>
+    
+    <!-- Meta/SEO stubs -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <!-- Animate.css -->
+    <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .breadcrumb-item.active { color: var(--primary-dark); font-weight: 500; font-size: 0.9rem; }
+        .content-header-title { font-weight: 700; color: var(--text-main); font-size: 1.5rem; }
+        .border-start { border-color: var(--border-color) !important; }
+        
+        @media(max-width: 768px) {
+            .border-start { border-left: none !important; border-top: 1px solid var(--border-color); padding-top: 20px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-envelope me-3"></i> Buku Tamu <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-image me-3"></i> Galeri Foto <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-credit-card me-3"></i> Atur Rekening</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-comment-dots me-3"></i> Kirim Masukan</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User">
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BREADCRUMB HEADER -->
+        <div class="content-header px-4 pt-2 pb-0">
+            <h2 class="content-header-title">Informasi Mempelai</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Pengaturan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Mempelai</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- FORM CONTENT -->
+        <div class="content-body px-4 pb-5">
+            <form id="wedding-form" action="#" method="POST" enctype="multipart/form-data">
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-4">
+                        
+                        <!-- Alert Box -->
+                        <div class="alert alert-secondary mb-4 p-3 border-0" style="background-color: #f1f5f9; color: #475569" role="alert">
+                            <h5 class="alert-heading fw-bold mb-1" style="color: #334155"><i class="fa-solid fa-circle-info me-2"></i>Informasi</h5>
+                            <p class="mb-0 fs-6">Disarankan untuk melakukan kompresi pada foto yang akan diunggah, ukuran maksimal per file foto adalah <strong>2MB</strong>.</p>
+                        </div>
+
+                        <hr class="my-4" style="opacity: 0.1;">
+
+                        <div class="row gx-lg-5">
+                            <!-- ================= MALE COLUMN ================= -->
+                            <div class="col-md-6 mb-4">
+                                <div class="media d-flex align-items-center mb-4">
+                                    <!-- Use a generic SVG or UI-avatar for placeholder -->
+                                    <img src="https://ui-avatars.com/api/?name=MP&background=e2e8f0&color=64748b&size=80" id="male-account-upload-img" class="rounded me-3 shadow-sm border" alt="profile image" height="80" width="80" style="object-fit: cover;">
+                                    <div class="media-body">
+                                        <label for="male-account-upload" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm mb-1" style="background-color: var(--primary-color); border: none;">
+                                            <i class="fa-solid fa-folder-open me-1"></i> Pilih
+                                        </label>
+                                        <input type="file" id="male-account-upload" hidden name="male_profile_photo" accept="image/*">
+                                        <p class="text-muted mb-0" style="font-size: 0.8rem;">Ekstensi File JPG, PNG. Maks 2MB</p>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="male_name">Nama Lengkap Pria <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="male_name" placeholder="Nama Lengkap..." name="male_name" required value="Rei za">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="male_nickname">Nama Panggilan Pria <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="male_nickname" placeholder="Nama Panggilan..." name="male_nickname" required>
+                                </div>
+                                <hr class="my-4" style="opacity: 0.1;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="male_father_name">Nama Ayah Pria <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="male_father_name" placeholder="Nama Ayah..." name="male_father_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="male_mother_name">Nama Ibu Pria <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="male_mother_name" placeholder="Nama Ibu..." name="male_mother_name" required>
+                                </div>
+                                <hr class="my-4" style="opacity: 0.1;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="male_family_sequence">Urutan Anak Pria <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="male_family_sequence" placeholder="Urutan Anak Pria..." name="male_family_sequence" value="Putra">
+                                </div>
+                                <hr class="my-4" style="opacity: 0.1;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="male_instagram">Username Instagram</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">@</span>
+                                        <input type="text" class="form-control bg-light border-start-0" id="male_instagram" placeholder="Username instagram" name="male_instagram">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ================= END MALE COLUMN ================= -->
+
+
+                            <!-- ================= FEMALE COLUMN ================= -->
+                            <div class="col-md-6 mb-4 border-start">
+                                <div class="media d-flex align-items-center mb-4">
+                                    <img src="https://ui-avatars.com/api/?name=MW&background=e2e8f0&color=64748b&size=80" id="female-account-upload-img" class="rounded me-3 shadow-sm border" alt="profile image" height="80" width="80" style="object-fit: cover;">
+                                    <div class="media-body">
+                                        <label for="female-account-upload" class="btn btn-sm btn-primary rounded-pill px-3 shadow-sm mb-1" style="background-color: var(--primary-color); border: none;">
+                                            <i class="fa-solid fa-folder-open me-1"></i> Pilih
+                                        </label>
+                                        <input type="file" id="female-account-upload" hidden name="female_profile_photo" accept="image/*">
+                                        <p class="text-muted mb-0" style="font-size: 0.8rem;">Ekstensi File JPG, PNG. Maks 2MB</p>
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="female_name">Nama Lengkap Wanita <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="female_name" placeholder="Nama Lengkap..." name="female_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="female_nickname">Nama Panggilan Wanita <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="female_nickname" placeholder="Nama Panggilan..." name="female_nickname" required>
+                                </div>
+                                <hr class="my-4" style="opacity: 0.1;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="female_father_name">Nama Ayah Wanita <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="female_father_name" placeholder="Nama Ayah..." name="female_father_name" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="female_mother_name">Nama Ibu Wanita <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="female_mother_name" placeholder="Nama Ibu..." name="female_mother_name" required>
+                                </div>
+                                <hr class="my-4" style="opacity: 0.1;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="female_family_sequence">Urutan Anak Wanita <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" id="female_family_sequence" placeholder="Urutan Anak Wanita..." name="female_family_sequence" value="Putri">
+                                </div>
+                                <hr class="my-4" style="opacity: 0.1;">
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold" for="female_instagram">Username Instagram</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white">@</span>
+                                        <input type="text" class="form-control bg-light border-start-0" id="female_instagram" placeholder="Username instagram" name="female_instagram">
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- ================= END FEMALE COLUMN ================= -->
+                        </div>
+
+                        <!-- SUBMIT BUTTON -->
+                        <div class="row">
+                            <div class="col-12 mt-2">
+                                <button class="btn btn-primary w-100 rounded-pill py-2 shadow-sm text-white" style="background-color: var(--primary-dark); border: none; font-size: 1rem; font-weight: 600;" type="submit">
+                                    Simpan <i class="fa-solid fa-chevron-right ms-2 fs-6"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- WHATSAPP WIDGET -->
+    <a href="#" class="wa-float">
+        <i class="fa-brands fa-whatsapp"></i>
+    </a>
+
+    <!-- SCRIPTS -->
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <!-- jQuery Validate Plugin Form (Simulation) -->
+    <!-- Custom JS -->
+    <script src="js/script.js"></script>
+</body>
+</html>

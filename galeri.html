@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Galeri Undangan - Joyvite</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper"><img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User"><div class="status-dot"></div></div>
+            </div>
+        </div>
+
+        <div class="content-header px-4 pt-4 pb-0">
+            <h2 class="content-header-title fw-bold">Galeri Foto & Video</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html" class="text-muted text-decoration-none">Pengaturan</a></li>
+                    <li class="breadcrumb-item active text-primary">Galeri</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="content-body px-4 pb-5">
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">Foto Pre-Wedding</h5>
+                        <button class="btn btn-primary rounded-pill px-3"><i class="fa-solid fa-plus me-1"></i> Unggah Baru</button>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="position-relative border rounded bg-light" style="height: 150px; background-image: url('https://ui-avatars.com/api/?name=P1'); background-size: cover; background-position: center;">
+                                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding:0"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="position-relative border rounded bg-light" style="height: 150px; background-image: url('https://ui-avatars.com/api/?name=P2'); background-size: cover; background-position: center;">
+                                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding:0"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                        <!-- Placeholder unggah -->
+                        <div class="col-6 col-md-4 col-lg-3">
+                            <div class="border rounded bg-light d-flex justify-content-center align-items-center flex-column text-muted" style="height: 150px; border-style: dashed !important; cursor: pointer;">
+                                <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2"></i>
+                                <span class="small font-weight-bold">Tambah Foto</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <h5 class="fw-bold mb-3">Tautan Video Gallery</h5>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white"><i class="fa-brands fa-youtube text-danger"></i></span>
+                        <input type="url" class="form-control bg-light border-start-0" placeholder="https://youtube.com/watch?v=....">
+                        <button class="btn btn-dark px-4">Simpan</button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">Mendukung format tautan Youtube untuk Video Cinematic Anda.</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

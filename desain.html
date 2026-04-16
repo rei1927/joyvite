@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Desain Undangan - Joyvite</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .theme-card {
+            border: 2px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .theme-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .theme-card.active {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(236,72,153,0.3);
+        }
+        .theme-preview {
+            height: 150px;
+            background-color: #f1f5f9;
+            border-radius: 8px 8px 0 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            background-size: cover;
+            background-position: center;
+        }
+    </style>
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper"><img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User"><div class="status-dot"></div></div>
+            </div>
+        </div>
+
+        <div class="content-header px-4 pt-4 pb-0">
+            <h2 class="content-header-title fw-bold">Desain Undangan</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html" class="text-muted text-decoration-none">Pengaturan</a></li>
+                    <li class="breadcrumb-item active text-primary">Desain</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="content-body px-4 pb-5">
+            <form id="wedding-form" action="#" method="POST">
+                
+                <!-- THEME SELECTOR -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title fw-bold mb-4">Pilih Tema Visual</h4>
+                        <div class="row g-4">
+                            <!-- Theme 1 -->
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <div class="card theme-card active rounded-3 h-100">
+                                    <div class="theme-preview" style="background-color: #fdf2f8;">
+                                        <i class="fa-solid fa-leaf fa-2x text-pink-300" style="color: #fbcfe8;"></i>
+                                    </div>
+                                    <div class="card-body text-center py-2">
+                                        <h6 class="mb-0 fw-bold">Sakura Blossom</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Theme 2 -->
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <div class="card theme-card rounded-3 h-100">
+                                    <div class="theme-preview" style="background-color: #f0fdf4;">
+                                        <i class="fa-solid fa-seedling fa-2x" style="color: #bbf7d0;"></i>
+                                    </div>
+                                    <div class="card-body text-center py-2">
+                                        <h6 class="mb-0 fw-bold">Emerald Sage</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Theme 3 -->
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <div class="card theme-card rounded-3 h-100">
+                                    <div class="theme-preview" style="background-color: #eff6ff;">
+                                        <i class="fa-solid fa-water fa-2x" style="color: #bfdbfe;"></i>
+                                    </div>
+                                    <div class="card-body text-center py-2">
+                                        <h6 class="mb-0 fw-bold">Ocean Blue</h6>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Theme 4 -->
+                            <div class="col-6 col-md-4 col-lg-3">
+                                <div class="card theme-card rounded-3 h-100">
+                                    <div class="theme-preview" style="background-color: #fffbeb;">
+                                        <i class="fa-regular fa-sun fa-2x" style="color: #fde68a;"></i>
+                                    </div>
+                                    <div class="card-body text-center py-2">
+                                        <h6 class="mb-0 fw-bold">Warm Gold</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COVER IMAGE -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title fw-bold mb-4">Sampul Depan (Cover Utama)</h4>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Pilih Gambar Sampul <span class="text-danger">*</span></label>
+                                <div class="border rounded p-3 mb-3 text-center bg-light" style="border-style: dashed !important;">
+                                    <i class="fa-solid fa-image fa-3x text-muted mb-2 opacity-50"></i>
+                                    <p class="text-muted small mb-3">Ukuran yang disarankan: 1080 x 1920px (Potret)</p>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-4">Browser / Unggah</button>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Warna Nuansa Utama (Primary Color)</label>
+                                <div class="input-group mb-3">
+                                    <input type="color" class="form-control form-control-color bg-light border-end-0" value="#ec4899" title="Pilih warna nuansa">
+                                    <input type="text" class="form-control bg-light" value="#ec4899">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn w-100 rounded-pill py-3 shadow-sm text-white mt-3" style="background-color: var(--primary-dark); font-weight: 600;" type="submit">
+                    Simpan Desain <i class="fa-solid fa-save ms-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+    <script>
+        // Simple Theme Selection interaction
+        $('.theme-card').click(function() {
+            $('.theme-card').removeClass('active');
+            $(this).addClass('active');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sesi Undangan - Joyvite</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper"><img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User"><div class="status-dot"></div></div>
+            </div>
+        </div>
+
+        <div class="content-header px-4 pt-4 pb-0">
+            <h2 class="content-header-title fw-bold">Sesi Kehadiran</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html" class="text-muted text-decoration-none">Pengaturan</a></li>
+                    <li class="breadcrumb-item active text-primary">Sesi Acara</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="content-body px-4 pb-5">
+            
+            <div class="alert alert-secondary mb-4 p-3 border-0 shadow-sm" style="background-color: #f1f5f9; color: #475569" role="alert">
+                <p class="mb-0 fs-6">Sistem sesi berguna jika Anda ingin membatasi kuota tamu per jam atau memisahkan kloter kehadiran (Misal: Sesi 1 PK 10.00-11.00, Sesi 2 PK 11.00-12.00).</p>
+            </div>
+
+            <!-- List Sesi Saat Ini -->
+            <div class="card shadow-sm border-0 rounded-3 mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Daftar Sesi (Waves)</h5>
+                        <button class="btn btn-sm btn-outline-primary rounded-pill fw-bold"><i class="fa-solid fa-plus me-1"></i> Tambah Baru</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th>Nama Sesi</th>
+                                    <th>Waktu</th>
+                                    <th>Maks. Tamu</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><span class="fw-semibold text-dark">Sesi Utama Pagi</span></td>
+                                    <td>10.00 - 12.00</td>
+                                    <td>200 Orang</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-light text-secondary"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="btn btn-sm btn-light text-danger"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><span class="fw-semibold text-dark">Sesi Siang (Rekan Kerja)</span></td>
+                                    <td>13.00 - 15.00</td>
+                                    <td>100 Orang</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-light text-secondary"><i class="fa-solid fa-pen"></i></button>
+                                        <button class="btn btn-sm btn-light text-danger"><i class="fa-solid fa-trash"></i></button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

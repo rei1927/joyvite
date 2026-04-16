@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buku Tamu - Joyvite</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper"><img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User"><div class="status-dot"></div></div>
+            </div>
+        </div>
+
+        <div class="content-header px-4 pt-4 pb-0">
+            <h2 class="content-header-title fw-bold">Daftar Kehadiran (Buku Tamu)</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html" class="text-muted text-decoration-none">Pengaturan</a></li>
+                    <li class="breadcrumb-item active text-primary">Buku Tamu</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="content-body px-4 pb-5">
+            <div class="row">
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 bg-primary text-white rounded-3 mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-1">Total Hadir</h6>
+                            <h2 class="fw-bold mb-0">142</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 bg-secondary text-white rounded-3 mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-1">Total Tidak Hadir</h6>
+                            <h2 class="fw-bold mb-0">18</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card shadow-sm border-0 bg-white text-dark rounded-3 mb-4">
+                        <div class="card-body">
+                            <h6 class="fw-bold mb-1 text-muted">Belum Konfirmasi</h6>
+                            <h2 class="fw-bold mb-0">40</h2>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm border-0 rounded-3">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <h5 class="fw-bold mb-0">Rekapitulasi Buku Tamu</h5>
+                        <button class="btn btn-sm btn-outline-success"><i class="fa-solid fa-file-excel me-1"></i> Export Excel</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light text-muted">
+                                <tr>
+                                    <th>Nama Tamu</th>
+                                    <th>Status (RSVP)</th>
+                                    <th>Jumlah Bersama</th>
+                                    <th>Pesan & Doa</th>
+                                    <th>Waktu Mengisi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class="fw-semibold">Andi & Keluarga</td>
+                                    <td><span class="badge bg-success">Hadir</span></td>
+                                    <td>4 Orang</td>
+                                    <td class="text-muted small">Selamat menempuh hidup baru sahabatku. Semoga samawa!</td>
+                                    <td class="text-muted small">2 Jam lalu</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Ria SW</td>
+                                    <td><span class="badge bg-danger">Tidak Hadir</span></td>
+                                    <td>0</td>
+                                    <td class="text-muted small">Maaf aku ada dinas ke luar kota, selamat ya!</td>
+                                    <td class="text-muted small">Kemarin</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lokasi Acara - Joyvite</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .breadcrumb-item.active { color: var(--primary-dark); font-weight: 500; font-size: 0.9rem; }
+        .content-header-title { font-weight: 700; color: var(--text-main); font-size: 1.5rem; }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-envelope me-3"></i> Buku Tamu <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-image me-3"></i> Galeri Foto <span class="badge-new">Baru</span></a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-credit-card me-3"></i> Atur Rekening</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-comment-dots me-3"></i> Kirim Masukan</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User">
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BREADCRUMB HEADER -->
+        <div class="content-header px-4 pt-2 pb-0">
+            <h2 class="content-header-title">Lokasi Acara</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Pengaturan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Lokasi Acara</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- FORM CONTENT -->
+        <div class="content-body px-4 pb-5">
+            <form id="wedding-form" action="#" method="POST">
+                
+                <!-- CARD 1: ACARA UTAMA -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <div class="alert alert-secondary mb-4 p-3 border-0" style="background-color: #f1f5f9; color: #475569" role="alert">
+                            <h5 class="alert-heading fw-bold mb-1" style="color: #334155"><i class="fa-solid fa-circle-info me-2"></i>Informasi</h5>
+                            <p class="mb-0 fs-6">Preview maps hanya akan tampil pada acara utama saja.</p>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <span class="badge bg-success rounded-pill px-3 py-2 fw-semibold fs-6"><i class="fa-solid fa-star me-1 text-warning"></i> Acara Utama</span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Judul Acara <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light" name="reception_type" value="Resepsi" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Alamat Acara <span class="text-danger">*</span></label>
+                            <textarea name="reception_location" class="form-control bg-light" rows="3" placeholder="Alamat lengkap acara..." required></textarea>
+                            <!-- Note: Real google maps integration should be placed here later -->
+                            <div class="mt-2 p-3 bg-secondary bg-opacity-10 rounded text-center border">
+                                <i class="fa-solid fa-map-location-dot fa-2x text-muted mb-2"></i>
+                                <p class="mb-0 text-muted small">Peta Google Maps (Simulasi)</p>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Nama Gedung/Lokasi <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light" name="reception_place_name" placeholder="Nama Gedung / Hotel..." required>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Tanggal <span class="text-danger">*</span></label>
+                                <input type="date" class="form-control bg-light" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Waktu Mulai <span class="text-danger">*</span></label>
+                                <input type="time" class="form-control bg-light" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label fw-semibold">Waktu Selesai</label>
+                                <input type="time" class="form-control bg-light">
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="checkLanjut">
+                                    <label class="form-check-label text-muted small" for="checkLanjut">Sampai Selesai</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Zona Waktu <span class="text-danger">*</span></label>
+                            <select class="form-select bg-light">
+                                <option value="WIB">WIB (Waktu Indonesia Barat)</option>
+                                <option value="WITA">WITA (Waktu Indonesia Tengah)</option>
+                                <option value="WIT">WIT (Waktu Indonesia Timur)</option>
+                            </select>
+                        </div>
+                        
+                        <hr class="my-4" style="opacity:0.1">
+
+                        <!-- Toggles -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div>
+                                <h6 class="fw-bold mb-1">Tampilkan Acara</h6>
+                                <p class="text-muted small mb-0">Menampilkan acara ke tamu</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h6 class="fw-bold mb-1">Tampilkan Preview Maps</h6>
+                                <p class="text-muted small mb-0">Menampilkan iframe gmaps ke tamu</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: ACARA OPSIONAL (AKAD) -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <div class="mb-3">
+                            <span class="badge bg-secondary rounded-pill px-3 py-2 fw-semibold fs-6">Acara Opsional</span>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Judul Acara</label>
+                            <input type="text" class="form-control bg-light" name="ceremony_type" value="Akad Nikah">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Alamat Acara</label>
+                            <textarea name="ceremony_location" class="form-control bg-light" rows="3" placeholder="Alamat lengkap akad..."></textarea>
+                        </div>
+                        <!-- simplified date controls -->
+                         <div class="row g-3 mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Tanggal</label>
+                                <input type="date" class="form-control bg-light">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Waktu Mulai</label>
+                                <input type="time" class="form-control bg-light">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Zona Waktu</label>
+                                <select class="form-select bg-light">
+                                    <option value="WIB">WIB</option>
+                                    <option value="WITA">WITA</option>
+                                    <option value="WIT">WIT</option>
+                                </select>
+                            </div>
+                        </div>
+                        <!-- Toggle -->
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <div>
+                                <h6 class="fw-bold mb-1">Tampilkan Acara</h6>
+                                <p class="text-muted small mb-0">Menampilkan acara akad ini ke tamu</p>
+                            </div>
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SUBMIT BUTTON -->
+                <button class="btn btn-primary w-100 rounded-pill py-3 shadow-sm text-white" style="background-color: var(--primary-dark); border: none; font-size: 1.1rem; font-weight: 600;" type="submit">
+                    Simpan Perubahan <i class="fa-solid fa-save ms-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>

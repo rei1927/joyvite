@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Musik Undangan - Joyvite</title>
+    
+    <meta name="robots" content="noindex, nofollow">
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="sidebar">
+        <!-- Reusing Sidebar from template -->
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item"><a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a></li>
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan</a></li>
+        </ul>
+    </nav>
+
+    <div class="main-content">
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper"><img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User"><div class="status-dot"></div></div>
+            </div>
+        </div>
+
+        <div class="content-header px-4 pt-4 pb-0">
+            <h2 class="content-header-title fw-bold">Musik Undangan</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html" class="text-muted text-decoration-none">Pengaturan</a></li>
+                    <li class="breadcrumb-item active text-primary">Musik</li>
+                </ol>
+            </nav>
+        </div>
+
+        <div class="content-body px-4 pb-5">
+            <form id="wedding-form" action="#" method="POST">
+                
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        
+                        <div class="alert alert-secondary mb-4 p-3 border-0" style="background-color: #f1f5f9; color: #475569" role="alert">
+                            <h5 class="alert-heading fw-bold mb-1" style="color: #334155"><i class="fa-solid fa-music me-2"></i>Informasi Audio</h5>
+                            <p class="mb-0 fs-6">Sistem perangkat pintar seperti iOS dan Android keluaran terbaru mungkin memblokir pemutaran musik otomatis demi alasan keamanan. Pengguna harus mengetuk layar undangan setidaknya sekali sebelum musik dapat berbunyi.</p>
+                        </div>
+                        
+                        <!-- Toggle Musik -->
+                        <div class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom">
+                            <div>
+                                <h5 class="fw-bold mb-1 col-auto text-dark">Aktifkan Musik</h5>
+                                <p class="text-muted small mb-0">Putar lagu latar belakang saat undangan terbuka</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input" type="checkbox" role="switch" checked>
+                            </div>
+                        </div>
+
+                        <!-- Unggah File Musik -->
+                        <div class="row g-4 mt-2">
+                            <div class="col-md-12">
+                                <label class="form-label fw-semibold">Pilih atau Unggah Musik (MP3)</label>
+                                <div class="border rounded px-4 py-5 mb-3 text-center bg-light" style="border-style: dashed !important; border-width: 2px !important; border-color: #cbd5e1 !important">
+                                    <div class="d-inline-flex justify-content-center align-items-center rounded-circle bg-white shadow-sm mb-3" style="width: 70px; height: 70px;">
+                                        <i class="fa-solid fa-cloud-arrow-up fa-2x" style="color: var(--primary-color)"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-1">Letakkan file MP3 di sini</h5>
+                                    <p class="text-muted small mb-3">Atau klik tombol di bawah untuk menelusuri komputer Anda (Maks. 5MB)</p>
+                                    <label class="btn btn-primary rounded-pill px-4 py-2 fw-semibold" for="musicUpload" style="cursor: pointer; background-color: var(--primary-color); border: none;">
+                                        <i class="fa-solid fa-folder-open me-2"></i> Telusuri Berkas
+                                    </label>
+                                    <input type="file" id="musicUpload" class="d-none" accept=".mp3,audio/*">
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Audio Player Preview Mockup -->
+                        <div class="bg-dark text-white rounded-3 p-3 mt-2 d-flex align-items-center">
+                            <button type="button" class="btn btn-light rounded-circle p-0 d-flex justify-content-center align-items-center me-3 shadow-none" style="width: 40px; height: 40px;">
+                                <i class="fa-solid fa-play" style="color: var(--primary-dark); margin-left: 3px;"></i>
+                            </button>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0 fw-bold">A_Thousand_Years_Piano.mp3</h6>
+                                <div class="progress mt-2" style="height: 5px; background-color: rgba(255,255,255,0.2);">
+                                    <div class="progress-bar bg-primary" role="progressbar" style="width: 25%; background-color: var(--primary-color) !important;" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100"></div>
+                                </div>
+                            </div>
+                            <span class="ms-3 small text-white-50">1:04 / 4:12</span>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <button class="btn w-100 rounded-pill py-3 shadow-sm text-white" style="background-color: var(--primary-dark); font-weight: 600;" type="submit">
+                    Simpan Pengaturan Musik <i class="fa-solid fa-save ms-2"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/script.js"></script>
+</body>
+</html>
