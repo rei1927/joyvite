@@ -11,5 +11,37 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - ./postgres-data:/var/lib/postgresql/data
+      - joyvite-pgdata:/var/lib/postgresql/data
     restart: unless-stopped
+    networks:
+      - joyvite-net
+
+  joyvite-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: joyvite-backend
+    environment:
+      PORT: "3000"
+      DATABASE_URL: "postgresql://admin:JoyvitePassword123!@joyvite-postgres:5432/joyvitedb?schema=public"
+      MINIO_ENDPOINT: "minio-api.dayamedialangit.co.id"
+      MINIO_ACCESS_KEY: "admin"
+      MINIO_SECRET_KEY: "rahasia123"
+      TEMPLATES_DIR: "/app/templates"
+    ports:
+      - "3500:3000"
+    volumes:
+      - joyvite-templates:/app/templates
+    depends_on:
+      - joyvite-postgres
+    restart: unless-stopped
+    networks:
+      - joyvite-net
+
+volumes:
+  joyvite-pgdata:
+  joyvite-templates:
+
+networks:
+  joyvite-net:
+    driver: bridge
