@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cerita Cinta - Joyvite</title>
+    
+    <!-- Meta/SEO stubs -->
+    <meta name="robots" content="noindex, nofollow">
+
+    <!-- Bootstrap 5 CSS -->
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <style>
+        .breadcrumb-item a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
+        .breadcrumb-item.active { color: var(--primary-dark); font-weight: 500; font-size: 0.9rem; }
+        .content-header-title { font-weight: 700; color: var(--text-main); font-size: 1.5rem; }
+        
+        .timeline-card {
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        .timeline-card:hover {
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.08) !important;
+            transform: translateX(5px);
+        }
+        .btn-remove-timeline {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-placeholder {
+            width: 100px;
+            height: 100px;
+            background-color: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+            position: relative;
+        }
+        .upload-placeholder img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0; left: 0;
+            display: none;
+        }
+        .upload-placeholder:hover {
+            background-color: #e2e8f0;
+            border-color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- SIDEBAR -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <i class="fa-solid fa-envelope-open-text" style="color: var(--primary-color); font-size: 1.5rem;"></i>
+            <h4>Joyvite</h4>
+        </div>
+        
+        <ul class="nav flex-column mt-2">
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-solid fa-house me-3"></i> Beranda</a></li>
+            <li class="nav-item">
+               <a class="nav-link active" href="index.html"><i class="fa-solid fa-gear me-3"></i> Pengaturan</a>
+            </li>
+            <!-- Sidebar sub list or generic -->
+            <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-paper-plane me-3"></i> Kirim Undangan</a></li>
+        </ul>
+    </nav>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <!-- TOPBAR -->
+        <div class="topbar">
+            <button class="btn d-lg-none" id="mobileMenuToggle"><i class="fa-solid fa-bars"></i></button>
+            <div class="user-profile ms-auto">
+                <span class="name">Rei za</span>
+                <div class="avatar-wrapper">
+                    <img src="https://ui-avatars.com/api/?name=Rei+Za&background=random" alt="Avatar User">
+                    <div class="status-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BREADCRUMB HEADER -->
+        <div class="content-header px-4 pt-2 pb-0">
+            <h2 class="content-header-title">Cerita Cinta</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="index.html">Pengaturan</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Cerita Cinta</li>
+                </ol>
+            </nav>
+        </div>
+
+        <!-- FORM CONTENT -->
+        <div class="content-body px-4 pb-5">
+            <form id="love-story-form" action="#" method="POST" enctype="multipart/form-data">
+                
+                <div class="alert alert-secondary mb-4 p-3 border-0" style="background-color: #f1f5f9; color: #475569" role="alert">
+                    <h5 class="alert-heading fw-bold mb-1" style="color: #334155"><i class="fa-solid fa-circle-info me-2"></i>Informasi</h5>
+                    <p class="mb-0 fs-6">Isi fase perjalanan kisah cinta Anda. Fitur ini kompatibel dengan mayoritas template Premium & Art. Anda juga bisa melampirkan 1 foto kenangan kecil di tiap cerita.</p>
+                </div>
+
+                <div id="timeline-container">
+                    <!-- Default First Timeline Card -->
+                    <div class="card shadow-sm border-0 rounded-3 mb-4 timeline-card position-relative">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-calendar-heart text-danger me-2"></i> Fase 1</h5>
+                            
+                            <div class="row align-items-center">
+                                <!-- Photo Upload Column -->
+                                <div class="col-md-3 col-lg-2 mb-3 mb-md-0 d-flex flex-column align-items-center">
+                                    <label class="form-label fw-semibold text-center w-100 mb-2">Foto Unik</label>
+                                    <label class="upload-placeholder shadow-sm">
+                                        <input type="file" name="story_photo[]" accept="image/*" class="d-none" onchange="previewImage(this)">
+                                        <i class="fa-solid fa-camera fa-2x text-muted"></i>
+                                        <img src="" alt="preview">
+                                    </label>
+                                    <small class="text-muted mt-2 text-center" style="font-size: 0.75rem;">Maks 2MB (Opsional)</small>
+                                </div>
+                                
+                                <!-- Content Column -->
+                                <div class="col-md-9 col-lg-10">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-semibold">Judul Cerita <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control bg-light" name="story_title[]" placeholder="Misal: Awal Bertemu" required>
+                                        </div>
+                                        <div class="col-md-6 mb-3">
+                                            <label class="form-label fw-semibold">Tahun / Tanggal <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control bg-light" name="story_date[]" placeholder="Misal: 14 Februari 2021" required>
+                                        </div>
+                                        <div class="col-12">
+                                            <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
+                                            <textarea class="form-control bg-light" name="story_desc[]" rows="2" placeholder="Ceritakan momen bersejarah ini secara singkat..." required></textarea>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ADD BUTTON -->
+                <button type="button" id="addTimelineBtn" class="btn btn-outline-primary w-100 rounded-3 py-2 mb-4 border-dashed" style="border-style: dashed; background-color: rgba(var(--primary-rgb), 0.05);">
+                    <i class="fa-solid fa-plus me-2"></i> Tambah Fase Cerita Lainnya
+                </button>
+
+                <!-- SUBMIT BUTTON -->
+                <div class="row">
+                    <div class="col-12">
+                        <button class="btn btn-primary w-100 rounded-pill py-3 shadow-sm text-white" style="background-color: var(--primary-dark); border: none; font-size: 1.1rem; font-weight: 600;" type="submit">
+                            Simpan Cerita <i class="fa-solid fa-save ms-2 fs-6"></i>
+                        </button>
+                    </div>
+                </div>
+
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPTS -->
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
+    <script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
+    <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
+    
+    <script>
+        let counter = 1;
+
+        // Add New Timeline Element
+        document.getElementById('addTimelineBtn').addEventListener('click', function() {
+            counter++;
+            const container = document.getElementById('timeline-container');
+            const clone = document.createElement('div');
+            clone.className = "card shadow-sm border-0 rounded-3 mb-4 timeline-card position-relative animate__animated animate__fadeIn";
+            clone.innerHTML = `
+                <button type="button" class="btn btn-danger btn-sm shadow-sm btn-remove-timeline animate__animated animate__zoomIn" onclick="this.closest('.card').remove()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <div class="card-body p-4">
+                    <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-calendar-heart text-danger me-2"></i> Fase ${counter}</h5>
+                    <div class="row align-items-center">
+                        <div class="col-md-3 col-lg-2 mb-3 mb-md-0 d-flex flex-column align-items-center">
+                            <label class="form-label fw-semibold text-center w-100 mb-2">Foto Unik</label>
+                            <label class="upload-placeholder shadow-sm">
+                                <input type="file" name="story_photo[]" accept="image/*" class="d-none" onchange="previewImage(this)">
+                                <i class="fa-solid fa-camera fa-2x text-muted"></i>
+                                <img src="" alt="preview">
+                            </label>
+                            <small class="text-muted mt-2 text-center" style="font-size: 0.75rem;">Maks 2MB (Opsional)</small>
+                        </div>
+                        <div class="col-md-9 col-lg-10">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Judul Cerita <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" name="story_title[]" placeholder="Misal: Lamaran" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label fw-semibold">Tahun / Tanggal <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control bg-light" name="story_date[]" placeholder="Misal: 25 Agustus 2023" required>
+                                </div>
+                                <div class="col-12">
+                                    <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
+                                    <textarea class="form-control bg-light" name="story_desc[]" rows="2" placeholder="Ceritakan momen ini..." required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            container.appendChild(clone);
+        });
+
+        // Image Preview Handler
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const img = input.parentElement.querySelector('img');
+                    const icon = input.parentElement.querySelector('i');
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    icon.style.display = 'none';
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+    <script src="js/script.js"></script>
+</body>
+</html>

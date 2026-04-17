@@ -9,7 +9,8 @@ datasource db {
 
 model WeddingConfig {
   id        String   @id @default(uuid())
-  slug      String   @unique // e.g., "reiza-wedding"
+  slug      String   @unique // e.g., "reiza-amanda"
+  template  String?  // slug template terpilih, e.g., "tema-15-tanpa-foto"
   
   // JSONB block to cleanly store all dynamic forms (design colors, quotes, titles, livestream links)
   settings  Json?    
@@ -17,6 +18,91 @@ model WeddingConfig {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+// =============================================
+// Struktur JSON yang diharapkan dalam field "settings":
+// =============================================
+// {
+//   "mempelai": {
+//     "male_name": "Reiza Rachmattullah",
+//     "male_nickname": "Rei",
+//     "male_father_name": "Bpk. Ahmad",
+//     "male_mother_name": "Ibu Siti",
+//     "male_family_sequence": "Putra Pertama",
+//     "male_instagram": "reiza",
+//     "male_profile_photo": "https://minio.../photo.jpg",
+//     "female_name": "Amanda Rawles",
+//     "female_nickname": "Amanda",
+//     "female_father_name": "Bpk. Budi",
+//     "female_mother_name": "Ibu Rina",
+//     "female_family_sequence": "Putri Kedua",
+//     "female_instagram": "amanda",
+//     "female_profile_photo": "https://minio.../photo.jpg"
+//   },
+//   "events": [
+//     {
+//       "type": "Akad Nikah",
+//       "place_name": "Masjid Agung",
+//       "location": "Jl. Sudirman No 1, Jakarta",
+//       "gmaps": "https://maps.google.com/...",
+//       "date": "2030-12-12",
+//       "time_start": "08:00",
+//       "time_end": "",
+//       "until_finish": false,
+//       "visible": true
+//     },
+//     {
+//       "type": "Resepsi",
+//       "place_name": "Hotel Mulia Senayan",
+//       "location": "Jl. Asia Afrika, Jakarta",
+//       "gmaps": "https://maps.google.com/...",
+//       "date": "2030-12-12",
+//       "time_start": "11:00",
+//       "time_end": "",
+//       "until_finish": true,
+//       "visible": true
+//     }
+//   ],
+//   "love_story": [
+//     {
+//       "title": "Awal Bertemu",
+//       "date": "14 Februari 2021",
+//       "description": "Kami bertemu di sebuah acara kampus...",
+//       "photo": "https://minio.../story1.jpg"
+//     }
+//   ],
+//   "quotes": {
+//     "content": "Maha suci Allah...",
+//     "author": "(QS. Ar-Rum: 21)"
+//   },
+//   "judul": {
+//     "judul_mempelai": "Mempelai",
+//     "judul_ayah": "Bapak",
+//     "judul_ibu": "Ibu",
+//     "judul_pemisah": "dari",
+//     "judul_cover": "Pernikahan",
+//     "judul_countdown": "Menghitung Hari"
+//   },
+//   "amplop": {
+//     "bank_accounts": [
+//       { "bank_name": "BCA", "account_number": "0123456789", "account_holder": "Reiza" }
+//     ],
+//     "visible": true
+//   },
+//   "galeri": {
+//     "photos": ["https://minio.../1.jpg", "https://minio.../2.jpg"],
+//     "video_url": "https://youtube.com/watch?v=..."
+//   },
+//   "musik": {
+//     "url": "https://minio.../song.mp3",
+//     "autoplay": true
+//   },
+//   "livestream": {
+//     "url": "https://youtube.com/live/...",
+//     "description": "Saksikan ikrar suci kami...",
+//     "visible": false
+//   }
+// }
 
 model Guest {
   id        String   @id @default(uuid())

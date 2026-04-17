@@ -1,2 +1,8 @@
 postgres-data/
 .DS_Store
+node_modules/
+.env
+TEMPLATE/Scraped_Templates/
+TEMPLATE/node_modules/
+TEMPLATE/*.log
+TEMPLATE/tema-*/
