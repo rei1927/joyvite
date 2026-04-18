@@ -93,6 +93,7 @@ app.post('/api/settings', async (req, res) => {
 
 // Get Config Settings Route
 app.get('/api/settings/:slug', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   try {
     const config = await prisma.weddingConfig.findUnique({
       where: { slug: req.params.slug }
@@ -191,6 +192,7 @@ app.use(express.static(dashboardPath, { extensions: ['html'] }));
 // GET /invitation/:slug
 // Flow: Ambil data dari DB → Compile template → Kirim HTML final
 app.get('/invitation/:slug', async (req, res) => {
+  res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
   try {
     const config = await prisma.weddingConfig.findUnique({
       where: { slug: req.params.slug }
