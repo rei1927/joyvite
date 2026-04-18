@@ -27,7 +27,7 @@ services:
       MINIO_ENDPOINT: "minio-api.dayamedialangit.co.id"
       MINIO_ACCESS_KEY: "admin"
       MINIO_SECRET_KEY: "rahasia123"
-      TEMPLATES_DIR: "/app/templates"
+      TEMPLATES_DIR: "/app/templates/Scraped_Templates"
     ports:
       - "3500:3000"
     volumes:

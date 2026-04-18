@@ -1,0 +1,6 @@
+#!/usr/bin/expect -f
+set timeout 30
+spawn ssh -o StrictHostKeyChecking=no root@192.168.0.102 {sed -i 's|TEMPLATES_DIR: "/app/templates"|TEMPLATES_DIR: "/app/templates/Scraped_Templates"|' /tmp/joyvite/docker-compose.yml && grep TEMPLATES /tmp/joyvite/docker-compose.yml && cd /tmp/joyvite && docker compose up -d --force-recreate joyvite-backend && sleep 10 && curl -s -o /dev/null -w "%{http_code}" http://localhost:3500/preview/tema-15-tanpa-foto}
+expect "password:"
+send "Alamatgue123\r"
+expect eof
