@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Joyvite Dashboard</title>
+    
+    <link href="node_modules/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
+    
+    <style>
+        :root {
+            --primary-color: #0ea5e9;
+            --primary-hover: #0284c7;
+            --text-dark: #334155;
+            --text-muted: #64748b;
+            --bg-color: #f8fafc;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0;
+            color: var(--text-dark);
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 420px;
+            padding: 2rem;
+        }
+
+        .card-login {
+            background: #ffffff;
+            border: none;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.05);
+            padding: 3rem 2.5rem;
+        }
+
+        .brand-logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .brand-logo i {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .brand-logo h2 {
+            font-weight: 700;
+            color: var(--text-dark);
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        .brand-logo p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-control {
+            padding: 0.75rem 1.2rem;
+            border-radius: 8px;
+            border: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .form-control:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 4px rgba(14, 165, 233, 0.1);
+        }
+
+        .form-label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: var(--text-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .btn-login {
+            width: 100%;
+            background-color: var(--primary-color);
+            border: none;
+            color: white;
+            padding: 0.8rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(14, 165, 233, 0.25);
+        }
+
+        .alert-error {
+            display: none;
+            font-size: 0.85rem;
+            padding: 0.75rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .hint {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 1.5rem;
+            background: #f1f5f9;
+            padding: 0.75rem;
+            border-radius: 8px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="login-wrapper">
+        <div class="card-login">
+            <div class="brand-logo">
+                <i class="fa-solid fa-envelope-open-text"></i>
+                <h2>Joyvite</h2>
+                <p>Masuk ke dashboard undangan Anda.</p>
+            </div>
+
+            <div class="alert alert-danger alert-error" id="errorMessage" role="alert">
+                Email atau kata sandi salah.
+            </div>
+
+            <form id="loginForm">
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" class="form-control" id="email" placeholder="contoh@email.com" required>
+                </div>
+                <div class="mb-4">
+                    <div class="d-flex justify-content-between">
+                        <label for="password" class="form-label">Kata Sandi</label>
+                        <a href="#" style="font-size: 0.8rem; color: var(--primary-color); text-decoration: none;">Lupa sandi?</a>
+                    </div>
+                    <input type="password" class="form-control" id="password" placeholder="••••••••" required>
+                </div>
+                <button type="submit" class="btn btn-login" id="loginBtn">Masuk <i class="fa-solid fa-arrow-right ms-2"></i></button>
+            </form>
+
+            <div class="hint">
+                <strong>Akun Mockup:</strong><br>
+                Email: test@joyvite.id <br>
+                Sandi: test123
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('loginBtn');
+            const errorAlert = document.getElementById('errorMessage');
+            
+            // Loading state
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span> Memproses...';
+            errorAlert.style.display = 'none';
+
+            try {
+                // Gunakan URL yang sesuai (saat local dev atau production)
+                const apiUrl = window.location.hostname.includes('joyvite.id') ? 'https://login.joyvite.id/api/login' : '/api/login';
+                
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok && data.success) {
+                    btn.innerHTML = 'Berhasil! Mengalihkan... <i class="fa-solid fa-check ms-2"></i>';
+                    btn.style.backgroundColor = '#10b981';
+                    
+                    // Set mock slug so data saves nicely for this user
+                    localStorage.setItem('joyvite_slug', 'mockup-test-account');
+                    
+                    setTimeout(() => {
+                        window.location.href = '/index'; // Clean URL ke dashboard beranda
+                    }, 800);
+                } else {
+                    throw new Error(data.message || 'Login gagal');
+                }
+            } catch (error) {
+                // Error state
+                errorAlert.textContent = error.message;
+                errorAlert.style.display = 'block';
+                btn.disabled = false;
+                btn.innerHTML = 'Masuk <i class="fa-solid fa-arrow-right ms-2"></i>';
+            }
+        });
+    </script>
+</body>
+</html>

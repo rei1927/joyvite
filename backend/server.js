@@ -144,6 +144,48 @@ app.use((req, res, next) => {
 const dockerDashboardPath = path.join(__dirname, 'dashboard');
 const localDashboardPath = path.join(__dirname, '..');
 const dashboardPath = fs.existsSync(dockerDashboardPath) ? dockerDashboardPath : localDashboardPath;
+
+// MOCKUP LOGIN PAGE
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(dashboardPath, 'login.html'));
+});
+
+// API LOGIN MOCKUP
+app.post('/api/login', (req, res) => {
+  const { email, password } = req.body;
+  
+  if (email === 'test@joyvite.id' && password === 'test123') {
+    // Set HTTP-Only Cookie berlaku 24 jam
+    res.setHeader('Set-Cookie', 'joyvite_auth=authenticated; Path=/; Max-Age=86400; HttpOnly');
+    return res.json({ success: true, message: 'Login berhasil!' });
+  }
+  
+  return res.status(401).json({ success: false, message: 'Email atau kata sandi salah.' });
+});
+
+// AUTHENTICATION MIDDLEWARE
+app.use((req, res, next) => {
+  const host = req.headers.host || '';
+  // Hanya jalankan proteksi jika sedang mengakses dashboard
+  if (host === 'login.joyvite.id' || host === 'localhost' || host === 'www.joyvite.id') {
+     
+     // Pengecualian rute publik (Assets & API Login)
+     const publicRoutes = ['/login', '/api/login', '/css', '/js', '/img', '/node_modules', '/favicon'];
+     const isPublic = publicRoutes.some(p => req.path === p || req.path.startsWith(`${p}/`));
+     
+     if (isPublic) {
+        return next();
+     }
+
+     // Cek Cookie
+     const cookies = req.headers.cookie || '';
+     if (!cookies.includes('joyvite_auth=authenticated')) {
+        return res.redirect('/login');
+     }
+  }
+  next();
+});
+
 app.use(express.static(dashboardPath, { extensions: ['html'] }));
 
 // GET /invitation/:slug
