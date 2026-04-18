@@ -310,7 +310,11 @@ $(document).ready(function() {
 
             // j. Fallback: template theme dari desain.html
             let templateName = null;
-            if (flatData['selectedTheme']) templateName = flatData['selectedTheme'];
+            if (flatData['selectedTheme']) {
+                templateName = flatData['selectedTheme'];
+            } else if ($('input[name="selectedTheme"]:checked').length > 0) {
+                templateName = $('input[name="selectedTheme"]:checked').val();
+            }
 
             
             // Galeri video URL
