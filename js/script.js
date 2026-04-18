@@ -155,11 +155,80 @@ $(document).ready(function() {
                 }
             }
             
-            // c. Fallback untuk data lainnya (misal: template theme di desain.html)
+            // c. Jika Halaman Judul
+            if (flatData['judul_cover'] || flatData['judul_countdown']) {
+                nestedSettings.judul = {
+                    judul_cover: flatData['judul_cover'],
+                    judul_countdown: flatData['judul_countdown'],
+                    label_hari: flatData['judul_label_hari'],
+                    label_jam: flatData['judul_label_jam'],
+                    label_menit: flatData['judul_label_menit'],
+                    label_detik: flatData['judul_label_detik']
+                };
+            }
+
+            // d. Jika Halaman Quotes
+            if (flatData['quote_content']) {
+                nestedSettings.quotes = {
+                    content: flatData['quote_content'],
+                    author: flatData['quote_author'] || ''
+                };
+            }
+
+            // e. Jika Halaman Cerita Cinta
+            if (flatData['story_title']) {
+                nestedSettings.love_story = [];
+                let titles = Array.isArray(flatData['story_title']) ? flatData['story_title'] : [flatData['story_title']];
+                for (let i = 0; i < titles.length; i++) {
+                    let getVal = (key) => Array.isArray(flatData[key]) ? flatData[key][i] : flatData[key];
+                    nestedSettings.love_story.push({
+                        title: getVal('story_title'),
+                        date: getVal('story_date'),
+                        description: getVal('story_desc')
+                    });
+                }
+            }
+
+            // f. Jika Halaman Livestream
+            if (flatData['livestream_url']) {
+                nestedSettings.livestream = {
+                    url: flatData['livestream_url'],
+                    description: flatData['livestream_desc'] || ''
+                };
+            }
+
+            // g. Jika Halaman Popup
+            if (flatData['popup_message'] || flatData['popup_btn_text']) {
+                nestedSettings.popup = {
+                    message: flatData['popup_message'],
+                    btn_text: flatData['popup_btn_text']
+                };
+            }
+
+            // h. Jika Halaman Musik
+            if (flatData['musik_enabled'] !== undefined) {
+                nestedSettings.musik = {
+                    enabled: flatData['musik_enabled'] === 'on' || flatData['musik_enabled'] === 'true'
+                };
+            }
+
+            // i. Jika Halaman Amplop
+            if (flatData['amplop_visible'] !== undefined) {
+                nestedSettings.amplop = {
+                    visible: flatData['amplop_visible'] === 'on' || flatData['amplop_visible'] === 'true'
+                };
+            }
+
+            // j. Fallback: template theme dari desain.html
             let templateName = null;
-            if (flatData['theme_type']) templateName = flatData['theme_type']; // Contoh jika ada input ini
+            if (flatData['theme_type']) templateName = flatData['theme_type'];
             
-            // Masukkan data sisanya ke nested. (Bisa diperluas utk buku tamu, rekening, dsb)
+            // Galeri video URL
+            if (flatData['galeri_video_url']) {
+                nestedSettings.galeri = {
+                    video_url: flatData['galeri_video_url']
+                };
+            }
 
             // 3. AUTO GENERATOR SUBDOMAIN SLUG
             let currentSlug = localStorage.getItem('joyvite_slug');

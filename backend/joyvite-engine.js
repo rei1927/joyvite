@@ -99,6 +99,28 @@ function compileTemplate(templateSlug, settings) {
   const judul = settings.judul || {};
   const amplop = settings.amplop || {};
   const livestream = settings.livestream || {};
+  const additional = settings.additionalSettings || {};
+
+  // =========================================
+  // ADVANCED SETTINGS (PENGATURAN TAMBAHAN)
+  // =========================================
+  if (additional.nav_bar === false) {
+    $('head').append('<style>.navbar, .elementor-location-footer, #navigasi, .nav-menu { display: none !important; }</style>');
+  }
+  
+  if (additional.penunjuk_arah === false) {
+    $('.elementor-widget-google_maps').remove();
+    $('a[href*="maps.google.com"], a[href*="goo.gl"]').closest('.elementor-widget-button').remove();
+  }
+  
+  if (additional.tampilkan_countdown === false) {
+    $('.wpkoi-elements-countdown-wrapper, .elementor-widget-weddingpress-countdown').remove();
+  }
+  
+  if (additional.tampilkan_foto_mempelai === false) {
+    $('head').append('<style>.elementor-widget-image img, .elementor-image img { display: none !important; }</style>');
+    // Catatan: Akan menyembunyikan gambar-gambar umum, bisa dispesifikkan ke blok profile jika ada class khusus
+  }
 
   // =========================================
   // 1. INJEKSI WAKTU & LOKASI ACARA (HARUS DULUAN)
@@ -118,13 +140,22 @@ function compileTemplate(templateSlug, settings) {
       replaceHeadingText($, 'Kediaman Mempelai Pria', secondaryEvent.place_name);
     }
 
-    // Tanggal (format: "Rabu, 15 Juli 2026")
+    // Tanggal
     if (primaryEvent.date) {
-      const dateStr = formatIndonesianDate(primaryEvent.date);
+      const dateStr = formatIndonesianDate(primaryEvent.date, additional.format_tanggal);
+      let isFirstDate = true;
       $('.elementor-heading-title').each(function () {
         const text = $(this).text().trim();
-        if (text.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),?\s+\d+/i)) {
-          $(this).text(dateStr);
+        if (text.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),?\s+\d+/i) || 
+            text.match(/^\d{1,2}\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)/i) || 
+            text.match(/^\d{2}\s*\/\s*\d{2}\s*\/\s*\d{4}/)) {
+          
+          if (isFirstDate && additional.tanggal_pada_cover === false) {
+             $(this).text('');
+          } else {
+             $(this).text(dateStr);
+          }
+          isFirstDate = false;
         }
       });
     }
@@ -164,7 +195,10 @@ function compileTemplate(templateSlug, settings) {
   
   // Nama panggilan di cover (.wdp-mempelai = WeddingPress cover element)
   if (mempelai.male_nickname && mempelai.female_nickname) {
-    const coverName = `${mempelai.male_nickname} & ${mempelai.female_nickname}`;
+    const isPriaWanita = !additional.posisi_nama || additional.posisi_nama === 'pria_wanita';
+    const coverName = isPriaWanita 
+      ? `${mempelai.male_nickname} & ${mempelai.female_nickname}`
+      : `${mempelai.female_nickname} & ${mempelai.male_nickname}`;
     
     // Target 1: WeddingPress cover div .wdp-mempelai
     $('.wdp-mempelai').each(function () {
@@ -283,29 +317,180 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
-  // 5. INJEKSI JUDUL KUSTOM
+  // 5. INJEKSI JUDUL KUSTOM (DIPERLUAS)
   // =========================================
   
   if (judul.judul_cover) {
-    replaceHeadingText($, 'WE ARE GETTING', judul.judul_cover);
+    // Replace judul cover pada berbagai template
+    const coverDefaults = ['WE ARE GETTING', 'THE WEDDING OF', 'Pernikahan', 'Wedding Invitation'];
+    coverDefaults.forEach(d => replaceHeadingText($, d, judul.judul_cover));
+  }
+
+  if (judul.judul_countdown) {
+    const countdownDefaults = ['Menghitung Hari', 'Counting Days'];
+    countdownDefaults.forEach(d => replaceHeadingText($, d, judul.judul_countdown));
+  }
+
+  // Label countdown (Hari, Jam, Menit, Detik)
+  if (judul.label_hari || judul.label_jam || judul.label_menit || judul.label_detik) {
+    $('.wpkoi-elements-countdown-label').each(function() {
+      const text = $(this).text().trim();
+      if (text === 'Hari' && judul.label_hari) $(this).text(judul.label_hari);
+      if (text === 'Jam' && judul.label_jam) $(this).text(judul.label_jam);
+      if (text === 'Menit' && judul.label_menit) $(this).text(judul.label_menit);
+      if (text === 'Detik' && judul.label_detik) $(this).text(judul.label_detik);
+    });
   }
 
   // =========================================
-  // 6. INJEKSI FOTO PROFIL MEMPELAI
+  // 6. INJEKSI INSTAGRAM LINKS
+  // =========================================
+  
+  if (mempelai.male_instagram || mempelai.female_instagram) {
+    $('a[href*="instagram.com"]').each(function() {
+      const href = $(this).attr('href') || '';
+      // Ganti username di link instagram
+      if (mempelai.male_instagram && (href.includes('username_pria') || href.includes('instagram.com'))) {
+        $(this).attr('href', `https://instagram.com/${mempelai.male_instagram}`);
+      }
+    });
+  }
+
+  // =========================================
+  // 7. INJEKSI NAMA ORANG TUA WANITA (FIX)
+  // =========================================
+  
+  // Handle orang tua wanita secara terpisah (blok kedua di template)
+  let parentBlockCount = 0;
+  $('.elementor-heading-title').each(function () {
+    let html = $(this).html();
+    if (!html) return;
+
+    if (html.includes('Bpk.') && html.includes('Ibu')) {
+      parentBlockCount++;
+      // Block kedua = orang tua wanita
+      if (parentBlockCount === 2) {
+        if (mempelai.female_father_name) {
+          html = html.replace(/Bpk\.\s*\w+/g, mempelai.female_father_name);
+        }
+        if (mempelai.female_mother_name) {
+          html = html.replace(/Ibu\s*\w+/g, mempelai.female_mother_name);
+        }
+        $(this).html(html);
+      }
+    }
+  });
+
+  // =========================================
+  // 8. INJEKSI FOTO PROFIL MEMPELAI
   // =========================================
   
   if (mempelai.male_profile_photo || mempelai.female_profile_photo) {
     // Template "foto" biasanya punya img elemen di section profil mempelai
-    // yang bisa diganti src-nya
-    // Untuk template "tanpa-foto", elemen ini tidak ada sehingga aman di-skip
+    let profileImgIdx = 0;
+    // Cari gambar profil di section "tentang kami" / "mempelai"
+    $('section[id*="mempelai"], section[id*="profil"], section[id*="about"]').find('img').each(function() {
+      profileImgIdx++;
+      if (profileImgIdx === 1 && mempelai.male_profile_photo) {
+        $(this).attr('src', mempelai.male_profile_photo);
+      } else if (profileImgIdx === 2 && mempelai.female_profile_photo) {
+        $(this).attr('src', mempelai.female_profile_photo);
+      }
+    });
   }
 
   // =========================================
-  // 7. INJEKSI GALERI FOTO
+  // 9. INJEKSI CERITA CINTA (LOVE STORY)
   // =========================================
   
-  // Galeri foto biasanya di section tertentu, kita bisa ganti src gambar
-  // Implementasi lanjutan nanti
+  const love_story = settings.love_story || [];
+  if (love_story.length > 0) {
+    // Template biasanya punya timeline/story section dengan class tertentu
+    let storyIdx = 0;
+    // Cari elemen timeline di template
+    $('section[id*="cerita"], section[id*="story"], section[id*="love"]').find('.elementor-heading-title').each(function() {
+      const text = $(this).text().trim();
+      // Deteksi placeholder judul cerita
+      if (text.match(/^(Awal|Pertama|First|Pertemuan|Lamaran|Engagement|Chapter)/i) || 
+          text.match(/^\d{4}$/) || text.match(/^\d{1,2}\s+\w+\s+\d{4}$/)) {
+        if (storyIdx < love_story.length) {
+          const story = love_story[storyIdx];
+          if (story.title) $(this).text(story.title);
+          storyIdx++;
+        }
+      }
+    });
+  }
+
+  // =========================================
+  // 10. INJEKSI LIVESTREAM
+  // =========================================
+  
+  if (livestream.url) {
+    // Ganti link livestream pada template
+    $('a[href*="youtube"], a[href*="youtu.be"], a[href*="zoom"]').each(function() {
+      $(this).attr('href', livestream.url);
+    });
+    // Ganti iframe YouTube jika ada
+    $('iframe[src*="youtube"]').attr('src', livestream.url.replace('watch?v=', 'embed/'));
+  }
+  if (livestream.description) {
+    replaceHeadingText($, 'Saksikan ikrar suci Kami', livestream.description);
+  }
+
+  // =========================================
+  // 11. INJEKSI POPUP / OPENING
+  // =========================================
+
+  const popup = settings.popup || {};
+  if (popup.message) {
+    // Ganti teks popup opening (biasanya di .wdp-opening atau overlay pertama)
+    $('.wdp-opening-text, .opening-text').each(function() {
+      $(this).text(popup.message);
+    });
+    // Fallback: cari teks "Kepada Yth"
+    replaceGlobalText = function(html, old, newt) {
+      return html.replace(new RegExp(escapeRegex(old), 'gi'), newt);
+    };
+  }
+  if (popup.btn_text) {
+    $('.wdp-opening-btn, .opening-btn').each(function() {
+      $(this).text(popup.btn_text);
+    });
+    // Fallback: Ganti "Buka Undangan"
+    $('button, a').each(function() {
+      if ($(this).text().trim() === 'Buka Undangan') {
+        $(this).text(popup.btn_text);
+      }
+    });
+  }
+
+  // =========================================
+  // 12. INJEKSI GALERI VIDEO
+  // =========================================
+
+  const galeri = settings.galeri || {};
+  if (galeri.video_url) {
+    // Masukkan video YouTube ke section galeri
+    const embedUrl = galeri.video_url.replace('watch?v=', 'embed/');
+    $('iframe[src*="youtube"]').attr('src', embedUrl);
+  }
+
+  // =========================================
+  // 13. INJEKSI MUSIK BACKGROUND
+  // =========================================
+
+  const musik = settings.musik || {};
+  if (musik.enabled === false) {
+    // Hapus semua elemen audio dari template
+    $('audio').remove();
+    $('[data-audio], .audio-player, .music-control').remove();
+  }
+  // Jika ada URL musik custom, ganti source audio
+  if (musik.url) {
+    $('audio source').attr('src', musik.url);
+    $('audio').attr('src', musik.url);
+  }
 
   // =========================================
   // FINAL: Kembalikan HTML yang sudah dimodifikasi
@@ -315,13 +500,22 @@ function compileTemplate(templateSlug, settings) {
 }
 
 /**
- * Format tanggal Indonesia: "Rabu, 15 Juli 2026"
+ * Format tanggal Indonesia dengan opsi format
  */
-function formatIndonesianDate(dateStr) {
+function formatIndonesianDate(dateStr, formatType = 'full') {
   const days = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
   const months = ['Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
                   'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'];
   const d = new Date(dateStr);
+  
+  if (formatType === 'numeric') {
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    return `${dd} / ${mm} / ${d.getFullYear()}`;
+  } else if (formatType === 'short') {
+    return `${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  }
+  
   return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
 }
 

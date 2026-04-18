@@ -11,29 +11,102 @@
     <link rel="stylesheet" href="node_modules/animate.css/animate.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
-        .theme-card {
-            border: 2px solid transparent;
+        .card-input-element:checked + .card-input {
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(236,72,153,0.3);
+            transform: translateY(-5px);
+        }
+        .card-input-element { display: none; }
+        .card-input {
             cursor: pointer;
             transition: all 0.3s ease;
+            border: 2px solid transparent;
         }
-        .theme-card:hover {
+        .card-input:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
         }
-        .theme-card.active {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(236,72,153,0.3);
-        }
         .theme-preview {
-            height: 150px;
+            height: 280px;
+            min-height: 280px;
             background-color: #f1f5f9;
             border-radius: 8px 8px 0 0;
-            display: flex;
+            overflow: hidden;
+            position: relative;
+        }
+        .theme-preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: top center;
+            display: block;
+        }
+
+        /* Accordion Theme Selector */
+        .theme-accordion-header {
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s;
+        }
+        .theme-accordion-header:hover { background-color: #f8f9fa; }
+        .theme-accordion-header .chevron-icon {
+            transition: transform 0.3s ease;
+        }
+        .theme-accordion-header.collapsed .chevron-icon {
+            transform: rotate(-90deg);
+        }
+        .theme-accordion-body {
+            transition: max-height 0.4s ease, opacity 0.3s ease;
+            overflow: hidden;
+        }
+        .selected-theme-badge {
+            display: inline-flex;
             align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, #ec4899, #8b5cf6);
+            color: white;
+            font-size: 0.78rem;
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .theme-page-dots {
+            display: flex;
             justify-content: center;
-            color: #94a3b8;
-            background-size: cover;
-            background-position: center;
+            align-items: center;
+            gap: 6px;
+            margin-top: 16px;
+        }
+        .theme-page-dots .dot {
+            width: 10px; height: 10px;
+            border-radius: 50%;
+            background: #d1d5db;
+            cursor: pointer;
+            transition: all 0.25s;
+            border: none;
+        }
+        .theme-page-dots .dot.active {
+            background: var(--primary-color, #ec4899);
+            width: 28px;
+            border-radius: 5px;
+        }
+        .theme-nav-btn {
+            border: 1px solid #e5e7eb;
+            background: white;
+            border-radius: 8px;
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            color: #374151;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .theme-nav-btn:hover:not(:disabled) {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+        .theme-nav-btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -72,54 +145,30 @@
         <div class="content-body px-4 pb-5">
             <form id="wedding-form" action="#" method="POST">
                 
-                <!-- THEME SELECTOR -->
+                <!-- THEME SELECTOR (Accordion + Pagination) -->
                 <div class="card shadow-sm border-0 rounded-3 mb-4">
                     <div class="card-body p-4">
-                        <h4 class="card-title fw-bold mb-4">Pilih Tema Visual</h4>
-                        <div class="row g-4">
-                            <!-- Theme 1 -->
-                            <div class="col-6 col-md-4 col-lg-3">
-                                <div class="card theme-card active rounded-3 h-100">
-                                    <div class="theme-preview" style="background-color: #fdf2f8;">
-                                        <i class="fa-solid fa-leaf fa-2x text-pink-300" style="color: #fbcfe8;"></i>
-                                    </div>
-                                    <div class="card-body text-center py-2">
-                                        <h6 class="mb-0 fw-bold">Sakura Blossom</h6>
-                                    </div>
+                        <div class="theme-accordion-header d-flex align-items-center justify-content-between" id="themeAccordionToggle">
+                            <div>
+                                <h4 class="card-title fw-bold mb-1">Pilih Tema Visual</h4>
+                                <div id="selectedThemeInfo" class="mt-1">
+                                    <span class="text-muted small">Belum ada tema dipilih</span>
                                 </div>
                             </div>
-                            <!-- Theme 2 -->
-                            <div class="col-6 col-md-4 col-lg-3">
-                                <div class="card theme-card rounded-3 h-100">
-                                    <div class="theme-preview" style="background-color: #f0fdf4;">
-                                        <i class="fa-solid fa-seedling fa-2x" style="color: #bbf7d0;"></i>
-                                    </div>
-                                    <div class="card-body text-center py-2">
-                                        <h6 class="mb-0 fw-bold">Emerald Sage</h6>
-                                    </div>
-                                </div>
+                            <i class="fa-solid fa-chevron-down chevron-icon fs-5 text-muted"></i>
+                        </div>
+                        <div class="theme-accordion-body mt-3" id="themeAccordionBody">
+                            <div class="row g-3" id="theme-grid">
+                                <!-- 3 cards per page rendered here -->
                             </div>
-                            <!-- Theme 3 -->
-                            <div class="col-6 col-md-4 col-lg-3">
-                                <div class="card theme-card rounded-3 h-100">
-                                    <div class="theme-preview" style="background-color: #eff6ff;">
-                                        <i class="fa-solid fa-water fa-2x" style="color: #bfdbfe;"></i>
-                                    </div>
-                                    <div class="card-body text-center py-2">
-                                        <h6 class="mb-0 fw-bold">Ocean Blue</h6>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Theme 4 -->
-                            <div class="col-6 col-md-4 col-lg-3">
-                                <div class="card theme-card rounded-3 h-100">
-                                    <div class="theme-preview" style="background-color: #fffbeb;">
-                                        <i class="fa-regular fa-sun fa-2x" style="color: #fde68a;"></i>
-                                    </div>
-                                    <div class="card-body text-center py-2">
-                                        <h6 class="mb-0 fw-bold">Warm Gold</h6>
-                                    </div>
-                                </div>
+                            <div class="d-flex align-items-center justify-content-between mt-3">
+                                <button type="button" class="theme-nav-btn" id="themePrev" disabled>
+                                    <i class="fa-solid fa-chevron-left me-1"></i> Sebelumnya
+                                </button>
+                                <div class="theme-page-dots" id="themePageDots"></div>
+                                <button type="button" class="theme-nav-btn" id="themeNext">
+                                    Berikutnya <i class="fa-solid fa-chevron-right ms-1"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -149,6 +198,97 @@
                     </div>
                 </div>
 
+                <!-- PENGATURAN TAMBAHAN -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <h4 class="card-title fw-bold mb-4">Pengaturan Tambahan</h4>
+                        
+                        <!-- Navigation Bar -->
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Navigation Bar</h6>
+                                <p class="text-muted small mb-0">Bar navigasi untuk mempermudah perpindahan antar halaman</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input switch-primary" type="checkbox" id="navBarSwitch" name="nav_bar" checked>
+                            </div>
+                        </div>
+
+                        <!-- Penunjuk Arah -->
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Penunjuk Arah</h6>
+                                <p class="text-muted small mb-0">Tombol penunjuk arah yang akan otomatis memberikan rute lewat Google Maps</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input switch-primary" type="checkbox" id="arahSwitch" name="penunjuk_arah" checked>
+                            </div>
+                        </div>
+
+                        <!-- Tampilkan Countdown -->
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Tampilkan Countdown</h6>
+                                <p class="text-muted small mb-0">Menampilkan countdown acara</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input switch-primary" type="checkbox" id="countdownSwitch" name="tampilkan_countdown" checked>
+                            </div>
+                        </div>
+
+                         <!-- Tampilkan Foto Mempelai -->
+                         <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Tampilkan Foto Mempelai</h6>
+                                <p class="text-muted small mb-0">Menampilkan kedua foto mempelai</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input switch-primary" type="checkbox" id="fotoMempelaiSwitch" name="tampilkan_foto_mempelai" checked>
+                            </div>
+                        </div>
+
+                        <!-- Tanggal Pada Cover -->
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Tanggal Pada Cover</h6>
+                                <p class="text-muted small mb-0">Menampilkan tanggal acara utama pada cover undangan</p>
+                            </div>
+                            <div class="form-check form-switch fs-4">
+                                <input class="form-check-input switch-primary" type="checkbox" id="tanggalCoverSwitch" name="tanggal_pada_cover" checked>
+                            </div>
+                        </div>
+
+                        <!-- Format Tanggal -->
+                        <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Format Tanggal</h6>
+                                <p class="text-muted small mb-0">Format tanggal pada undangan</p>
+                            </div>
+                            <div style="max-width: 250px; width: 100%;">
+                                <select class="form-select bg-light" name="format_tanggal">
+                                    <option value="full">Rabu, 17 Februari 2026</option>
+                                    <option value="short">17 Februari 2026</option>
+                                    <option value="numeric">17 / 02 / 2026</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Posisi Nama Mempelai -->
+                        <div class="d-flex align-items-center justify-content-between pt-2">
+                            <div>
+                                <h6 class="mb-1 text-dark fw-semibold">Posisi Nama Mempelai</h6>
+                                <p class="text-muted small mb-0">Posisi mempelai yang ditampilkan lebih dahulu</p>
+                            </div>
+                            <div style="max-width: 250px; width: 100%;">
+                                <select class="form-select bg-light" name="posisi_nama">
+                                    <option value="pria_wanita">Pria - Wanita</option>
+                                    <option value="wanita_pria">Wanita - Pria</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <button class="btn w-100 rounded-pill py-3 shadow-sm text-white mt-3" style="background-color: var(--primary-dark); font-weight: 600;" type="submit">
                     Simpan Desain <i class="fa-solid fa-save ms-2"></i>
                 </button>
@@ -158,12 +298,187 @@
 
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/templates.js"></script>
     <script src="js/script.js"></script>
     <script>
-        // Simple Theme Selection interaction
-        $('.theme-card').click(function() {
-            $('.theme-card').removeClass('active');
-            $(this).addClass('active');
+        $(document).ready(function() {
+            var data = joyviteTemplates;
+            var PER_PAGE = 3;
+            var currentPage = 0;
+            var totalPages = Math.ceil(data.length / PER_PAGE);
+            var grid = $('#theme-grid');
+            var isOpen = true;
+
+            // Cek tema tersimpan
+            var currentTheme = '';
+            var lsSettingsStr = localStorage.getItem('joyvite_settings');
+            if(lsSettingsStr) {
+                try {
+                    var lsSettings = JSON.parse(lsSettingsStr);
+                    if(lsSettings.selectedTheme) currentTheme = lsSettings.selectedTheme;
+                } catch(e) {}
+            }
+
+            // Jika sudah ada tema tersimpan, tutup accordion & tampilkan badge
+            if (currentTheme) {
+                var found = data.find(t => t.id === currentTheme);
+                if (found) {
+                    $('#selectedThemeInfo').html('<span class="selected-theme-badge"><i class="fa-solid fa-check-circle"></i>' + found.name + '</span>');
+                }
+                isOpen = false;
+                $('#themeAccordionBody').hide();
+                $('#themeAccordionToggle').addClass('collapsed');
+            }
+
+            // Accordion toggle
+            $('#themeAccordionToggle').on('click', function() {
+                isOpen = !isOpen;
+                if (isOpen) {
+                    $('#themeAccordionBody').slideDown(300);
+                    $(this).removeClass('collapsed');
+                } else {
+                    $('#themeAccordionBody').slideUp(300);
+                    $(this).addClass('collapsed');
+                }
+            });
+
+            // Render halaman
+            function renderPage(page) {
+                grid.empty();
+                var start = page * PER_PAGE;
+                var end = Math.min(start + PER_PAGE, data.length);
+                
+                for (var i = start; i < end; i++) {
+                    var template = data[i];
+                    var isChecked = (currentTheme === template.id);
+                    var checkedAttr = isChecked ? 'checked' : '';
+                    
+                    var cardHtml = 
+                        '<div class="col-4">' +
+                            '<label class="w-100 m-0">' +
+                                '<input type="radio" class="card-input-element" name="selectedTheme" value="' + template.id + '" required ' + checkedAttr + '>' +
+                                '<div class="card card-input rounded-3 h-100 shadow-sm">' +
+                                    '<div class="theme-preview">' +
+                                        '<img src="' + template.thumbnail + '" alt="' + template.name + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+                                    '</div>' +
+                                    '<div class="card-footer pt-3 pb-3 text-center bg-white border-top-0 rounded-bottom-3">' +
+                                        '<h6 class="mb-0 fw-bold" style="font-size:0.85rem">' + template.name + '</h6>' +
+                                    '</div>' +
+                                '</div>' +
+                            '</label>' +
+                        '</div>';
+                    grid.append(cardHtml);
+                }
+
+                // Update navigasi
+                $('#themePrev').prop('disabled', page === 0);
+                $('#themeNext').prop('disabled', page >= totalPages - 1);
+                renderDots(page);
+
+                // Event: pilih tema → update badge
+                grid.find('.card-input-element').off('change').on('change', function() {
+                    currentTheme = $(this).val();
+                    var found = data.find(t => t.id === currentTheme);
+                    if (found) {
+                        $('#selectedThemeInfo').html('<span class="selected-theme-badge"><i class="fa-solid fa-check-circle"></i> ' + found.name + '</span>');
+                    }
+                });
+            }
+
+            // Render dots
+            function renderDots(activePage) {
+                var dotsEl = $('#themePageDots');
+                dotsEl.empty();
+                var maxDots = 7;
+                var startDot = Math.max(0, activePage - Math.floor(maxDots/2));
+                var endDot = Math.min(totalPages, startDot + maxDots);
+                if (endDot - startDot < maxDots) startDot = Math.max(0, endDot - maxDots);
+
+                for (var d = startDot; d < endDot; d++) {
+                    var cls = d === activePage ? 'dot active' : 'dot';
+                    dotsEl.append('<button type="button" class="' + cls + '" data-page="' + d + '"></button>');
+                }
+                dotsEl.find('.dot').on('click', function() {
+                    currentPage = parseInt($(this).data('page'));
+                    renderPage(currentPage);
+                });
+            }
+
+            // Navigasi tombol
+            $('#themePrev').on('click', function() {
+                if (currentPage > 0) { currentPage--; renderPage(currentPage); }
+            });
+            $('#themeNext').on('click', function() {
+                if (currentPage < totalPages - 1) { currentPage++; renderPage(currentPage); }
+            });
+
+            // Jika ada tema tersimpan, navigasi ke halaman tema itu
+            if (currentTheme) {
+                var idx = data.findIndex(t => t.id === currentTheme);
+                if (idx >= 0) currentPage = Math.floor(idx / PER_PAGE);
+            }
+            renderPage(currentPage);
+
+            // Hijack wedding-form on submit
+            $('#wedding-form').on('submit', function(e) {
+                e.preventDefault();
+                
+                var selectedTheme = $('input[name="selectedTheme"]:checked').val();
+                
+                // Ambil nilai pengaturan tambahan
+                var additionalSettings = {
+                    nav_bar: $('#navBarSwitch').is(':checked'),
+                    penunjuk_arah: $('#arahSwitch').is(':checked'),
+                    tampilkan_countdown: $('#countdownSwitch').is(':checked'),
+                    tampilkan_foto_mempelai: $('#fotoMempelaiSwitch').is(':checked'),
+                    tanggal_pada_cover: $('#tanggalCoverSwitch').is(':checked'),
+                    format_tanggal: $('select[name="format_tanggal"]').val(),
+                    posisi_nama: $('select[name="posisi_nama"]').val()
+                };
+                
+                // Simpan ke localStorage untuk saat ini sebelum merge dengan backend global
+                if(selectedTheme) {
+                    var currentSettings = {};
+                    var lsSettingsStr = localStorage.getItem('joyvite_settings');
+                    if(lsSettingsStr) {
+                        try {
+                            currentSettings = JSON.parse(lsSettingsStr);
+                        } catch(e) {}
+                    }
+                    currentSettings.selectedTheme = selectedTheme;
+                    currentSettings.additionalSettings = additionalSettings;
+                    localStorage.setItem('joyvite_settings', JSON.stringify(currentSettings));
+                    
+                    // POST to Backend
+                    let currentSlug = localStorage.getItem('joyvite_slug');
+                    if (!currentSlug) currentSlug = 'undangan-baru-' + Math.floor(Math.random() * 1000);
+                    
+                    fetch('https://login.joyvite.id/api/settings', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            slug: currentSlug,
+                            settings: currentSettings,
+                            template: selectedTheme
+                        })
+                    }).then(res => res.json())
+                      .then(data => {
+                          const event = new CustomEvent('joyvite:saved', {
+                              detail: { component: 'TEMA_DESAIN', status: 'success' }
+                          });
+                          document.dispatchEvent(event);
+                      })
+                      .catch(err => console.error("Gagal simpan desain:", err));
+
+                    var btn = $(this).find('button[type="submit"]');
+                    var oldHtml = btn.html();
+                    btn.html('<i class="fa-solid fa-check me-2"></i> Tersimpan').removeClass('btn-primary').addClass('btn-success');
+                    
+                    setTimeout(function() {
+                        btn.html(oldHtml).removeClass('btn-success').addClass('btn-primary');
+                    }, 2000);
+                }
+            });
         });
     </script>
 </body>
