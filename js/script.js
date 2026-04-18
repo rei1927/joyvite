@@ -287,9 +287,23 @@ $(document).ready(function() {
                 };
             }
 
+            // k. Pengaturan Tambahan (Desain Halaman)
+            if (flatData['nav_bar'] !== undefined || flatData['penunjuk_arah'] !== undefined) {
+                nestedSettings.additionalSettings = {
+                    nav_bar: flatData['nav_bar'] === 'on',
+                    penunjuk_arah: flatData['penunjuk_arah'] === 'on',
+                    tampilkan_countdown: flatData['tampilkan_countdown'] === 'on',
+                    tampilkan_foto_mempelai: flatData['tampilkan_foto_mempelai'] === 'on',
+                    tanggal_pada_cover: flatData['tanggal_pada_cover'] === 'on',
+                    format_tanggal: flatData['format_tanggal'],
+                    posisi_nama: flatData['posisi_nama']
+                };
+            }
+
             // j. Fallback: template theme dari desain.html
             let templateName = null;
-            if (flatData['theme_type']) templateName = flatData['theme_type'];
+            if (flatData['selectedTheme']) templateName = flatData['selectedTheme'];
+
             
             // Galeri video URL
             if (flatData['galeri_video_url']) {

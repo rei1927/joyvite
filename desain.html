@@ -449,27 +449,8 @@
                     currentSettings.additionalSettings = additionalSettings;
                     localStorage.setItem('joyvite_settings', JSON.stringify(currentSettings));
                     
-                    // POST to Backend
-                    let currentSlug = localStorage.getItem('joyvite_slug');
-                    if (!currentSlug) currentSlug = 'undangan-baru-' + Math.floor(Math.random() * 1000);
-                    
-                    fetch('https://login.joyvite.id/api/settings', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            slug: currentSlug,
-                            settings: currentSettings,
-                            template: selectedTheme
-                        })
-                    }).then(res => res.json())
-                      .then(data => {
-                          const event = new CustomEvent('joyvite:saved', {
-                              detail: { component: 'TEMA_DESAIN', status: 'success' }
-                          });
-                          document.dispatchEvent(event);
-                      })
-                      .catch(err => console.error("Gagal simpan desain:", err));
-
+                    // POST to Backend is now fully Handled by js/script.js automatically.
+                    // We just trigger UI response here
                     var btn = $(this).find('button[type="submit"]');
                     var oldHtml = btn.html();
                     btn.html('<i class="fa-solid fa-check me-2"></i> Tersimpan').removeClass('btn-primary').addClass('btn-success');
