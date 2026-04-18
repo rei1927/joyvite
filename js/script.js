@@ -46,6 +46,74 @@ $(document).ready(function() {
     );
 
     // ==========================================
+    // AUTO LOAD SAVED SETTINGS FROM DATABASE
+    // ==========================================
+    async function loadWeddingSettings() {
+        try {
+            let currentSlug = localStorage.getItem('joyvite_slug') || 'mockup-test-account';
+            const apiUrl = window.location.hostname.includes('joyvite.id') ? `https://login.joyvite.id/api/settings/${currentSlug}` : `/api/settings/${currentSlug}`;
+            
+            const res = await fetch(apiUrl);
+            if (!res.ok) return; // Belum ada data
+            
+            const data = await res.json();
+            const settings = data.settings || {};
+            
+            // Generic Populator
+            const populateForm = (obj) => {
+                if (!obj) return;
+                Object.keys(obj).forEach(key => {
+                    const value = obj[key];
+                    if (typeof value === 'string' || typeof value === 'number') {
+                        const input = $(`[name="${key}"]`);
+                        if (input.length) input.val(value);
+                    } else if (typeof value === 'boolean') {
+                        const input = $(`[name="${key}"]`);
+                        if (input.length && (input.attr('type') === 'checkbox' || input.attr('type') === 'radio')) {
+                            input.prop('checked', value);
+                        }
+                    }
+                });
+            };
+
+            // Jalankan untuk semua section yang menggunakan nama attribute linear
+            populateForm(settings.mempelai);
+            populateForm(settings.judul);
+            populateForm(settings.quotes);
+            populateForm(settings.livestream);
+            populateForm(settings.popup);
+            
+            // Isi fallback manual yang bernama beda
+            if (settings.amplop && settings.amplop.visible !== undefined) {
+                $('[name="amplop_visible"]').prop('checked', settings.amplop.visible);
+            }
+            if (settings.musik && settings.musik.enabled !== undefined) {
+                $('[name="musik_enabled"]').prop('checked', settings.musik.enabled);
+            }
+            if (settings.galeri && settings.galeri.video_url !== undefined) {
+                $('[name="galeri_video_url"]').val(settings.galeri.video_url);
+            }
+
+            // Theme selector (Design page)
+            if (data.template) {
+                $(`input[name="theme_type"][value="${data.template}"]`).prop('checked', true);
+            }
+
+            // Preview Images (Mempelai Page)
+            if (settings.mempelai) {
+                if (settings.mempelai.male_profile_photo) $('#male-account-upload-img').attr('src', settings.mempelai.male_profile_photo);
+                if (settings.mempelai.female_profile_photo) $('#female-account-upload-img').attr('src', settings.mempelai.female_profile_photo);
+            }
+
+        } catch (error) {
+            console.error('Gagal me-load data undangan:', error);
+        }
+    }
+    
+    // Jalankan auto-load saat halaman pertama kali dibuka
+    loadWeddingSettings();
+
+    // ==========================================
     // LOGIKA HALAMAN MEMPELAI (Image Preview)
     // ==========================================
     
