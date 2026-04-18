@@ -162,11 +162,30 @@ function compileTemplate(templateSlug, settings) {
   // 2. INJEKSI NAMA MEMPELAI
   // =========================================
   
-  // Nama panggilan di cover (biasanya format: "Haqi & Dewi")
+  // Nama panggilan di cover (.wdp-mempelai = WeddingPress cover element)
   if (mempelai.male_nickname && mempelai.female_nickname) {
+    const coverName = `${mempelai.male_nickname} & ${mempelai.female_nickname}`;
+    
+    // Target 1: WeddingPress cover div .wdp-mempelai
+    $('.wdp-mempelai').each(function () {
+      $(this).text(coverName);
+    });
+    
+    // Target 2: Heading title yang berisi format "Nama & Nama" (cover headings)
     $('.elementor-heading-title').each(function () {
       const text = $(this).text().trim();
-      if (text === '&' || text === '&amp;') return;
+      // Match pattern: "Haqi & Dewi" atau nama apapun yang dipisah "&"
+      if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40) {
+        $(this).text(coverName);
+      }
+    });
+
+    // Target 3: Meta og:description (SEO)
+    $('meta[property="og:description"]').each(function () {
+      const content = $(this).attr('content');
+      if (content) {
+        $(this).attr('content', content.replace(/Haqi\s*(&amp;|&)\s*Dewi/gi, coverName));
+      }
     });
   }
 
@@ -184,7 +203,7 @@ function compileTemplate(templateSlug, settings) {
     }
   });
 
-  // Ganti nama panggilan di cover
+  // Ganti nama panggilan individual di headings
   const defaultMaleNames = ['Haqi', 'Pria', 'Nama Panggilan Pria', 'Romeo'];
   const defaultFemaleNames = ['Dewi', 'Wanita', 'Nama Panggilan Wanita', 'Juliet'];
   
