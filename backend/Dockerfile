@@ -4,12 +4,18 @@ RUN apk add --no-cache openssl
 
 WORKDIR /app
 
-# Copy package files and install
-COPY package*.json ./
+# Copy backend package files and install
+COPY backend/package*.json ./
 RUN npm ci --omit=dev
 
-# Copy source code
-COPY . .
+# Copy backend source code
+COPY backend/ .
+
+# Copy dashboard frontend files ke /app/dashboard
+COPY *.html /app/dashboard/
+COPY css/ /app/dashboard/css/
+COPY js/ /app/dashboard/js/
+COPY img/ /app/dashboard/img/
 
 # Generate Prisma Client
 RUN npx prisma generate

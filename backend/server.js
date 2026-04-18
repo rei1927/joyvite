@@ -5,6 +5,8 @@ const multer = require('multer');
 const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
 const { PrismaClient } = require('@prisma/client');
 const { compileTemplate } = require('./joyvite-engine');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
 const prisma = new PrismaClient();
@@ -127,6 +129,12 @@ app.use((req, res, next) => {
   
   next();
 });
+
+// SERVE STATIC DASHBOARD (login.joyvite.id atau localhost)
+const dockerDashboardPath = path.join(__dirname, 'dashboard');
+const localDashboardPath = path.join(__dirname, '..');
+const dashboardPath = fs.existsSync(dockerDashboardPath) ? dockerDashboardPath : localDashboardPath;
+app.use(express.static(dashboardPath));
 
 // GET /invitation/:slug
 // Flow: Ambil data dari DB → Compile template → Kirim HTML final
