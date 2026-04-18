@@ -12,6 +12,8 @@ RUN npm ci --omit=dev
 COPY backend/ .
 
 # Copy dashboard frontend files ke /app/dashboard
+COPY package*.json /app/dashboard/
+RUN cd /app/dashboard && npm ci --omit=dev
 COPY *.html /app/dashboard/
 COPY css/ /app/dashboard/css/
 COPY js/ /app/dashboard/js/
