@@ -63,11 +63,23 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 app.post('/api/settings', async (req, res) => {
   try {
     const { slug, settings, template } = req.body;
+    const targetSlug = slug || 'default';
+    
+    // Ambil data config lama
+    const existingConfig = await prisma.weddingConfig.findUnique({
+      where: { slug: targetSlug }
+    });
+    
+    // Lakukan deep merge / shallow merge pada setting tingkat top-level (mempelai, events, dll)
+    let mergedSettings = settings;
+    if (existingConfig && existingConfig.settings) {
+       mergedSettings = { ...existingConfig.settings, ...settings };
+    }
     
     const result = await prisma.weddingConfig.upsert({
-      where: { slug: slug || 'default' },
-      update: { settings, ...(template && { template }) },
-      create: { slug: slug || 'default', settings, template }
+      where: { slug: targetSlug },
+      update: { settings: mergedSettings, ...(template && { template }) },
+      create: { slug: targetSlug, settings: mergedSettings, template }
     });
     
     res.json({ message: 'Settings saved successfully', data: result });
@@ -93,6 +105,29 @@ app.get('/api/settings/:slug', async (req, res) => {
 // ============================================
 // JOYVITE ENGINE: Render Undangan Dinamis (SSR)
 // ============================================
+
+// Middleware: Subdomain Routing
+app.use((req, res, next) => {
+  const host = req.hostname;
+  
+  // Jika akses langsung IP atau localhost, izinkan lewat
+  if (!host || host === 'localhost' || host === '127.0.0.1' || host.match(/^\d+\.\d+\.\d+\.\d+$/)) {
+    return next();
+  }
+
+  // Jika domain adalah joyvite.id tapi BUKAN login.joyvite.id atau www.joyvite.id
+  if (host.includes('.joyvite.id') && host !== 'login.joyvite.id' && host !== 'www.joyvite.id') {
+    const slug = host.split('.')[0]; // contoh: reiza-amanda.joyvite.id -> reiza-amanda
+    
+    // Rewrite internal URL agar di-handle oleh route /invitation/:slug
+    if (req.path === '/' || req.path === '') {
+       req.url = `/invitation/${slug}`;
+    }
+  }
+  
+  next();
+});
+
 // GET /invitation/:slug
 // Flow: Ambil data dari DB → Compile template → Kirim HTML final
 app.get('/invitation/:slug', async (req, res) => {

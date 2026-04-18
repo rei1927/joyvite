@@ -83,35 +83,106 @@ $(document).ready(function() {
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Menyimpan...');
         
         try {
-            // 1. Ambil pengaturan form menjadi Object JSON
+            // 1. Ambil pengaturan form menjadi Object JSON Datar
             var formData = new FormData(form);
-            var settings = {};
+            var flatData = {};
             
-            // Ekstrak data teks dan unggah file secara simultan jika ada
             for (let [key, value] of formData.entries()) {
                 if (value instanceof File && value.name) {
                     // Upload file terpisah ke API MinIO kita
                     let fileData = new FormData();
                     fileData.append('file', value);
                     
-                    const uploadRes = await fetch('http://localhost:3000/api/upload', {
+                    const uploadRes = await fetch('https://login.joyvite.id/api/upload', {
                         method: 'POST',
                         body: fileData
                     });
                     const uploadJson = await uploadRes.json();
                     if(uploadJson.url) {
-                         settings[key] = uploadJson.url; // Ganti File menjadi URL S3
+                        flatData[key] = uploadJson.url; // Ganti File menjadi URL S3
                     }
                 } else if (!(value instanceof File)) {
-                    settings[key] = value;
+                    // Cek jika ini adalah form array (contoh location.html)
+                    if (key.endsWith('[]')) {
+                        let cleanKey = key.slice(0, -2);
+                        if (!flatData[cleanKey]) flatData[cleanKey] = [];
+                        flatData[cleanKey].push(value);
+                    } else {
+                        // Kumpulkan checkboxes multiple dengan nama yg sama
+                        if (flatData[key] !== undefined) {
+                            if (!Array.isArray(flatData[key])) {
+                                flatData[key] = [flatData[key]];
+                            }
+                            flatData[key].push(value);
+                        } else {
+                            flatData[key] = value;
+                        }
+                    }
                 }
             }
 
-            // 2. Kirim seluruh JSON ke pangkalan data PostgreSQL
-            const dbRes = await fetch('http://localhost:3000/api/settings', {
+            // 2. Format menjadi Nested Settings Object yang sesuai Joyvite Engine
+            var nestedSettings = {};
+            
+            // a. Jika Halaman Mempelai
+            if (flatData['male_name'] || flatData['female_name']) {
+                nestedSettings.mempelai = {};
+                for (let k in flatData) {
+                    if (k.startsWith('male_') || k.startsWith('female_')) {
+                        nestedSettings.mempelai[k] = flatData[k];
+                    }
+                }
+            }
+            
+            // b. Jika Halaman Lokasi Acara
+            if (flatData['event_type']) {
+                nestedSettings.events = [];
+                let eventsList = Array.isArray(flatData['event_type']) ? flatData['event_type'] : [flatData['event_type']];
+                
+                for(let i=0; i<eventsList.length; i++) {
+                    let getVal = (key) => Array.isArray(flatData[key]) ? flatData[key][i] : flatData[key];
+                    nestedSettings.events.push({
+                        type: getVal('event_type'),
+                        place_name: getVal('event_place_name'),
+                        location: getVal('event_location'),
+                        gmaps: getVal('event_gmaps'),
+                        date: getVal('event_date'),
+                        time_start: getVal('event_time_start'),
+                        time_end: getVal('event_time_end'),
+                        until_finish: getVal('event_until_finish') === 'true',
+                        visible: getVal('event_visible') === 'true' || getVal('event_visible') === 'on'
+                    });
+                }
+            }
+            
+            // c. Fallback untuk data lainnya (misal: template theme di desain.html)
+            let templateName = null;
+            if (flatData['theme_type']) templateName = flatData['theme_type']; // Contoh jika ada input ini
+            
+            // Masukkan data sisanya ke nested. (Bisa diperluas utk buku tamu, rekening, dsb)
+
+            // 3. AUTO GENERATOR SUBDOMAIN SLUG
+            let currentSlug = localStorage.getItem('joyvite_slug');
+            // Jika form mempelai punya nickname, auto generate slug baru
+            if (flatData['male_nickname'] && flatData['female_nickname']) {
+                currentSlug = (flatData['male_nickname'] + '-' + flatData['female_nickname'])
+                    .toLowerCase()
+                    .replace(/[^a-z0-9-]/g, '')
+                    .replace(/\s+/g, '-');
+                localStorage.setItem('joyvite_slug', currentSlug);
+            }
+            // Fallback
+            if (!currentSlug) currentSlug = 'undangan-baru-' + Math.floor(Math.random() * 1000);
+
+            // 4. Kirim seluruh JSON ke pangkalan data PostgreSQL Joyvite
+            const dbRes = await fetch('https://login.joyvite.id/api/settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ slug: 'reiza-wedding', settings: settings })
+                body: JSON.stringify({ 
+                    slug: currentSlug, 
+                    settings: nestedSettings,
+                    template: templateName 
+                })
             });
 
             if (!dbRes.ok) throw new Error('Gagal menyimpan ke pangkalan data HTTP ' + dbRes.status);
@@ -120,6 +191,9 @@ $(document).ready(function() {
             btn.html('<i class="fa-solid fa-check me-2"></i>Tersimpan');
             btn.removeClass('btn-primary').addClass('btn-success');
             
+            // Trigger custom event untuk memberitahu UI memperbarui Link dll
+            $(document).trigger('joyvite:saved', [currentSlug]);
+
             setTimeout(function() {
                 btn.html(originalText);
                 btn.removeClass('btn-success').addClass('btn-primary');
@@ -128,7 +202,7 @@ $(document).ready(function() {
             
         } catch (error) {
             console.error('Error Integrasi Backend:', error);
-            alert('Terjadi kesalahan dari Server. Pastikan Backend di port 3000 menyala! (' + error.message + ')');
+            alert('Terjadi kesalahan koneksi ke server pusat! (' + error.message + ')');
             btn.html('<i class="fa-solid fa-triangle-exclamation me-2"></i>Gagal');
             btn.removeClass('btn-primary').addClass('btn-danger');
             setTimeout(() => {

@@ -293,5 +293,39 @@
     
     <!-- Custom JS -->
     <script src="js/script.js"></script>
+
+    <!-- LIVE LINK DASHBOARD UPDATER -->
+    <script>
+    $(document).ready(function() {
+        function updateDashboardLink(slug) {
+            if(slug) {
+                const liveUrl = `https://${slug}.joyvite.id`;
+                $('#weddingUrl').html(`<i class="fa-solid fa-link"></i> ${liveUrl}`);
+                $('#weddingUrl').attr('href', liveUrl);
+                // Ubah lambang '&' menjadi teks nama yang sesuai slug jika ada
+                if(slug !== 'default' && slug.includes('-')) {
+                    const parts = slug.split('-');
+                    if(parts.length >= 2) {
+                        const nameString = parts[0].charAt(0).toUpperCase() + parts[0].slice(1) + ' & ' + parts[1].charAt(0).toUpperCase() + parts[1].slice(1);
+                        $('.link-info h2').text(nameString);
+                    }
+                }
+            }
+        }
+
+        // On Load, read from localStorage
+        const savedSlug = localStorage.getItem('joyvite_slug');
+        if (savedSlug) {
+            updateDashboardLink(savedSlug);
+        } else {
+            $('#weddingUrl').html(`<i class="fa-solid fa-link"></i> https://undangan-baru.joyvite.id`);
+        }
+
+        // Listen for save event from any forms
+        $(document).on('joyvite:saved', function(e, newSlug) {
+            updateDashboardLink(newSlug);
+        });
+    });
+    </script>
 </body>
 </html>
