@@ -134,7 +134,7 @@ app.use((req, res, next) => {
 const dockerDashboardPath = path.join(__dirname, 'dashboard');
 const localDashboardPath = path.join(__dirname, '..');
 const dashboardPath = fs.existsSync(dockerDashboardPath) ? dockerDashboardPath : localDashboardPath;
-app.use(express.static(dashboardPath));
+app.use(express.static(dashboardPath, { extensions: ['html'] }));
 
 // GET /invitation/:slug
 // Flow: Ambil data dari DB → Compile template → Kirim HTML final
