@@ -105,6 +105,14 @@ $(document).ready(function() {
                 if (settings.mempelai.female_profile_photo) $('#female-account-upload-img').attr('src', settings.mempelai.female_profile_photo);
             }
 
+            // Update Link URL di Dashboard (Index Page)
+            if ($('#weddingUrl').length) {
+                $('#weddingUrl').html('<i class="fa-solid fa-link"></i> https://' + currentSlug + '.joyvite.id');
+                // Jadikan bisa diklik
+                $('#weddingUrl').attr('href', 'https://' + currentSlug + '.joyvite.id');
+                $('#weddingUrl').attr('target', '_blank');
+            }
+
         } catch (error) {
             console.error('Gagal me-load data undangan:', error);
         }
