@@ -513,4 +513,4 @@ app.get('/test', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(\`Joyvite Backend terhubung di port \${PORT}\`));
+app.listen(PORT, () => console.log(`Joyvite Backend terhubung di port ${PORT}`));
