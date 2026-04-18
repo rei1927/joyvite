@@ -130,6 +130,16 @@ app.use((req, res, next) => {
   next();
 });
 
+// Force redirect .html to clean URL
+app.use((req, res, next) => {
+  if (req.path.endsWith('.html')) {
+    const cleanPath = req.path.slice(0, -5);
+    const query = req.url.slice(req.path.length);
+    return res.redirect(301, cleanPath === '' ? '/' : cleanPath + query);
+  }
+  next();
+});
+
 // SERVE STATIC DASHBOARD (login.joyvite.id atau localhost)
 const dockerDashboardPath = path.join(__dirname, 'dashboard');
 const localDashboardPath = path.join(__dirname, '..');
