@@ -562,6 +562,73 @@ function compileTemplate(templateSlug, settings) {
   finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/api\.whatsapp\.com\//g, '$1="https://api.whatsapp.com/');
   finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/maps\.google\.com\//g, '$1="https://maps.google.com/');
 
+  // =========================================
+  // FINAL: Inject CSS/JS override untuk Elementor animations
+  // Elementor menyembunyikan elemen dengan opacity:0 dan mengandalkan
+  // JS animation system untuk memunculkannya. Karena kita serve dari
+  // domain berbeda, animation triggers tidak jalan. Override di sini.
+  // =========================================
+  
+  const visibilityOverride = `
+<style id="joyvite-visibility-fix">
+  /* Force semua elemen Elementor yang tersembunyi oleh animasi menjadi visible */
+  .elementor-invisible {
+    visibility: visible !important;
+    opacity: 1 !important;
+  }
+  .elementor-widget {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .elementor-element {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  /* Fix untuk section/container yang di-hide oleh entrance animation */
+  [data-settings*="animation"] .elementor-widget-container {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .elementor-section, .elementor-container, .elementor-column, .elementor-column-wrap {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  /* Pastikan heading dan teks terlihat */
+  .elementor-heading-title, .elementor-text-editor, .elementor-widget-text-editor {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  /* WeddingPress specific */
+  .wdp-mempelai, .wdp-envelope, .wdp-countdown {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+</style>
+<script id="joyvite-animation-fix">
+document.addEventListener('DOMContentLoaded', function() {
+  // Force hapus class elementor-invisible dari semua elemen setelah 500ms
+  setTimeout(function() {
+    document.querySelectorAll('.elementor-invisible').forEach(function(el) {
+      el.classList.remove('elementor-invisible');
+      el.style.opacity = '1';
+      el.style.visibility = 'visible';
+    });
+  }, 500);
+  
+  // Retry setelah 2 detik jika Elementor JS terlambat load
+  setTimeout(function() {
+    document.querySelectorAll('.elementor-invisible').forEach(function(el) {
+      el.classList.remove('elementor-invisible');
+      el.style.opacity = '1';
+      el.style.visibility = 'visible';
+    });
+  }, 2000);
+});
+</script>`;
+
+  // Inject sebelum </head>
+  finalHtml = finalHtml.replace('</head>', visibilityOverride + '\n</head>');
+
   return finalHtml;
 }
 
