@@ -493,10 +493,35 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
-  // FINAL: Kembalikan HTML yang sudah dimodifikasi
+  // FINAL: Rewrite asset URLs agar berfungsi dari domain klien
+  // Template scraping menyimpan file dengan path relatif (../wp-content/...)
+  // Kita rewrite ke absolute URL menuju sumber asli menujuacara.id
   // =========================================
   
-  return $.html();
+  let finalHtml = $.html();
+  
+  // Rewrite path relatif CSS/JS/Gambar ke menujuacara.id asli
+  // Pattern: href="../wp-content/..." → href="https://menujuacara.id/wp-content/..."
+  finalHtml = finalHtml.replace(/(href|src|srcset)="\.\.\/wp-content\//g, '$1="https://menujuacara.id/wp-content/');
+  finalHtml = finalHtml.replace(/(href|src|srcset)="\.\.\/wp-includes\//g, '$1="https://menujuacara.id/wp-includes/');
+  
+  // Rewrite fonts & CDN relative paths
+  finalHtml = finalHtml.replace(/(href|src)="\.\.\/\.\.\/fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
+  finalHtml = finalHtml.replace(/(href|src)="\.\.\/\.\.\/fonts\.gstatic\.com\//g, '$1="https://fonts.gstatic.com/');
+  finalHtml = finalHtml.replace(/(href|src)="\.\.\/\.\.\/cdnjs\.cloudflare\.com\//g, '$1="https://cdnjs.cloudflare.com/');
+  finalHtml = finalHtml.replace(/(href|src)="\.\.\/\.\.\/unpkg\.com\//g, '$1="https://unpkg.com/');
+  
+  // Rewrite data-thumbnail untuk gallery (absolute ke menujuacara.id)
+  finalHtml = finalHtml.replace(/data-thumbnail="https:\/\/menujuacara\.id\//g, 'data-thumbnail="https://menujuacara.id/');
+  
+  // Rewrite social media & external links
+  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/instagram\.com\//g, '$1="https://instagram.com/');
+  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/www\.google\.com\//g, '$1="https://www.google.com/');
+  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/accounts\.google\.com\//g, '$1="https://accounts.google.com/');
+  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/api\.whatsapp\.com\//g, '$1="https://api.whatsapp.com/');
+  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/maps\.google\.com\//g, '$1="https://maps.google.com/');
+
+  return finalHtml;
 }
 
 /**
