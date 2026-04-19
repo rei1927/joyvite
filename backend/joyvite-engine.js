@@ -563,64 +563,56 @@ function compileTemplate(templateSlug, settings) {
   finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/maps\.google\.com\//g, '$1="https://maps.google.com/');
 
   // =========================================
-  // FINAL: Inject CSS/JS override untuk Elementor animations
-  // Elementor menyembunyikan elemen dengan opacity:0 dan mengandalkan
-  // JS animation system untuk memunculkannya. Karena kita serve dari
-  // domain berbeda, animation triggers tidak jalan. Override di sini.
+  // FINAL: Inject CSS/JS override untuk WeddingPress & Elementor animations
+  // Template WeddingPress menggunakan custom ".anim" system:
+  // - .anim.fade/.zoom/.fadeup = opacity:0, needs ".active" class via scroll
+  // - .anim.zoomOne/.fadeupOne = auto-play CSS keyframe (cover elements)
+  // - #cover section blocks scroll until "Buka Undangan" is clicked
+  // Elementor juga punya ".elementor-invisible" yang perlu di-override.
   // =========================================
   
   const visibilityOverride = `
 <style id="joyvite-visibility-fix">
-  /* Force semua elemen Elementor yang tersembunyi oleh animasi menjadi visible */
+  /* Force scroll-based .anim elements to their visible/active state */
+  .anim.fade, .anim.zoom, .anim.fadeup, .anim.fadedown, 
+  .anim.faderight, .anim.fadeleft {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  
+  /* Elementor invisible elements */
   .elementor-invisible {
     visibility: visible !important;
     opacity: 1 !important;
   }
-  .elementor-widget {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .elementor-element {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  /* Fix untuk section/container yang di-hide oleh entrance animation */
-  [data-settings*="animation"] .elementor-widget-container {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  .elementor-section, .elementor-container, .elementor-column, .elementor-column-wrap {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
+  
   /* Pastikan heading dan teks terlihat */
-  .elementor-heading-title, .elementor-text-editor, .elementor-widget-text-editor {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  /* WeddingPress specific */
-  .wdp-mempelai, .wdp-envelope, .wdp-countdown {
+  .elementor-heading-title, .elementor-text-editor {
     opacity: 1 !important;
     visibility: visible !important;
   }
 </style>
 <script id="joyvite-animation-fix">
 document.addEventListener('DOMContentLoaded', function() {
-  // Force hapus class elementor-invisible dari semua elemen setelah 500ms
+  // Force tambahkan .active class ke semua .anim elements setelah load
+  // Ini memicu transisi visibility yang normalnya di-trigger oleh scroll
   setTimeout(function() {
-    document.querySelectorAll('.elementor-invisible').forEach(function(el) {
-      el.classList.remove('elementor-invisible');
-      el.style.opacity = '1';
-      el.style.visibility = 'visible';
+    document.querySelectorAll('.anim').forEach(function(el) {
+      el.classList.add('active');
     });
-  }, 500);
-  
-  // Retry setelah 2 detik jika Elementor JS terlambat load
-  setTimeout(function() {
+    // Hapus elementor-invisible
     document.querySelectorAll('.elementor-invisible').forEach(function(el) {
       el.classList.remove('elementor-invisible');
-      el.style.opacity = '1';
-      el.style.visibility = 'visible';
+    });
+  }, 300);
+  
+  // Retry setelah 2 detik untuk elemen yang terlambat di-render
+  setTimeout(function() {
+    document.querySelectorAll('.anim').forEach(function(el) {
+      el.classList.add('active');
+    });
+    document.querySelectorAll('.elementor-invisible').forEach(function(el) {
+      el.classList.remove('elementor-invisible');
     });
   }, 2000);
 });
