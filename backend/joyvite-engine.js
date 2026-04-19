@@ -204,6 +204,8 @@ function compileTemplate(templateSlug, settings) {
     const coverName = isPriaWanita 
       ? `${mempelai.male_nickname} & ${mempelai.female_nickname}`
       : `${mempelai.female_nickname} & ${mempelai.male_nickname}`;
+      
+    console.log(`[DEBUG Engine] Execution reached Mempelai Mapping! coverName: ${coverName}`);
     
     // Target 1: WeddingPress cover div .wdp-mempelai
     $('.wdp-mempelai').each(function () {
@@ -216,6 +218,7 @@ function compileTemplate(templateSlug, settings) {
       // Match pattern: "Haqi & Dewi" atau nama apapun yang dipisah "&"
       if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40) {
         $(this).text(coverName);
+        console.log(`[DEBUG Engine] Target 2 replaced heading containing '&' with: ${coverName}`);
       }
     });
 
