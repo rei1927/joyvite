@@ -101,6 +101,11 @@ function compileTemplate(templateSlug, settings) {
   const livestream = settings.livestream || {};
   const additional = settings.additionalSettings || {};
 
+  console.log(`[DEBUG Engine] Render URL for slug: ${templateSlug}`);
+  console.log(`[DEBUG Engine] settings.mempelai:`, mempelai);
+  console.log(`[DEBUG Engine] settings.additionalSettings:`, additional);
+
+
   // =========================================
   // ADVANCED SETTINGS (PENGATURAN TAMBAHAN)
   // =========================================
