@@ -538,8 +538,13 @@ function compileTemplate(templateSlug, settings) {
   finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, '$1="https://menujuacara.id/wp-includes/');
   
   // Rewrite inline styles URL patterns: url(../wp-content/...), url('../wp-content/...'), url("../wp-content/...")
-  finalHtml = finalHtml.replace(/url\(['"]?\.\.\/wp-content\//g, 'url(\'https://menujuacara.id/wp-content/');
-  finalHtml = finalHtml.replace(/url\(['"]?\.\.\/wp-includes\//g, 'url(\'https://menujuacara.id/wp-includes/');
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, 'url(https://menujuacara.id/wp-content/');
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, 'url(\'https://menujuacara.id/wp-content/');
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, 'url("https://menujuacara.id/wp-content/');
+
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, 'url(https://menujuacara.id/wp-includes/');
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, 'url(\'https://menujuacara.id/wp-includes/');
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, 'url("https://menujuacara.id/wp-includes/');
   
   // Rewrite fonts & CDN relative paths
   finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
