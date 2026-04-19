@@ -218,21 +218,28 @@ function compileTemplate(templateSlug, settings) {
     $('meta[property="og:description"]').each(function () {
       const content = $(this).attr('content');
       if (content) {
-        $(this).attr('content', content.replace(/Haqi\s*(&amp;|&)\s*Dewi/gi, coverName));
+        // Ganti berbagai macam format nama "Name & Name" atau "Name &amp; Name"
+        let newContent = content.replace(/[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/gi, coverName);
+        $(this).attr('content', newContent);
       }
     });
+
+    $('meta[property="og:title"]').each(function () {
+      $(this).attr('content', coverName);
+    });
+    $('title').text(coverName);
   }
 
   // Ganti nama mempelai di bagian "TENTANG KAMI"
   let mempelaiCount = 0;
   $('.elementor-heading-title').each(function () {
     const text = $(this).text().trim();
-    if (text === 'Nama Mempelai') {
+    if (text === 'Nama Mempelai' || text === 'Yori' || text === 'Aria' || text === 'Romeo' || text === 'Juliet') {
       mempelaiCount++;
-      if (mempelaiCount === 1 && mempelai.male_name) {
-        $(this).text(mempelai.male_name);
-      } else if (mempelaiCount === 2 && mempelai.female_name) {
+      if (mempelaiCount === 1 && mempelai.female_name) {
         $(this).text(mempelai.female_name);
+      } else if (mempelaiCount === 2 && mempelai.male_name) {
+        $(this).text(mempelai.male_name);
       }
     }
   });
