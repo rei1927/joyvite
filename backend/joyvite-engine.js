@@ -215,8 +215,9 @@ function compileTemplate(templateSlug, settings) {
     // Target 2: Heading title yang berisi format "Nama & Nama" (cover headings)
     $('.elementor-heading-title').each(function () {
       const text = $(this).text().trim();
+      const lowerText = text.toLowerCase();
       // Match pattern: "Haqi & Dewi" atau nama apapun yang dipisah "&"
-      if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40) {
+      if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40 && !lowerText.includes('bpk') && !lowerText.includes('bapak') && !lowerText.includes('ibu')) {
         $(this).text(coverName);
         console.log(`[DEBUG Engine] Target 2 replaced heading containing '&' with: ${coverName}`);
       }
@@ -242,7 +243,7 @@ function compileTemplate(templateSlug, settings) {
   let mempelaiCount = 0;
   $('.elementor-heading-title').each(function () {
     const text = $(this).text().trim();
-    if (text === 'Nama Mempelai' || text === 'Yori' || text === 'Aria' || text === 'Romeo' || text === 'Juliet') {
+    if (text === 'Nama Mempelai' || text === 'Yori' || text === 'Aria' || text === 'Romeo' || text === 'Juliet' || text === 'Aria Wicaksono' || text === 'Elsa Mayori') {
       mempelaiCount++;
       if (mempelaiCount === 1 && mempelai.female_name) {
         $(this).text(mempelai.female_name);
