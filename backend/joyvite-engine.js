@@ -238,8 +238,8 @@ function compileTemplate(templateSlug, settings) {
   });
 
   // Ganti nama panggilan individual di headings
-  const defaultMaleNames = ['Haqi', 'Pria', 'Nama Panggilan Pria', 'Romeo'];
-  const defaultFemaleNames = ['Dewi', 'Wanita', 'Nama Panggilan Wanita', 'Juliet'];
+  const defaultMaleNames = ['Haqi', 'Pria', 'Nama Panggilan Pria', 'Romeo', 'Aria'];
+  const defaultFemaleNames = ['Dewi', 'Wanita', 'Nama Panggilan Wanita', 'Juliet', 'Yori'];
   
   if (mempelai.male_nickname) {
     defaultMaleNames.forEach(name => {
@@ -250,6 +250,14 @@ function compileTemplate(templateSlug, settings) {
     defaultFemaleNames.forEach(name => {
       replaceHeadingText($, name, mempelai.female_nickname);
     });
+  }
+
+  // Ganti nama lengkap jika ada nama spesifik
+  if (mempelai.male_name) {
+    replaceHeadingText($, 'Aria Wicaksono', mempelai.male_name);
+  }
+  if (mempelai.female_name) {
+    replaceHeadingText($, 'Elsa Mayori', mempelai.female_name);
   }
 
   // Ganti info orang tua
