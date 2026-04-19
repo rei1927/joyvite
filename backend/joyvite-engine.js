@@ -227,8 +227,16 @@ function compileTemplate(templateSlug, settings) {
     $('meta[property="og:description"]').each(function () {
       const content = $(this).attr('content');
       if (content) {
-        // Ganti berbagai macam format nama "Name & Name" atau "Name &amp; Name"
-        let newContent = content.replace(/[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/gi, coverName);
+        // Hanya replace jika ada di awal atau setelah The Wedding Of 
+        // Menggunakan regex yang lebih aman agar tidak me-replace "Tholib & Ibu" dll.
+        let newContent = content.replace(/The Wedding Of\s+[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/gi, "The Wedding Of " + coverName);
+        if (newContent === content) {
+          // Fallback ganti 20 karakter pertama jika formatnya nama di awal (misal "Name & Name | ...")
+          const startMatches = content.match(/^[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/i);
+          if (startMatches) {
+            newContent = content.replace(startMatches[0], coverName);
+          }
+        }
         $(this).attr('content', newContent);
       }
     });
