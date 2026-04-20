@@ -572,125 +572,91 @@ function compileTemplate(templateSlug, settings) {
   // =========================================
   
   const visibilityOverride = `
-<style id="joyvite-visibility-fix">
-  /* === COVER SECTION FIX === */
-  /* Cover section (#cover) is position:fixed and overlays the page.
-     Background is applied to nested .elementor-widget-wrap via Elementor CSS.
-     Text is white (#FFF) designed for dark background with 40% overlay. */
+<script id="joyvite-cover-fix">
+(function() {
+  // === JOYVITE COVER FIX ===
+  // This runs immediately (not waiting for DOMContentLoaded) to fix cover ASAP.
+  // Uses inline styles which ALWAYS override any CSS selector specificity.
   
-  /* Apply background directly to cover and all its nested containers */
-  #cover,
-  #cover > .elementor-container,
-  #cover .elementor-column > .elementor-widget-wrap,
-  #cover .elementor-element-populated {
-    background-color: #C8B1A5 !important;
-    background-image: url("https://menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg") !important;
-    background-size: cover !important;
-    background-position: center center !important;
-    background-repeat: no-repeat !important;
-  }
-  
-  /* Dark overlay on cover */
-  #cover .elementor-background-overlay {
-    background-color: #000000 !important;
-    opacity: 0.4 !important;
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    bottom: 0 !important;
-  }
-  
-  /* Ensure cover takes full screen and is on top */
-  #cover {
-    z-index: 999 !important;
-    min-height: 100vh !important;
-    width: 100% !important;
-  }
-  
-  /* Force white text and visibility on cover elements */
-  #cover .elementor-heading-title {
-    color: #FFFFFF !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    position: relative !important;
-    z-index: 2 !important;
-  }
-  #cover .elementor-button {
-    opacity: 1 !important;
-    visibility: visible !important;
-    position: relative !important;
-    z-index: 2 !important;
-    background-color: #FFFFFF !important;
-    color: #7A5F4F !important;
-  }
-  #cover .elementor-widget {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-  #cover .elementor-widget-container {
-    opacity: 1 !important;
-    visibility: visible !important;
-    position: relative !important;
-    z-index: 2 !important;
-  }
-  #cover .elementor-button-icon {
-    color: #7A5F4F !important;
-  }
-  
-  /* Hide preloader section (first section before cover) */
-  .elementor-element-1ff834dc {
-    display: none !important;
-  }
-  
-  /* === ANIMATION SYSTEM FIX === */
-  /* Force scroll-based .anim elements to their visible/active state */
-  .anim.fade, .anim.zoom, .anim.fadeup, .anim.fadedown, 
-  .anim.faderight, .anim.fadeleft {
-    opacity: 1 !important;
-    transform: none !important;
-  }
-  
-  /* Elementor invisible elements */
-  .elementor-invisible {
-    visibility: visible !important;
-    opacity: 1 !important;
-  }
-  
-  /* Pastikan heading dan teks terlihat */
-  .elementor-heading-title, .elementor-text-editor {
-    opacity: 1 !important;
-    visibility: visible !important;
-  }
-</style>
-<script id="joyvite-animation-fix">
-document.addEventListener('DOMContentLoaded', function() {
-  // Force tambahkan .active class ke semua .anim elements setelah load
-  // Ini memicu transisi visibility yang normalnya di-trigger oleh scroll
-  setTimeout(function() {
-    document.querySelectorAll('.anim').forEach(function(el) {
+  function fixCover() {
+    var cover = document.getElementById('cover');
+    if (!cover) return;
+    
+    // Fix cover section - position fixed, full screen
+    cover.style.cssText += ';position:fixed!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:999!important;min-height:100vh!important;width:100%!important;overflow:hidden!important;';
+    
+    // Fix the column inside cover (has the photo background)
+    var coverColumn = cover.querySelector('.elementor-column');
+    if (coverColumn) {
+      var widgetWrap = coverColumn.querySelector('.elementor-widget-wrap');
+      if (widgetWrap) {
+        widgetWrap.style.cssText += ';background-color:#C8B1A5!important;background-image:url(https://menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg)!important;background-size:cover!important;background-position:center center!important;background-repeat:no-repeat!important;min-height:100vh!important;display:flex!important;flex-direction:column!important;justify-content:flex-end!important;align-items:center!important;position:relative!important;';
+      }
+    }
+    
+    // Fix the dark overlay
+    var overlay = cover.querySelector('.elementor-background-overlay');
+    if (overlay) {
+      overlay.style.cssText += ';background-color:#000000!important;opacity:0.4!important;position:absolute!important;top:0!important;left:0!important;right:0!important;bottom:0!important;z-index:1!important;';
+    }
+    
+    // Fix ALL headings inside cover - white text, visible
+    var headings = cover.querySelectorAll('.elementor-heading-title');
+    headings.forEach(function(h) {
+      h.style.cssText += ';color:#FFFFFF!important;opacity:1!important;visibility:visible!important;position:relative!important;z-index:2!important;';
+    });
+    
+    // Fix ALL widgets inside cover - visible
+    var widgets = cover.querySelectorAll('.elementor-widget');
+    widgets.forEach(function(w) {
+      w.style.cssText += ';opacity:1!important;visibility:visible!important;position:relative!important;z-index:2!important;';
+    });
+    
+    // Fix widget containers
+    var containers = cover.querySelectorAll('.elementor-widget-container');
+    containers.forEach(function(c) {
+      c.style.cssText += ';opacity:1!important;visibility:visible!important;';
+    });
+    
+    // Fix Buka Undangan button
+    var btn = cover.querySelector('.elementor-button');
+    if (btn) {
+      btn.style.cssText += ';opacity:1!important;visibility:visible!important;position:relative!important;z-index:2!important;background-color:#FFFFFF!important;color:#7A5F4F!important;border-radius:5px!important;padding:8px 20px!important;cursor:pointer!important;';
+    }
+    
+    // Fix anim classes - add .active to trigger visibility
+    var anims = document.querySelectorAll('.anim');
+    anims.forEach(function(el) {
       el.classList.add('active');
+      el.style.cssText += ';opacity:1!important;visibility:visible!important;';
     });
-    // Hapus elementor-invisible
-    document.querySelectorAll('.elementor-invisible').forEach(function(el) {
+    
+    // Fix elementor-invisible
+    var invisibles = document.querySelectorAll('.elementor-invisible');
+    invisibles.forEach(function(el) {
       el.classList.remove('elementor-invisible');
+      el.style.opacity = '1';
+      el.style.visibility = 'visible';
     });
-  }, 300);
+    
+    console.log('[Joyvite] Cover fix applied successfully');
+  }
   
-  // Retry setelah 2 detik untuk elemen yang terlambat di-render
-  setTimeout(function() {
-    document.querySelectorAll('.anim').forEach(function(el) {
-      el.classList.add('active');
-    });
-    document.querySelectorAll('.elementor-invisible').forEach(function(el) {
-      el.classList.remove('elementor-invisible');
-    });
-  }, 2000);
-});
+  // Run immediately if DOM is already loaded
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', fixCover);
+  } else {
+    fixCover();
+  }
+  
+  // Also run after a delay to catch late-loading elements
+  setTimeout(fixCover, 500);
+  setTimeout(fixCover, 2000);
+})();
 </script>`;
 
-  // Inject sebelum </head>
-  finalHtml = finalHtml.replace('</head>', visibilityOverride + '\n</head>');
+  // Inject sebelum </body> agar load SETELAH semua external CSS
+  finalHtml = finalHtml.replace('</body>', visibilityOverride + '\n</body>');
 
   return finalHtml;
 }
