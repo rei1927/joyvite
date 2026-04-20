@@ -655,8 +655,16 @@ function compileTemplate(templateSlug, settings) {
 })();
 </script>`;
 
-  // Inject sebelum </body> agar load SETELAH semua external CSS
-  finalHtml = finalHtml.replace('</body>', visibilityOverride + '\n</body>');
+  // Inject di KEDUA lokasi untuk maximum compatibility
+  // Beberapa template scraped mungkin tidak punya </body> yang valid
+  if (finalHtml.includes('</body>')) {
+    finalHtml = finalHtml.replace('</body>', visibilityOverride + '\n</body>');
+  } else if (finalHtml.includes('</head>')) {
+    finalHtml = finalHtml.replace('</head>', visibilityOverride + '\n</head>');
+  } else {
+    // Fallback: append ke akhir HTML
+    finalHtml += visibilityOverride;
+  }
 
   return finalHtml;
 }
