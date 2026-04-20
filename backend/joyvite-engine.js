@@ -663,6 +663,17 @@ function compileTemplate(templateSlug, settings) {
     visibility: visible !important;
   }
   
+  /* Hide preloader section so it doesn't block cover */
+  .elementor-element.elementor-element-1ff834dc {
+    display: none !important;
+    opacity: 0 !important;
+    z-index: -1 !important;
+  }
+  
+  #cover {
+    z-index: 2147483647 !important; /* maximum z-index */
+  }
+  
   /* Animation system fix */
   .anim.fade, .anim.zoom, .anim.fadeup, .anim.fadedown,
   .anim.faderight, .anim.fadeleft {
