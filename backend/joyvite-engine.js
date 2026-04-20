@@ -574,25 +574,55 @@ function compileTemplate(templateSlug, settings) {
   const visibilityOverride = `
 <style id="joyvite-visibility-fix">
   /* === COVER SECTION FIX === */
-  /* Cover text is white (#FFF) designed for dark background. 
-     Add fallback dark bg so text is visible even if external CSS/images load slowly */
-  #cover {
+  /* Cover section (#cover) is position:fixed and overlays the page.
+     Background is applied to nested .elementor-widget-wrap via Elementor CSS.
+     Text is white (#FFF) designed for dark background with 40% overlay. */
+  
+  /* Apply background directly to cover and all its nested containers */
+  #cover,
+  #cover > .elementor-container,
+  #cover .elementor-column > .elementor-widget-wrap,
+  #cover .elementor-element-populated {
     background-color: #C8B1A5 !important;
+    background-image: url("https://menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg") !important;
     background-size: cover !important;
     background-position: center center !important;
+    background-repeat: no-repeat !important;
   }
+  
+  /* Dark overlay on cover */
   #cover .elementor-background-overlay {
     background-color: #000000 !important;
     opacity: 0.4 !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
   }
+  
+  /* Ensure cover takes full screen and is on top */
+  #cover {
+    z-index: 999 !important;
+    min-height: 100vh !important;
+    width: 100% !important;
+  }
+  
+  /* Force white text and visibility on cover elements */
   #cover .elementor-heading-title {
     color: #FFFFFF !important;
     opacity: 1 !important;
     visibility: visible !important;
+    position: relative !important;
+    z-index: 2 !important;
   }
   #cover .elementor-button {
     opacity: 1 !important;
     visibility: visible !important;
+    position: relative !important;
+    z-index: 2 !important;
+    background-color: #FFFFFF !important;
+    color: #7A5F4F !important;
   }
   #cover .elementor-widget {
     opacity: 1 !important;
@@ -601,6 +631,16 @@ function compileTemplate(templateSlug, settings) {
   #cover .elementor-widget-container {
     opacity: 1 !important;
     visibility: visible !important;
+    position: relative !important;
+    z-index: 2 !important;
+  }
+  #cover .elementor-button-icon {
+    color: #7A5F4F !important;
+  }
+  
+  /* Hide preloader section (first section before cover) */
+  .elementor-element-1ff834dc {
+    display: none !important;
   }
   
   /* === ANIMATION SYSTEM FIX === */
