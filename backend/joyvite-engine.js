@@ -573,6 +573,37 @@ function compileTemplate(templateSlug, settings) {
   
   const visibilityOverride = `
 <style id="joyvite-visibility-fix">
+  /* === COVER SECTION FIX === */
+  /* Cover text is white (#FFF) designed for dark background. 
+     Add fallback dark bg so text is visible even if external CSS/images load slowly */
+  #cover {
+    background-color: #C8B1A5 !important;
+    background-size: cover !important;
+    background-position: center center !important;
+  }
+  #cover .elementor-background-overlay {
+    background-color: #000000 !important;
+    opacity: 0.4 !important;
+  }
+  #cover .elementor-heading-title {
+    color: #FFFFFF !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #cover .elementor-button {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #cover .elementor-widget {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  #cover .elementor-widget-container {
+    opacity: 1 !important;
+    visibility: visible !important;
+  }
+  
+  /* === ANIMATION SYSTEM FIX === */
   /* Force scroll-based .anim elements to their visible/active state */
   .anim.fade, .anim.zoom, .anim.fadeup, .anim.fadedown, 
   .anim.faderight, .anim.fadeleft {
