@@ -550,6 +550,7 @@ function compileTemplate(templateSlug, settings) {
                $(targetImg).attr('src', mempelai.female_profile_photo);
                // Hapus atribut srcset agar gambar baru tidak di-override oleh layar responsif Elementor
                $(targetImg).removeAttr('srcset sizes');
+                $(targetImg).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(targetImg).attr('style') || ''));
                console.log('[Heuristic] Foto WANITA terganti.');
                // Kosongkan array untuk pencarian pria berikutnya
                recentImages = []; 
@@ -561,6 +562,7 @@ function compileTemplate(templateSlug, settings) {
                const targetImg = recentImages[recentImages.length - 1];
                $(targetImg).attr('src', mempelai.male_profile_photo);
                $(targetImg).removeAttr('srcset sizes');
+                $(targetImg).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(targetImg).attr('style') || ''));
                console.log('[Heuristic] Foto PRIA terganti.');
                recentImages = []; 
            }
@@ -580,9 +582,13 @@ function compileTemplate(templateSlug, settings) {
           if (profileImgIdx === 1 && mempelai.male_profile_photo && currentSrc !== mempelai.male_profile_photo) {
             $(this).attr('src', mempelai.male_profile_photo);
             $(this).removeAttr('srcset sizes');
+            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
+            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
           } else if (profileImgIdx === 2 && mempelai.female_profile_photo && currentSrc !== mempelai.female_profile_photo) {
             $(this).attr('src', mempelai.female_profile_photo);
             $(this).removeAttr('srcset sizes');
+            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
+            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
           }
       }
     });
@@ -651,6 +657,7 @@ function compileTemplate(templateSlug, settings) {
                      if (!lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && !lowerSrc.includes('daun') && !lowerSrc.includes('ornament')) {
                          $(this).attr('src', story.photo);
                          $(this).removeAttr('srcset sizes');
+            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
                      }
                  });
               }

@@ -66,7 +66,10 @@ $(document).ready(function() {
                     const value = obj[key];
                     if (typeof value === 'string' || typeof value === 'number') {
                         const input = $(`[name="${key}"]`);
-                        if (input.length) input.val(value);
+                        // Cegah error "InvalidStateError" jika ini adalah input file
+                        if (input.length && input.attr('type') !== 'file') {
+                            input.val(value);
+                        }
                     } else if (typeof value === 'boolean') {
                         const input = $(`[name="${key}"]`);
                         if (input.length && (input.attr('type') === 'checkbox' || input.attr('type') === 'radio')) {
