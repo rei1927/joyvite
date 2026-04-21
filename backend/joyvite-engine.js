@@ -533,18 +533,18 @@ function compileTemplate(templateSlug, settings) {
   let finalHtml = $.html();
   
   // Rewrite path relatif CSS/JS/Gambar ke aset lokal Joyvite
-  // File statis sudah diekspos di server.js melalui rute /assets
-  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-content\//g, `$1="/assets/${templateSlug}/menujuacara.id/wp-content/`);
-  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, `$1="/assets/${templateSlug}/menujuacara.id/wp-includes/`);
+  // File statis sudah diekspos di server.js melalui rute /joyvite-assets
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-content\//g, `$1="/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, `$1="/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
   
   // Rewrite inline styles URL patterns
-  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, `url(/assets/${templateSlug}/menujuacara.id/wp-content/`);
-  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, `url('/assets/${templateSlug}/menujuacara.id/wp-content/`);
-  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, `url("/assets/${templateSlug}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, `url(/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, `url('/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, `url("/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
 
-  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, `url(/assets/${templateSlug}/menujuacara.id/wp-includes/`);
-  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, `url('/assets/${templateSlug}/menujuacara.id/wp-includes/`);
-  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, `url("/assets/${templateSlug}/menujuacara.id/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, `url(/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, `url('/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, `url("/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
   
   // Rewrite fonts & CDN relative paths
   finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
@@ -553,7 +553,7 @@ function compileTemplate(templateSlug, settings) {
   finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/unpkg\.com\//g, '$1="https://unpkg.com/');
   
   // Rewrite data-thumbnail untuk gallery (absolute ke localhost assets)
-  finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, `data-thumbnail="/assets/${templateSlug}/menujuacara.id/`);
+  finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, `data-thumbnail="/joyvite-assets/${templateSlug}/menujuacara.id/`);
 
   // Rewrite social media & external links
   finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/instagram\.com\//g, '$1="https://instagram.com/');
@@ -579,21 +579,24 @@ function compileTemplate(templateSlug, settings) {
    * These selectors have EQUAL or HIGHER specificity than the external CSS.
    */
   
-  /* Cover section: position fixed, full viewport */
+  /* Sembunyikan preloader bawaan template yang menghalangi konten */
+  .elementor-element-1ff834dc,
+  .elementor-element-59ac045e {
+    display: none !important;
+  }
+
+  /* Pastikan elemen cover (section utama) berada di z-index paling atas */
+  #cover, 
   .elementor-48952 .elementor-element.elementor-element-5031a1c7 {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    z-index: 999 !important;
-    overflow: hidden !important;
+    z-index: 2147483647 !important;
+    position: relative !important;
   }
   
   /* Cover column: dark photo background */
   .elementor-48952 .elementor-element.elementor-element-2dd11f4f > .elementor-widget-wrap,
   .elementor-48952 .elementor-element.elementor-element-2dd11f4f > .elementor-element-populated {
     background-color: #C8B1A5 !important;
-    background-image: url("/assets/${templateSlug}/menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg") !important;
+    background-image: url("/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg") !important;
     background-size: cover !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;
