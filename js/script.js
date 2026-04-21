@@ -108,9 +108,49 @@ $(document).ready(function() {
             // Update Link URL di Dashboard (Index Page)
             if ($('#weddingUrl').length) {
                 $('#weddingUrl').html('<i class="fa-solid fa-link"></i> https://' + currentSlug + '.joyvite.id');
-                // Jadikan bisa diklik
                 $('#weddingUrl').attr('href', 'https://' + currentSlug + '.joyvite.id');
                 $('#weddingUrl').attr('target', '_blank');
+            }
+
+            // AUTO-POPULATE ARRAY: Lokasi Acara (events)
+            if (settings.events && settings.events.length > 0) {
+                settings.events.forEach((evt, idx) => {
+                    // Click Add Event Button jika idx > 0 (karena card pertama sudah ada di HTML)
+                    if (idx > 0) $('#addEventBtn').trigger('click');
+                    
+                    setTimeout(() => {
+                        const block = $('.event-card').eq(idx);
+                        block.find('input[name="event_type[]"]').val(evt.type);
+                        block.find('input[name="event_place_name[]"]').val(evt.place_name);
+                        block.find('textarea[name="event_location[]"]').val(evt.location);
+                        block.find('input[name="event_gmaps[]"]').val(evt.gmaps);
+                        if (evt.date) {
+                            const d = new Date(evt.date);
+                            if (!isNaN(d)) block.find('input[name="event_date[]"]').val(d.toISOString().split('T')[0]);
+                        }
+                        block.find('input[name="event_time_start[]"]').val(evt.time_start);
+                        block.find('input[name="event_time_end[]"]').val(evt.time_end);
+                        block.find('input[name="event_until_finish[]"]').prop('checked', evt.until_finish);
+                        block.find('input[name="event_visible[]"]').prop('checked', evt.visible !== false);
+                    }, 50); // slight delay for DOM insertion
+                });
+            }
+
+            // AUTO-POPULATE ARRAY: Cerita Cinta (love_story)
+            if (settings.love_story && settings.love_story.length > 0) {
+                settings.love_story.forEach((story, idx) => {
+                    if (idx > 0) $('#addStoryBtn').trigger('click');
+                    
+                    setTimeout(() => {
+                        const block = $('.timeline-card').eq(idx);
+                        block.find('input[name="story_title[]"]').val(story.title);
+                        if (story.date) {
+                            const d = new Date(story.date);
+                            if (!isNaN(d)) block.find('input[name="story_date[]"]').val(d.toISOString().split('T')[0]);
+                        }
+                        block.find('textarea[name="story_desc[]"]').val(story.description);
+                    }, 50);
+                });
             }
 
         } catch (error) {
