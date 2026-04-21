@@ -530,10 +530,12 @@ function compileTemplate(templateSlug, settings) {
            img.each(function() {
                const src = $(this).attr('src') || '';
                const lowerSrc = src.toLowerCase();
-               if (!lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && 
-                   !lowerSrc.includes('daun') && !lowerSrc.includes('leaf') &&
-                   !lowerSrc.includes('ornament') && !lowerSrc.includes('bg') && 
-                   !lowerSrc.includes('shape') && !lowerSrc.includes('mask')) {
+                if (!lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && 
+                    !lowerSrc.includes('daun') && !lowerSrc.includes('leaf') &&
+                    !lowerSrc.includes('ornament') && !lowerSrc.includes('bg') && 
+                    !lowerSrc.includes('shape') && !lowerSrc.includes('mask') &&
+                    !lowerSrc.includes('animasi') && !lowerSrc.includes('bingkai') &&
+                    !lowerSrc.includes('frame') && !lowerSrc.includes('wreath')) {
                    recentImages.push(this);
                }
            });
