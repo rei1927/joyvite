@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const { S3Client, PutObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
 const { PrismaClient } = require('@prisma/client');
 const { compileTemplate } = require('./joyvite-engine');
 const path = require('path');
@@ -53,11 +53,34 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
     
     res.json({
       message: 'Upload success',
-      url: `https://${process.env.MINIO_ENDPOINT}/joyvite-assets/${fileName}`
+      url: `https://login.joyvite.id/joyvite-assets/${fileName}`
     });
   } catch (error) {
     console.error('Upload Error:', error);
     res.status(500).json({ error: error.message });
+  }
+});
+
+// Proxy Image dari MinIO S3 Stream
+app.get('/joyvite-assets/:fileName', async (req, res) => {
+  try {
+    const fileName = req.params.fileName;
+    const command = new GetObjectCommand({
+      Bucket: 'joyvite-assets',
+      Key: fileName
+    });
+    
+    const response = await s3Client.send(command);
+    
+    // Set response headers equivalent to S3 content type
+    res.setHeader('Content-Type', response.ContentType || 'image/jpeg');
+    res.setHeader('Cache-Control', 'public, max-age=31536000'); // Cache for 1 year
+    
+    // Pipe the S3 stream directly to Express response
+    response.Body.pipe(res);
+  } catch (error) {
+    console.error(`S3 Stream Error for ${req.params.fileName}:`, error.message);
+    res.status(404).send('Image not found');
   }
 });
 
@@ -208,8 +231,13 @@ app.get('/invitation/:slug', async (req, res) => {
       return res.status(400).send('<h1>Template belum dipilih</h1>');
     }
 
-    const settings = config.settings || {};
-    const compiledHtml = compileTemplate(config.template, settings);
+    // Auto-patch legacy MinIO URLs to route through the login proxy to bypass CORS/SSL issues
+    let configStr = JSON.stringify(config);
+    configStr = configStr.replace(/minio-api\.dayamedialangit\.co\.id/g, 'login.joyvite.id');
+    const patchedConfig = JSON.parse(configStr);
+
+    const settings = patchedConfig.settings || {};
+    const compiledHtml = compileTemplate(patchedConfig.template, settings);
 
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(compiledHtml);
