@@ -137,20 +137,41 @@ function compileTemplate(templateSlug, settings) {
     const primaryEvent = events[0];
     const secondaryEvent = events.length > 1 ? events[1] : null;
 
-    // Lokasi - REPLACE INI DULU sebelum yang lain
-    if (primaryEvent.place_name) {
-      replaceHeadingText($, 'Kediaman Mempelai Wanita', primaryEvent.place_name);
-    }
-    if (secondaryEvent && secondaryEvent.place_name) {
-      replaceHeadingText($, 'Kediaman Mempelai Pria', secondaryEvent.place_name);
-    }
+    // ======== A. Heuristik Injeksi Waktu ========
+    let timeIndex = 0;
+    
+    // Cari teks yang memiliki format Jam (misal "08:00", "08.00 WIB", dll) pada elemen heading atau teks
+    $('.elementor-heading-title, .elementor-text-editor, .elementor-button-text').each(function () {
+      const text = $(this).text().trim();
+      const lowerText = text.toLowerCase();
+      
+      // Deteksi format jam HH:MM atau HH.MM
+      if (lowerText.match(/\b\d{2}[\:\.]\d{2}\b/) || lowerText.includes('pukul') || lowerText.match(/\bjam\s+\d{1,2}\b/)) {
+         timeIndex++;
+         
+         if (timeIndex === 1 && primaryEvent.time_start) {
+             const timeText = primaryEvent.until_finish 
+               ? `Pukul ${primaryEvent.time_start} WIB - Selesai`
+               : `Pukul ${primaryEvent.time_start} WIB`;
+             $(this).text(timeText);
+             console.log(`[Heuristic] Diganti Jam Akad: -> ${timeText}`);
+         } else if (timeIndex === 2 && secondaryEvent && secondaryEvent.time_start) {
+             const timeText = secondaryEvent.until_finish 
+               ? `Pukul ${secondaryEvent.time_start} WIB - Selesai`
+               : `Pukul ${secondaryEvent.time_start} WIB`;
+             $(this).text(timeText);
+             console.log(`[Heuristic] Diganti Jam Resepsi: -> ${timeText}`);
+         }
+      }
+    });
 
-    // Tanggal
+    // ======== B. Heuristik Injeksi Tanggal ========
     if (primaryEvent.date) {
       const dateStr = formatIndonesianDate(primaryEvent.date, additional.format_tanggal);
       let isFirstDate = true;
-      $('.elementor-heading-title').each(function () {
+      $('.elementor-heading-title, .elementor-text-editor').each(function () {
         const text = $(this).text().trim();
+        // Deteksi format tanggal Indonesia (Senin, 17 Agustus 1945) atau format numerik (17/08/1945)
         if (text.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),?\s+\d+/i) || 
             text.match(/^\d{1,2}\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)/i) || 
             text.match(/^\d{2}\s*\/\s*\d{2}\s*\/\s*\d{4}/)) {
@@ -163,21 +184,8 @@ function compileTemplate(templateSlug, settings) {
           isFirstDate = false;
         }
       });
-    }
-
-    // Jam acara
-    if (primaryEvent.time_start) {
-      replaceHeadingText($, 'Pukul 08.00 WIB', `Pukul ${primaryEvent.time_start} WIB`);
-    }
-    if (secondaryEvent && secondaryEvent.time_start) {
-      const timeText = secondaryEvent.until_finish 
-        ? `Pukul ${secondaryEvent.time_start} WIB - Selesai`
-        : `Pukul ${secondaryEvent.time_start} WIB`;
-      replaceHeadingText($, 'Pukul 10.00 WIB - Selesai', timeText);
-    }
-
-    // Update countdown date
-    if (primaryEvent.date) {
+      
+      // Update data atribut countdown
       $('[data-date]').attr('data-date', formatCountdownDate(primaryEvent.date));
       const day = new Date(primaryEvent.date).getDate();
       $('[data-to-value]').each(function() {
@@ -188,83 +196,144 @@ function compileTemplate(templateSlug, settings) {
       });
     }
 
-    // Google Maps iframe
+    // ======== C. Heuristik Injeksi Lokasi Acara ========
+    let locationIndex = 0;
+    
+    // Biasanya nama lokasi berada di elemen spancontent, text-editor, atau heading tertentu sesudah jam
+    // Kita juga bisa mencari kata kunci "Gedung", "Hotel", "Kediaman", "Jalan", "Jl."
+    $('.elementor-heading-title, .spancontent, .elementor-text-editor, .weddingpress-location-text, p').each(function () {
+      const text = $(this).text().trim();
+      const lowerText = text.toLowerCase();
+      
+      if (lowerText.includes('kediaman') || lowerText.includes('gedung') || lowerText.includes('hotel') || lowerText.includes('jl.') || lowerText.includes('jalan ') || lowerText.includes('masjid')) {
+        // Skip jika teks ini terlalu panjang (misal deskripsi full alamat map) dan kita hanya mau ganti nama lokasinya
+        // Namun, jika teks mengandung koma/alamat persis, kita timpa keseluruhannya
+        if (text.length > 5 && text.length < 100 && !lowerText.includes('akad') && !lowerText.includes('resepsi')) {
+            locationIndex++;
+            if (locationIndex === 1 && primaryEvent.place_name) {
+                $(this).text(primaryEvent.place_name);
+                console.log(`[Heuristic] Diganti Alamat Akad: -> ${primaryEvent.place_name}`);
+            } else if (locationIndex === 2 && secondaryEvent && secondaryEvent.place_name) {
+                $(this).text(secondaryEvent.place_name);
+                console.log(`[Heuristic] Diganti Alamat Resepsi: -> ${secondaryEvent.place_name}`);
+            }
+        }
+      }
+    });
+
     if (primaryEvent.gmaps) {
       $('iframe[src*="maps.google"]').attr('src', primaryEvent.gmaps);
     }
   }
 
   // =========================================
-  // 2. INJEKSI NAMA MEMPELAI
+  // 2. INJEKSI NAMA MEMPELAI SECARA HEURISTIK DOM
   // =========================================
   
-  // Nama panggilan di cover (.wdp-mempelai = WeddingPress cover element)
-  if (mempelai.male_nickname && mempelai.female_nickname) {
-    const isPriaWanita = !additional.posisi_nama || additional.posisi_nama === 'pria_wanita';
-    const coverName = isPriaWanita 
-      ? `${mempelai.male_nickname} & ${mempelai.female_nickname}`
-      : `${mempelai.female_nickname} & ${mempelai.male_nickname}`;
-      
-    console.log(`[DEBUG Engine] Execution reached Mempelai Mapping! coverName: ${coverName}`);
-    
-    // Target 1: WeddingPress cover div .wdp-mempelai
-    $('.wdp-mempelai').each(function () {
-      $(this).text(coverName);
-    });
-    
-    // Target 2: Heading title yang berisi format "Nama & Nama" (cover headings)
-    $('.elementor-heading-title').each(function () {
-      const text = $(this).text().trim();
-      const lowerText = text.toLowerCase();
-      // Match pattern: "Haqi & Dewi" atau nama apapun yang dipisah "&"
-      if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40 && !lowerText.includes('bpk') && !lowerText.includes('bapak') && !lowerText.includes('ibu')) {
-        $(this).text(coverName);
-        console.log(`[DEBUG Engine] Target 2 replaced heading containing '&' with: ${coverName}`);
-      }
-    });
-
-    // Target 3: Meta og:description (SEO)
-    $('meta[property="og:description"]').each(function () {
-      const content = $(this).attr('content');
-      if (content) {
-        // Hanya replace jika ada di awal atau setelah The Wedding Of 
-        // Menggunakan regex yang lebih aman agar tidak me-replace "Tholib & Ibu" dll.
-        let newContent = content.replace(/The Wedding Of\s+[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/gi, "The Wedding Of " + coverName);
-        if (newContent === content) {
-          // Fallback ganti 20 karakter pertama jika formatnya nama di awal (misal "Name & Name | ...")
-          const startMatches = content.match(/^[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/i);
-          if (startMatches) {
-            newContent = content.replace(startMatches[0], coverName);
-          }
-        }
-        $(this).attr('content', newContent);
-      }
-    });
-
-    $('meta[property="og:title"]').each(function () {
-      $(this).attr('content', coverName);
-    });
-    $('title').text(coverName);
-  }
-
-  // Ganti nama mempelai di bagian "TENTANG KAMI"
-  let mempelaiCount = 0;
+  // A. Deteksi Nama Panggilan dari Cover
+  let detectedNicknames = [];
   $('.elementor-heading-title').each(function () {
     const text = $(this).text().trim();
-    if (text === 'Nama Mempelai' || text === 'Yori' || text === 'Aria' || text === 'Romeo' || text === 'Juliet' || text === 'Aria Wicaksono' || text === 'Elsa Mayori') {
-      mempelaiCount++;
-      if (mempelaiCount === 1 && mempelai.female_name) {
-        $(this).text(mempelai.female_name);
-      } else if (mempelaiCount === 2 && mempelai.male_name) {
-        $(this).text(mempelai.male_name);
+    const lowerText = text.toLowerCase();
+    if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40 && !lowerText.includes('bpk') && !lowerText.includes('bapak') && !lowerText.includes('ibu')) {
+      const parts = text.split('&').map(s => s.trim());
+      if (parts.length === 2 && parts[0].length > 0 && parts[1].length > 0) {
+        detectedNicknames = parts;
       }
     }
   });
 
-  // Ganti nama panggilan individual di headings
-  const defaultMaleNames = ['Haqi', 'Pria', 'Nama Panggilan Pria', 'Romeo', 'Aria'];
-  const defaultFemaleNames = ['Dewi', 'Wanita', 'Nama Panggilan Wanita', 'Juliet', 'Yori'];
+  // B. Eksekusi Traversal untuk Nama Profil (Putra/Putri dari)
+  let lastSeenHeading = null;
+  let lastSeenText = '';
   
+  let detectedFemaleName = '';
+  let detectedMaleName = '';
+
+  $('.elementor-widget').each(function() {
+     const heading = $(this).find('.elementor-heading-title');
+     const textEditor = $(this).find('.elementor-text-editor');
+     
+     let text = '';
+     let el = null;
+
+     if (heading.length > 0) {
+        text = heading.text().trim();
+        el = heading;
+     } else if (textEditor.length > 0) {
+        text = textEditor.text().trim();
+     } else {
+        text = $(this).text().trim();
+     }
+
+     const lowerText = text.toLowerCase();
+     
+     // Deteksi area mempelai wanita
+     if (lowerText.includes('putri dari') || lowerText.match(/putri (pertama|kedua|ketiga|keempat|kelima|keenam|bungsu)/)) {
+         if (lastSeenHeading) {
+             detectedFemaleName = lastSeenText;
+             if (mempelai.female_name) {
+                 $(lastSeenHeading).text(mempelai.female_name);
+                 console.log(`[Heuristic] Diganti profil WANITA: ${detectedFemaleName} -> ${mempelai.female_name}`);
+             }
+         }
+     }
+     // Deteksi area mempelai pria
+     else if (lowerText.includes('putra dari') || lowerText.match(/putra (pertama|kedua|ketiga|keempat|kelima|keenam|bungsu)/)) {
+         if (lastSeenHeading) {
+             detectedMaleName = lastSeenText;
+             if (mempelai.male_name) {
+                 $(lastSeenHeading).text(mempelai.male_name);
+                 console.log(`[Heuristic] Diganti profil PRIA: ${detectedMaleName} -> ${mempelai.male_name}`);
+             }
+         }
+     }
+     // Simpan kandidat nama profil (biasanya pendek, bukan deskripsi panjang)
+     else if (el && text.length > 2 && text.length < 40 && !text.includes('&') && !lowerText.includes('bapak') && !lowerText.includes('ibu')) {
+         lastSeenHeading = el;
+         lastSeenText = text;
+     }
+  });
+
+  // C. Tebak Nickname Pria/Wanita Asli Template
+  let templateFemaleNick = '';
+  let templateMaleNick = '';
+  
+  if (detectedNicknames.length === 2 && detectedFemaleName && detectedMaleName) {
+    // Cocokkan nickname dengan nama panjang yang baru saja dideteksi
+    const n1 = detectedNicknames[0].toLowerCase();
+    const n2 = detectedNicknames[1].toLowerCase();
+    
+    if (detectedFemaleName.toLowerCase().includes(n1)) {
+        templateFemaleNick = detectedNicknames[0];
+        templateMaleNick = detectedNicknames[1];
+    } else if (detectedFemaleName.toLowerCase().includes(n2)) {
+        templateFemaleNick = detectedNicknames[1];
+        templateMaleNick = detectedNicknames[0];
+    } else if (detectedMaleName.toLowerCase().includes(n1)) {
+        templateMaleNick = detectedNicknames[0];
+        templateFemaleNick = detectedNicknames[1];
+    } else if (detectedMaleName.toLowerCase().includes(n2)) {
+        templateMaleNick = detectedNicknames[1];
+        templateFemaleNick = detectedNicknames[0];
+    } else {
+        // Fallback: anggap format umumnya Wanita & Pria jika tak bisa ditebak
+        templateFemaleNick = detectedNicknames[0];
+        templateMaleNick = detectedNicknames[1];
+    }
+  } else if (detectedNicknames.length === 2) {
+    templateFemaleNick = detectedNicknames[0];
+    templateMaleNick = detectedNicknames[1];
+  }
+
+  // Fallback defaults jika deteksi gagal
+  const defaultMaleNames = ['Haqi', 'Pria', 'Romeo', 'Aria'];
+  const defaultFemaleNames = ['Dewi', 'Wanita', 'Juliet', 'Yori'];
+  
+  if (templateMaleNick) defaultMaleNames.push(templateMaleNick);
+  if (templateFemaleNick) defaultFemaleNames.push(templateFemaleNick);
+
+  // D. Terapkan Penggantian Nickname Individual
   if (mempelai.male_nickname) {
     defaultMaleNames.forEach(name => {
       replaceHeadingText($, name, mempelai.male_nickname);
@@ -276,12 +345,43 @@ function compileTemplate(templateSlug, settings) {
     });
   }
 
-  // Ganti nama lengkap jika ada nama spesifik
-  if (mempelai.male_name) {
-    replaceHeadingText($, 'Aria Wicaksono', mempelai.male_name);
-  }
-  if (mempelai.female_name) {
-    replaceHeadingText($, 'Elsa Mayori', mempelai.female_name);
+  // E. Terapkan Nama Cover (A & B) secara global
+  if (mempelai.male_nickname && mempelai.female_nickname) {
+    const isPriaWanita = !additional.posisi_nama || additional.posisi_nama === 'pria_wanita';
+    const coverName = isPriaWanita 
+      ? `${mempelai.male_nickname} & ${mempelai.female_nickname}`
+      : `${mempelai.female_nickname} & ${mempelai.male_nickname}`;
+      
+    // Target 1: WeddingPress cover div .wdp-mempelai
+    $('.wdp-mempelai').each(function () {
+      $(this).text(coverName);
+    });
+    
+    // Target 2: Elementor headings yang mengandung &
+    $('.elementor-heading-title').each(function () {
+      const text = $(this).text().trim();
+      const lowerText = text.toLowerCase();
+      if (text.match(/^.+\s*[&]\s*.+$/) && !text.includes(',') && text.length < 40 && !lowerText.includes('bpk') && !lowerText.includes('bapak') && !lowerText.includes('ibu')) {
+        $(this).text(coverName);
+      }
+    });
+
+    // Target 3: Meta SEO
+    $('meta[property="og:title"]').each(function () { $(this).attr('content', coverName); });
+    $('title').text(coverName);
+    $('meta[property="og:description"]').each(function () {
+      const content = $(this).attr('content');
+      if (content) {
+        let newContent = content.replace(/The Wedding Of\s+[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/gi, "The Wedding Of " + coverName);
+        if (newContent === content) {
+          const startMatches = content.match(/^[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/i);
+          if (startMatches) {
+            newContent = content.replace(startMatches[0], coverName);
+          }
+        }
+        $(this).attr('content', newContent);
+      }
+    });
   }
 
   // Ganti info orang tua
