@@ -532,19 +532,19 @@ function compileTemplate(templateSlug, settings) {
   
   let finalHtml = $.html();
   
-  // Rewrite path relatif CSS/JS/Gambar ke menujuacara.id asli
-  // Pattern: href="../wp-content/..." → href="https://menujuacara.id/wp-content/..."
-  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-content\//g, '$1="https://menujuacara.id/wp-content/');
-  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, '$1="https://menujuacara.id/wp-includes/');
+  // Rewrite path relatif CSS/JS/Gambar ke aset lokal Joyvite
+  // File statis sudah diekspos di server.js melalui rute /assets
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-content\//g, `$1="/assets/${templateName}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, `$1="/assets/${templateName}/menujuacara.id/wp-includes/`);
   
-  // Rewrite inline styles URL patterns: url(../wp-content/...), url('../wp-content/...'), url("../wp-content/...")
-  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, 'url(https://menujuacara.id/wp-content/');
-  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, 'url(\'https://menujuacara.id/wp-content/');
-  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, 'url("https://menujuacara.id/wp-content/');
+  // Rewrite inline styles URL patterns
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, `url(/assets/${templateName}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, `url('/assets/${templateName}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, `url("/assets/${templateName}/menujuacara.id/wp-content/`);
 
-  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, 'url(https://menujuacara.id/wp-includes/');
-  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, 'url(\'https://menujuacara.id/wp-includes/');
-  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, 'url("https://menujuacara.id/wp-includes/');
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, `url(/assets/${templateName}/menujuacara.id/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, `url('/assets/${templateName}/menujuacara.id/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, `url("/assets/${templateName}/menujuacara.id/wp-includes/`);
   
   // Rewrite fonts & CDN relative paths
   finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
@@ -552,9 +552,9 @@ function compileTemplate(templateSlug, settings) {
   finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/cdnjs\.cloudflare\.com\//g, '$1="https://cdnjs.cloudflare.com/');
   finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/unpkg\.com\//g, '$1="https://unpkg.com/');
   
-  // Rewrite data-thumbnail untuk gallery (absolute ke menujuacara.id)
-  finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, 'data-thumbnail="https://menujuacara.id/');
-  
+  // Rewrite data-thumbnail untuk gallery (absolute ke localhost assets)
+  finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, `data-thumbnail="/assets/${templateName}/menujuacara.id/`);
+
   // Rewrite social media & external links
   finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/instagram\.com\//g, '$1="https://instagram.com/');
   finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/www\.google\.com\//g, '$1="https://www.google.com/');
@@ -593,7 +593,7 @@ function compileTemplate(templateSlug, settings) {
   .elementor-48952 .elementor-element.elementor-element-2dd11f4f > .elementor-widget-wrap,
   .elementor-48952 .elementor-element.elementor-element-2dd11f4f > .elementor-element-populated {
     background-color: #C8B1A5 !important;
-    background-image: url("https://menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg") !important;
+    background-image: url("/assets/${templateName}/menujuacara.id/wp-content/uploads/2023/10/Tema-simple-1-S1.jpg") !important;
     background-size: cover !important;
     background-position: center center !important;
     background-repeat: no-repeat !important;

@@ -188,6 +188,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static(dashboardPath, { extensions: ['html'] }));
+app.use('/assets', express.static(path.join(__dirname, '../TEMPLATE/Scraped_Templates')));
 
 // GET /invitation/:slug
 // Flow: Ambil data dari DB → Compile template → Kirim HTML final
