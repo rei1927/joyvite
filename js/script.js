@@ -139,7 +139,7 @@ $(document).ready(function() {
             // AUTO-POPULATE ARRAY: Cerita Cinta (love_story)
             if (settings.love_story && settings.love_story.length > 0) {
                 settings.love_story.forEach((story, idx) => {
-                    if (idx > 0) $('#addStoryBtn').trigger('click');
+                    if (idx > 0) $('#addTimelineBtn').trigger('click');
                     
                     setTimeout(() => {
                         const block = $('.timeline-card').eq(idx);
@@ -149,6 +149,15 @@ $(document).ready(function() {
                             if (!isNaN(d)) block.find('input[name="story_date[]"]').val(d.toISOString().split('T')[0]);
                         }
                         block.find('textarea[name="story_desc[]"]').val(story.description);
+                        
+                        // Populate Photo UI Preview jika ada
+                        if (story.photo) {
+                            const img = block.find('img');
+                            const icon = block.find('i.fa-camera');
+                            img.attr('src', story.photo);
+                            img.css('display', 'block');
+                            icon.css('display', 'none');
+                        }
                     }, 50);
                 });
             }
@@ -204,35 +213,56 @@ $(document).ready(function() {
             var flatData = {};
             
             for (let [key, value] of formData.entries()) {
+                let parsedValue = value;
+                
+                // Jika input bertipe File dan ADA file yang diunggah
                 if (value instanceof File && value.name) {
-                    // Upload file terpisah ke API MinIO kita
                     let fileData = new FormData();
                     fileData.append('file', value);
-                    
-                    const uploadRes = await fetch('https://login.joyvite.id/api/upload', {
-                        method: 'POST',
-                        body: fileData
-                    });
+                    const uploadRes = await fetch('https://login.joyvite.id/api/upload', { method: 'POST', body: fileData });
                     const uploadJson = await uploadRes.json();
-                    if(uploadJson.url) {
-                        flatData[key] = uploadJson.url; // Ganti File menjadi URL S3
+                    if(uploadJson.url) parsedValue = uploadJson.url; // Ganti blob menjadi S3 URL
+                } 
+                // Jika input File TAPI KOSONG (user menekan save tanpa upload gambar baru)
+                else if (value instanceof File && !value.name) {
+                    // Cek jika ini adalah form mempelai (Halaman Mempelai)
+                    if (key === 'male_profile_photo') {
+                        const existingSrc = $('#male-account-upload-img').attr('src');
+                        if (existingSrc && !existingSrc.includes('ui-avatars.com')) parsedValue = existingSrc;
+                        else parsedValue = '';
+                    } else if (key === 'female_profile_photo') {
+                        const existingSrc = $('#female-account-upload-img').attr('src');
+                        if (existingSrc && !existingSrc.includes('ui-avatars.com')) parsedValue = existingSrc;
+                        else parsedValue = '';
+                    } 
+                    // Kita akan mendeteksi form array (seperti Cerita Cinta: story_photo) di pengecekan Array di bawah
+                    else {
+                        parsedValue = '';
                     }
-                } else if (!(value instanceof File)) {
-                    // Cek jika ini adalah form array (contoh location.html)
-                    if (key.endsWith('[]')) {
-                        let cleanKey = key.slice(0, -2);
-                        if (!flatData[cleanKey]) flatData[cleanKey] = [];
-                        flatData[cleanKey].push(value);
-                    } else {
-                        // Kumpulkan checkboxes multiple dengan nama yg sama
-                        if (flatData[key] !== undefined) {
-                            if (!Array.isArray(flatData[key])) {
-                                flatData[key] = [flatData[key]];
-                            }
-                            flatData[key].push(value);
-                        } else {
-                            flatData[key] = value;
+                }
+                
+                // Array Processing Handler
+                if (key.endsWith('[]')) {
+                    let cleanKey = key.slice(0, -2);
+                    if (!flatData[cleanKey]) flatData[cleanKey] = [];
+                    
+                    // Khusus array kosong pada story_photo, mari kita tebak URL img lamanya sesuai dom yang aktif
+                    if (parsedValue === '' && cleanKey === 'story_photo') {
+                        let arrayIndex = flatData[cleanKey].length; // Index ke berapa file ini
+                        let block = $('.timeline-card').eq(arrayIndex);
+                        let existingSrc = block.find('img').attr('src');
+                        if (existingSrc && existingSrc !== '') parsedValue = existingSrc;
+                    }
+                    flatData[cleanKey].push(parsedValue);
+                } else {
+                    // Checkbox multiple handling
+                    if (flatData[key] !== undefined) {
+                        if (!Array.isArray(flatData[key])) {
+                            flatData[key] = [flatData[key]];
                         }
+                        flatData[key].push(parsedValue);
+                    } else {
+                        flatData[key] = parsedValue;
                     }
                 }
             }
@@ -300,7 +330,8 @@ $(document).ready(function() {
                     nestedSettings.love_story.push({
                         title: getVal('story_title'),
                         date: getVal('story_date'),
-                        description: getVal('story_desc')
+                        description: getVal('story_desc'),
+                        photo: getVal('story_photo') || ''
                     });
                 }
             }

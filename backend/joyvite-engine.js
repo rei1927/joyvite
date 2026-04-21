@@ -589,23 +589,88 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
-  // 9. INJEKSI CERITA CINTA (LOVE STORY)
+  // 9. INJEKSI CERITA CINTA (LOVE STORY) (HEURISTIK)
   // =========================================
   
   const love_story = settings.love_story || [];
   if (love_story.length > 0) {
-    // Template biasanya punya timeline/story section dengan class tertentu
     let storyIdx = 0;
-    // Cari elemen timeline di template
-    $('section[id*="cerita"], section[id*="story"], section[id*="love"]').find('.elementor-heading-title').each(function() {
-      const text = $(this).text().trim();
-      // Deteksi placeholder judul cerita
-      if (text.match(/^(Awal|Pertama|First|Pertemuan|Lamaran|Engagement|Chapter)/i) || 
-          text.match(/^\d{4}$/) || text.match(/^\d{1,2}\s+\w+\s+\d{4}$/)) {
+    
+    // Kita gunakan dua sasaran: Widget Timeline khusus (pp-timeline-item) DAN Column generic Elementor
+    $('section[id*="cerita"], section[id*="story"], section[id*="love"], .elementor-section:contains("Bertemu"), .elementor-section:contains("Cerita"), .elementor-section:contains("Story")').find('.pp-timeline-item, .elementor-column').each(function() {
+      // Mencegah child column diproses dua kali jika Parentnya sudah terproses
+      if ($(this).attr('data-processed-story')) return;
+      
+      const colText = $(this).text().trim();
+      const hasTitlePattern = colText.match(/(Awal|Pertama|First|Pertemuan|Lamaran|Engagement|Chapter|Tahun|Bulan)/i);
+      const hasDatePattern = colText.match(/(\d{4}|\d{1,2}\s+(Jan|Feb|Mar|Apr|Mei|Jun|Jul|Agu|Sep|Okt|Nov|Des)\w*\s+\d{4})/i);
+      
+      if (hasTitlePattern || hasDatePattern) {
         if (storyIdx < love_story.length) {
           const story = love_story[storyIdx];
-          if (story.title) $(this).text(story.title);
-          storyIdx++;
+          
+          if ($(this).hasClass('pp-timeline-item')) {
+              // 1. Template Khusus pp-timeline
+              if (story.title) $(this).find('.pp-timeline-card-title').text(story.title);
+              if (story.date) $(this).find('.pp-timeline-card-date').text(story.date);
+              if (story.description) $(this).find('.pp-timeline-card-content p').text(story.description);
+              if (story.photo) {
+                  const img = $(this).find('.pp-timeline-card-image img');
+                  img.attr('src', story.photo);
+                  img.removeAttr('srcset sizes');
+              }
+              storyIdx++;
+              $(this).attr('data-processed-story', 'true');
+          } else {
+              // 2. Template Column Generic
+              let headerCount = 0;
+              $(this).find('.elementor-heading-title').each(function() {
+                  const txt = $(this).text().trim();
+                  if (txt.length > 0 && txt.length < 50) { // Jika cukup pendek, anggap sebagai judul/tanggal
+                      if (headerCount === 0 && story.title) {
+                          $(this).text(story.title);
+                      } else if (headerCount === 1 && story.date) {
+                          $(this).text(story.date);
+                      }
+                      headerCount++;
+                  }
+              });
+              
+              // Ganti Description (biasanya di text-editor)
+              $(this).find('.elementor-text-editor, .elementor-widget-text-editor p, p').each(function() {
+                  const txt = $(this).text().trim();
+                  if (txt.length > 20 && story.description && !txt.match(/Awal|Pertemuan|Lamaran/)) {
+                      $(this).text(story.description);
+                  }
+              });
+              
+              // Ganti Foto
+              if (story.photo) {
+                 $(this).find('img').each(function() {
+                     const lowerSrc = ($(this).attr('src') || '').toLowerCase();
+                     if (!lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && !lowerSrc.includes('daun') && !lowerSrc.includes('ornament')) {
+                         $(this).attr('src', story.photo);
+                         $(this).removeAttr('srcset sizes');
+                     }
+                 });
+              }
+              
+              storyIdx++;
+              $(this).attr('data-processed-story', 'true');
+              $(this).find('*').attr('data-processed-story', 'true'); // Tandai childs agar tidak terproses duplikat
+          }
+        }
+      }
+    });
+
+    // Fallback darurat (Legacy Title detection)
+    let legacyIdx = 0;
+    $('section[id*="cerita"], section[id*="story"], section[id*="love"]').find('.elementor-heading-title:not([data-processed-story])').each(function() {
+      const text = $(this).text().trim();
+      if (text.match(/^(Awal|Pertama|First|Pertemuan|Lamaran|Engagement|Chapter)/i)) {
+        if (legacyIdx < love_story.length) {
+          if (love_story[legacyIdx].title) $(this).text(love_story[legacyIdx].title);
+          legacyIdx++;
         }
       }
     });
