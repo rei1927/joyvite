@@ -514,19 +514,76 @@ function compileTemplate(templateSlug, settings) {
   });
 
   // =========================================
-  // 8. INJEKSI FOTO PROFIL MEMPELAI
+  // 8. INJEKSI FOTO PROFIL MEMPELAI (HEURISTIK)
   // =========================================
   
   if (mempelai.male_profile_photo || mempelai.female_profile_photo) {
-    // Template "foto" biasanya punya img elemen di section profil mempelai
+    let recentImages = [];
+    
+    // Melakukan loop pada seluruh widget untuk melacak letak gambar relatif terhadap teks profil
+    $('.elementor-widget').each(function() {
+       const img = $(this).find('img');
+       const text = $(this).text().trim().toLowerCase();
+       
+       if (img.length > 0) {
+           // Simpan kandidat gambar (Abaikan yang nama filenya berbau hiasan bunga/daun/ornamen)
+           img.each(function() {
+               const src = $(this).attr('src') || '';
+               const lowerSrc = src.toLowerCase();
+               if (!lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && 
+                   !lowerSrc.includes('daun') && !lowerSrc.includes('leaf') &&
+                   !lowerSrc.includes('ornament') && !lowerSrc.includes('bg') && 
+                   !lowerSrc.includes('shape') && !lowerSrc.includes('mask')) {
+                   recentImages.push(this);
+               }
+           });
+           
+           // Simpan maksimal 3 gambar terbaru ke memori untuk efisiensi
+           if (recentImages.length > 3) recentImages.shift();
+       }
+       
+       // Jika menemukan dekripsi mempelai wanita
+       if (text.includes('putri dari') || text.match(/putri (pertama|kedua|ketiga|keempat|kelima|keenam|bungsu)/)) {
+           if (recentImages.length > 0 && mempelai.female_profile_photo) {
+               // Biasanya foto mempelai adalah gambar terakhir atau kedua terakhir sebelum teks profil
+               const targetImg = recentImages[recentImages.length - 1];
+               $(targetImg).attr('src', mempelai.female_profile_photo);
+               // Hapus atribut srcset agar gambar baru tidak di-override oleh layar responsif Elementor
+               $(targetImg).removeAttr('srcset sizes');
+               console.log('[Heuristic] Foto WANITA terganti.');
+               // Kosongkan array untuk pencarian pria berikutnya
+               recentImages = []; 
+           }
+       }
+       // Jika menemukan dekripsi mempelai pria
+       else if (text.includes('putra dari') || text.match(/putra (pertama|kedua|ketiga|keempat|kelima|keenam|bungsu)/)) {
+           if (recentImages.length > 0 && mempelai.male_profile_photo) {
+               const targetImg = recentImages[recentImages.length - 1];
+               $(targetImg).attr('src', mempelai.male_profile_photo);
+               $(targetImg).removeAttr('srcset sizes');
+               console.log('[Heuristic] Foto PRIA terganti.');
+               recentImages = []; 
+           }
+       }
+    });
+
+    // Fallback Darurat: Jika teks "putra dari" tidak ditemukan (contoh template yang sangat abstrak)
     let profileImgIdx = 0;
-    // Cari gambar profil di section "tentang kami" / "mempelai"
-    $('section[id*="mempelai"], section[id*="profil"], section[id*="about"]').find('img').each(function() {
-      profileImgIdx++;
-      if (profileImgIdx === 1 && mempelai.male_profile_photo) {
-        $(this).attr('src', mempelai.male_profile_photo);
-      } else if (profileImgIdx === 2 && mempelai.female_profile_photo) {
-        $(this).attr('src', mempelai.female_profile_photo);
+    $('section[id*="mempelai"], section[id*="profil"], section[id*="about"], .elementor-section:contains("Putra"), .elementor-section:contains("Putri")').find('img').each(function() {
+      const src = $(this).attr('src') || '';
+      const lowerSrc = src.toLowerCase();
+      // Pastikan bukan elemen hiasan
+      if (!lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && !lowerSrc.includes('daun') && !lowerSrc.includes('leaf') && !lowerSrc.includes('ornament')) {
+          profileImgIdx++;
+          // Kita hanya fallback jika heuristic utama (recentImages) belum berhasil menempelkannya
+          const currentSrc = $(this).attr('src');
+          if (profileImgIdx === 1 && mempelai.male_profile_photo && currentSrc !== mempelai.male_profile_photo) {
+            $(this).attr('src', mempelai.male_profile_photo);
+            $(this).removeAttr('srcset sizes');
+          } else if (profileImgIdx === 2 && mempelai.female_profile_photo && currentSrc !== mempelai.female_profile_photo) {
+            $(this).attr('src', mempelai.female_profile_photo);
+            $(this).removeAttr('srcset sizes');
+          }
       }
     });
   }
