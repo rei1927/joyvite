@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const multer = require('multer');
-const { S3Client, PutObjectCommand, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { S3Client, PutObjectCommand, GetObjectCommand, CreateBucketCommand, HeadBucketCommand } = require('@aws-sdk/client-s3');
 const { PrismaClient } = require('@prisma/client');
 const { compileTemplate } = require('./joyvite-engine');
 const path = require('path');
@@ -28,6 +28,27 @@ const s3Client = new S3Client({
 
 // Multer memory storage
 const upload = multer({ storage: multer.memoryStorage() });
+
+// Auto-provision bucket
+async function initMinio() {
+  try {
+    await s3Client.send(new HeadBucketCommand({ Bucket: 'joyvite-assets' }));
+    console.log('✅ MinIO Bucket "joyvite-assets" exists.');
+  } catch (err) {
+    if (err.$metadata && err.$metadata.httpStatusCode === 404) {
+      console.log('⚠️ Bucket "joyvite-assets" not found, creating it...');
+      try {
+        await s3Client.send(new CreateBucketCommand({ Bucket: 'joyvite-assets' }));
+        console.log('✅ Bucket "joyvite-assets" created successfully.');
+      } catch (createErr) {
+        console.error('❌ Failed to create bucket:', createErr);
+      }
+    } else {
+      console.error('❌ Error checking bucket:', err);
+    }
+  }
+}
+initMinio();
 
 // --- ROUTES ---
 
