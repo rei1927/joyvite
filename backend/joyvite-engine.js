@@ -57,13 +57,10 @@ function replaceHeadingText($, oldText, newText) {
   $('.elementor-heading-title').each(function () {
     const el = $(this);
     const text = el.text().trim();
-    const html = el.html();
-    // Match lewat text() untuk kecocokan yang lebih akurat
+    // HANYA exact match, JANGAN substring replace
+    // Substring replace merusak teks seperti "Mempelai Wanita" → "Mempelai Andini"
     if (text === oldText) {
       el.text(newText);
-      replaced = true;
-    } else if (html && html.includes(oldText)) {
-      el.html(html.replace(oldText, newText));
       replaced = true;
     }
   });
@@ -343,8 +340,9 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // Fallback defaults jika deteksi gagal
-  const defaultMaleNames = ['Haqi', 'Pria', 'Romeo', 'Aria'];
-  const defaultFemaleNames = ['Dewi', 'Wanita', 'Juliet', 'Yori'];
+  // JANGAN masukkan kata generik seperti 'Pria'/'Wanita' karena ini adalah label UI di template!
+  const defaultMaleNames = ['Haqi', 'Romeo', 'Aria'];
+  const defaultFemaleNames = ['Dewi', 'Juliet', 'Yori'];
   
   if (templateMaleNick) defaultMaleNames.push(templateMaleNick);
   if (templateFemaleNick) defaultFemaleNames.push(templateFemaleNick);
