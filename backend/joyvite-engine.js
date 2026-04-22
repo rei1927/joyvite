@@ -90,24 +90,24 @@ function escapeRegex(string) {
  */
 function compileTemplate(templateSlug, settings) {
 
-        // Algoritma dinamis pendeteksi rasio dimensi asli templat
-        function applyAdaptiveStyle(imgElement, newSrc) {
-            const w = $(imgElement).attr('width');
-            const h = $(imgElement).attr('height');
-            $(imgElement).attr('src', newSrc);
-            $(imgElement).removeAttr('srcset sizes');
-            let aspectStyle = "object-fit: cover !important; object-position: center !important; max-width: 100%; ";
-            if (w && h && w !== '0' && h !== '0') {
-                aspectStyle += `aspect-ratio: ${w} / ${h} !important; height: auto !important; `;
-            } else {
-                aspectStyle += `height: 100% !important; `;
-            }
-            $(imgElement).attr('style', aspectStyle + ($(imgElement).attr('style') || '').replace(/border-radius: 50% !important; /g, '').replace(/aspect-ratio: 1\/1 !important; /g, '').replace(/object-fit: cover !important; /g, ''));
-        }
-
   const htmlPath = findTemplateHtml(templateSlug);
   let rawHtml = fs.readFileSync(htmlPath, 'utf-8');
   const $ = cheerio.load(rawHtml);
+
+  // Algoritma dinamis pendeteksi rasio dimensi asli templat
+  // HARUS didefinisikan SETELAH $ (Cheerio) tersedia
+  function applyAdaptiveStyle(imgElement, newSrc) {
+    const existingStyle = $(imgElement).attr('style') || '';
+    $(imgElement).attr('src', newSrc);
+    $(imgElement).removeAttr('srcset sizes');
+    // Hanya tambahkan object-fit cover, JANGAN timpa style asli template
+    // Ini menjaga border-radius, clip-path, mask, dll dari CSS Elementor
+    const newProps = 'object-fit: cover !important; object-position: center !important;';
+    if (!existingStyle.includes('object-fit')) {
+      $(imgElement).attr('style', existingStyle + ' ' + newProps);
+    }
+    console.log(`[Adaptive] Replaced image src, preserved original styles.`);
+  }
 
   const mempelai = settings.mempelai || {};
   const events = settings.events || [];
