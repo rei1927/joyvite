@@ -348,23 +348,27 @@ function compileTemplate(templateSlug, settings) {
   if (templateFemaleNick) defaultFemaleNames.push(templateFemaleNick);
 
   // D. Terapkan Penggantian Nickname Individual
-  if (mempelai.male_nickname) {
+  // Fallback: jika nickname tidak diisi, gunakan kata pertama dari nama lengkap
+  const effectiveMaleNick = mempelai.male_nickname || (mempelai.male_name ? mempelai.male_name.split(' ')[0] : '');
+  const effectiveFemaleNick = mempelai.female_nickname || (mempelai.female_name ? mempelai.female_name.split(' ')[0] : '');
+  
+  if (effectiveMaleNick) {
     defaultMaleNames.forEach(name => {
-      replaceHeadingText($, name, mempelai.male_nickname);
+      replaceHeadingText($, name, effectiveMaleNick);
     });
   }
-  if (mempelai.female_nickname) {
+  if (effectiveFemaleNick) {
     defaultFemaleNames.forEach(name => {
-      replaceHeadingText($, name, mempelai.female_nickname);
+      replaceHeadingText($, name, effectiveFemaleNick);
     });
   }
 
   // E. Terapkan Nama Cover (A & B) secara global
-  if (mempelai.male_nickname && mempelai.female_nickname) {
+  if (effectiveMaleNick && effectiveFemaleNick) {
     const isPriaWanita = !additional.posisi_nama || additional.posisi_nama === 'pria_wanita';
     const coverName = isPriaWanita 
-      ? `${mempelai.male_nickname} & ${mempelai.female_nickname}`
-      : `${mempelai.female_nickname} & ${mempelai.male_nickname}`;
+      ? `${effectiveMaleNick} & ${effectiveFemaleNick}`
+      : `${effectiveFemaleNick} & ${effectiveMaleNick}`;
       
     // Target 1: WeddingPress cover div .wdp-mempelai
     $('.wdp-mempelai').each(function () {
@@ -391,6 +395,13 @@ function compileTemplate(templateSlug, settings) {
           const startMatches = content.match(/^[A-Za-z]+\s*(&amp;|&)\s*[A-Za-z]+/i);
           if (startMatches) {
             newContent = content.replace(startMatches[0], coverName);
+          }
+        }
+        // Fallback: banyak template menggunakan "NamaA NamaB" tanpa & di og:description
+        if (newContent === content && templateFemaleNick && templateMaleNick) {
+          newContent = content.replace(templateFemaleNick + ' ' + templateMaleNick, coverName);
+          if (newContent === content) {
+            newContent = content.replace(templateMaleNick + ' ' + templateFemaleNick, coverName);
           }
         }
         $(this).attr('content', newContent);
