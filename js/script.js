@@ -51,7 +51,7 @@ $(document).ready(function() {
     async function loadWeddingSettings() {
         try {
             let currentSlug = localStorage.getItem('joyvite_slug') || 'mockup-test-account';
-            const apiUrl = window.location.hostname.includes('joyvite.id') ? `https://login.joyvite.id/api/settings/${currentSlug}` : `/api/settings/${currentSlug}`;
+            const apiUrl = `https://login.joyvite.id/api/settings/${currentSlug}`;
             
             const res = await fetch(apiUrl);
             if (!res.ok) return; // Belum ada data
