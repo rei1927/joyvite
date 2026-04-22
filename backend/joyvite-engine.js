@@ -89,6 +89,22 @@ function escapeRegex(string) {
  * Menerima slug template dan data settings, mengembalikan HTML final.
  */
 function compileTemplate(templateSlug, settings) {
+
+        // Algoritma dinamis pendeteksi rasio dimensi asli templat
+        function applyAdaptiveStyle(imgElement, newSrc) {
+            const w = $(imgElement).attr('width');
+            const h = $(imgElement).attr('height');
+            $(imgElement).attr('src', newSrc);
+            $(imgElement).removeAttr('srcset sizes');
+            let aspectStyle = "object-fit: cover !important; object-position: center !important; max-width: 100%; ";
+            if (w && h && w !== '0' && h !== '0') {
+                aspectStyle += `aspect-ratio: ${w} / ${h} !important; height: auto !important; `;
+            } else {
+                aspectStyle += `height: 100% !important; `;
+            }
+            $(imgElement).attr('style', aspectStyle + ($(imgElement).attr('style') || '').replace(/border-radius: 50% !important; /g, '').replace(/aspect-ratio: 1\/1 !important; /g, '').replace(/object-fit: cover !important; /g, ''));
+        }
+
   const htmlPath = findTemplateHtml(templateSlug);
   let rawHtml = fs.readFileSync(htmlPath, 'utf-8');
   const $ = cheerio.load(rawHtml);
@@ -549,10 +565,7 @@ function compileTemplate(templateSlug, settings) {
            if (recentImages.length > 0 && mempelai.female_profile_photo) {
                // Biasanya foto mempelai adalah gambar terakhir atau kedua terakhir sebelum teks profil
                const targetImg = recentImages[recentImages.length - 1];
-               $(targetImg).attr('src', mempelai.female_profile_photo);
-               // Hapus atribut srcset agar gambar baru tidak di-override oleh layar responsif Elementor
-               $(targetImg).removeAttr('srcset sizes');
-                $(targetImg).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(targetImg).attr('style') || ''));
+               applyAdaptiveStyle(targetImg, mempelai.female_profile_photo);
                console.log('[Heuristic] Foto WANITA terganti.');
                // Kosongkan array untuk pencarian pria berikutnya
                recentImages = []; 
@@ -562,9 +575,7 @@ function compileTemplate(templateSlug, settings) {
        else if (text.includes('putra dari') || text.match(/putra (pertama|kedua|ketiga|keempat|kelima|keenam|bungsu)/)) {
            if (recentImages.length > 0 && mempelai.male_profile_photo) {
                const targetImg = recentImages[recentImages.length - 1];
-               $(targetImg).attr('src', mempelai.male_profile_photo);
-               $(targetImg).removeAttr('srcset sizes');
-                $(targetImg).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(targetImg).attr('style') || ''));
+               applyAdaptiveStyle(targetImg, mempelai.male_profile_photo);
                console.log('[Heuristic] Foto PRIA terganti.');
                recentImages = []; 
            }
@@ -582,15 +593,9 @@ function compileTemplate(templateSlug, settings) {
           // Kita hanya fallback jika heuristic utama (recentImages) belum berhasil menempelkannya
           const currentSrc = $(this).attr('src');
           if (profileImgIdx === 1 && mempelai.male_profile_photo && currentSrc !== mempelai.male_profile_photo) {
-            $(this).attr('src', mempelai.male_profile_photo);
-            $(this).removeAttr('srcset sizes');
-            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
-            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
+            applyAdaptiveStyle(this, mempelai.male_profile_photo);
           } else if (profileImgIdx === 2 && mempelai.female_profile_photo && currentSrc !== mempelai.female_profile_photo) {
-            $(this).attr('src', mempelai.female_profile_photo);
-            $(this).removeAttr('srcset sizes');
-            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
-            $(this).attr('style', 'object-fit: cover !important; aspect-ratio: 1/1 !important; border-radius: 50% !important; ' + ($(this).attr('style') || ''));
+            applyAdaptiveStyle(this, mempelai.female_profile_photo);
           }
       }
     });
