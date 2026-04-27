@@ -512,8 +512,8 @@ function compileTemplate(templateSlug, settings) {
   // =========================================
   if (mempelai.cover_photo) {
       let foundCover = false;
-      // Heuristic 1: Gambar pertama di section pertama yang memiliki background (hero)
-      $('.elementor-section').first().find('img').each(function() {
+      // Heuristic 1: Gambar pertama di halaman yang bukan elemen dekorasi
+      $('img').each(function() {
           const src = $(this).attr('src') || '';
           const lowerSrc = src.toLowerCase();
           // Pastikan bukan elemen hiasan kecil/bunga/background abstrak
