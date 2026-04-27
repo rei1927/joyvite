@@ -101,15 +101,33 @@ function compileTemplate(templateSlug, settings) {
     const $img = $(imgElement);
     const existingStyle = $img.attr('style') || '';
     
-    // Dapatkan width & height asli untuk mempertahankan aspect ratio
-    const origW = $img.attr('width');
-    const origH = $img.attr('height');
+    // Dapatkan width & height asli 
+    let targetW = $img.attr('width');
+    let targetH = $img.attr('height');
+    
+    // CARI FRAME DI CONTAINER YANG SAMA
+    // Template Javanese Serenity meletakkan frame (absolute) dan photo (static) di container yang sama
+    const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
+    if ($parent.length > 0) {
+        const $frameImg = $parent.find('img').filter(function() {
+            const src = $(this).attr('src') || '';
+            const lowerSrc = src.toLowerCase();
+            return lowerSrc.includes('frame') || lowerSrc.includes('bingkai');
+        }).first();
+        
+        if ($frameImg.length > 0) {
+            targetW = $frameImg.attr('width') || targetW;
+            targetH = $frameImg.attr('height') || targetH;
+            console.log(`[Adaptive] Menggunakan dimensi frame: ${targetW}x${targetH}`);
+        }
+    }
+    
     let aspectStyle = '';
     
-    if (origW && origH) {
-        aspectStyle = `width: ${origW}px !important; max-width: 100% !important; height: auto !important; aspect-ratio: ${origW}/${origH} !important;`;
-    } else {
-        aspectStyle = ``;
+    if (targetW && targetH) {
+        // Gunakan ukuran frame sebagai basis, max-width 100% untuk responsif, 
+        // dan aspect-ratio yang sama persis dengan frame agar tidak meluber
+        aspectStyle = `width: ${targetW}px !important; max-width: 100% !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
     }
 
     $img.attr('src', newSrc);
