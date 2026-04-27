@@ -125,9 +125,11 @@ function compileTemplate(templateSlug, settings) {
     let aspectStyle = '';
     
     if (targetW && targetH) {
-        // Gunakan ukuran frame sebagai basis, max-width 100% untuk responsif, 
-        // dan aspect-ratio yang sama persis dengan frame agar tidak meluber
-        aspectStyle = `width: ${targetW}px !important; max-width: 100% !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
+        // Gunakan width 100% agar responsif menyesuaikan layar mobile.
+        // Gunakan max-width asli foto (origW) agar tidak membesar tak terbatas di layar desktop.
+        // Gunakan aspect-ratio milik frame agar bentuknya 100% sinkron dengan frame.
+        const clampW = origW || targetW;
+        aspectStyle = `width: 100% !important; max-width: ${clampW}px !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
     }
 
     $img.attr('src', newSrc);
