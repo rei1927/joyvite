@@ -126,9 +126,9 @@ function compileTemplate(templateSlug, settings) {
     
     if (targetW && targetH) {
         // Gunakan width 100% agar responsif menyesuaikan layar mobile.
-        // Gunakan max-width asli foto (origW) agar tidak membesar tak terbatas di layar desktop.
+        // Gunakan max-width asli foto agar tidak membesar tak terbatas di layar desktop.
         // Gunakan aspect-ratio milik frame agar bentuknya 100% sinkron dengan frame.
-        const clampW = origW || targetW;
+        const clampW = $img.attr('width') || targetW;
         aspectStyle = `width: 100% !important; max-width: ${clampW}px !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
     }
 
