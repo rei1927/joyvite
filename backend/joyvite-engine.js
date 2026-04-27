@@ -107,7 +107,7 @@ function compileTemplate(templateSlug, settings) {
     let aspectStyle = '';
     
     if (origW && origH) {
-        aspectStyle = `aspect-ratio: ${origW}/${origH} !important;`;
+        aspectStyle = `width: ${origW}px !important; max-width: 100% !important; height: auto !important; aspect-ratio: ${origW}/${origH} !important;`;
     } else {
         aspectStyle = ``;
     }
