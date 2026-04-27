@@ -98,14 +98,28 @@ function compileTemplate(templateSlug, settings) {
   // Algoritma dinamis pendeteksi rasio dimensi asli templat
   // HARUS didefinisikan SETELAH $ (Cheerio) tersedia
   function applyAdaptiveStyle(imgElement, newSrc) {
-    const existingStyle = $(imgElement).attr('style') || '';
-    $(imgElement).attr('src', newSrc);
-    $(imgElement).removeAttr('srcset sizes');
+    const $img = $(imgElement);
+    const existingStyle = $img.attr('style') || '';
+    
+    // Dapatkan width & height asli untuk mempertahankan aspect ratio
+    const origW = $img.attr('width');
+    const origH = $img.attr('height');
+    let aspectStyle = '';
+    
+    if (origW && origH) {
+        aspectStyle = `aspect-ratio: ${origW}/${origH} !important; width: 100% !important; height: 100% !important;`;
+    } else {
+        aspectStyle = `width: 100% !important; height: 100% !important;`;
+    }
+
+    $img.attr('src', newSrc);
+    $img.removeAttr('srcset sizes');
+    
     // Hanya tambahkan object-fit cover, JANGAN timpa style asli template
     // Ini menjaga border-radius, clip-path, mask, dll dari CSS Elementor
-    const newProps = 'object-fit: cover !important; object-position: center !important;';
+    const newProps = `object-fit: cover !important; object-position: center !important; ${aspectStyle}`;
     if (!existingStyle.includes('object-fit')) {
-      $(imgElement).attr('style', existingStyle + ' ' + newProps);
+      $img.attr('style', existingStyle + (existingStyle ? ' ' : '') + newProps);
     }
     console.log(`[Adaptive] Replaced image src, preserved original styles.`);
   }
