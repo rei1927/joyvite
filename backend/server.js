@@ -105,6 +105,29 @@ app.get('/joyvite-assets/:fileName', async (req, res) => {
   }
 });
 
+// Simple deep merge function
+function deepMerge(target, source) {
+  if (typeof target !== 'object' || target === null) return source;
+  if (typeof source !== 'object' || source === null) return source;
+  
+  // Replace arrays entirely because UI sends full array state
+  if (Array.isArray(target) && Array.isArray(source)) return source;
+  
+  const output = { ...target };
+  Object.keys(source).forEach(key => {
+      if (typeof source[key] === 'object' && source[key] !== null && !Array.isArray(source[key])) {
+          if (!(key in target)) {
+              Object.assign(output, { [key]: source[key] });
+          } else {
+              output[key] = deepMerge(target[key], source[key]);
+          }
+      } else {
+          Object.assign(output, { [key]: source[key] });
+      }
+  });
+  return output;
+}
+
 // Save Config Settings Route (Using JSONB)
 app.post('/api/settings', async (req, res) => {
   try {
@@ -116,10 +139,10 @@ app.post('/api/settings', async (req, res) => {
       where: { slug: targetSlug }
     });
     
-    // Lakukan deep merge / shallow merge pada setting tingkat top-level (mempelai, events, dll)
+    // Lakukan deep merge agar update parsial dari form yang berbeda tidak saling menimpa
     let mergedSettings = settings;
     if (existingConfig && existingConfig.settings) {
-       mergedSettings = { ...existingConfig.settings, ...settings };
+       mergedSettings = deepMerge(existingConfig.settings, settings);
     }
     
     const result = await prisma.weddingConfig.upsert({
