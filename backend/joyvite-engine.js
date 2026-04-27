@@ -107,9 +107,9 @@ function compileTemplate(templateSlug, settings) {
     let aspectStyle = '';
     
     if (origW && origH) {
-        aspectStyle = `aspect-ratio: ${origW}/${origH} !important; width: 100% !important; height: 100% !important;`;
+        aspectStyle = `aspect-ratio: ${origW}/${origH} !important;`;
     } else {
-        aspectStyle = `width: 100% !important; height: 100% !important;`;
+        aspectStyle = ``;
     }
 
     $img.attr('src', newSrc);
