@@ -32,6 +32,10 @@ function findTemplateHtml(templateSlug) {
   const scraperPath = path.join(baseDir, 'menujuacara.id', templateSlug, 'index.html');
   if (fs.existsSync(scraperPath)) return scraperPath;
 
+  // Cek path struktur web.menujuacara.id/slug/index.html (domain baru)
+  const webScraperPath = path.join(baseDir, 'web.menujuacara.id', templateSlug, 'index.html');
+  if (fs.existsSync(webScraperPath)) return webScraperPath;
+
   // Cek semua subfolder untuk index.html
   const subDirs = fs.readdirSync(baseDir, { withFileTypes: true })
     .filter(d => d.isDirectory())
@@ -409,25 +413,52 @@ function compileTemplate(templateSlug, settings) {
     });
   }
 
-  // Ganti info orang tua
+  // Ganti info orang tua secara heuristik
+  // Scan semua heading yang mengandung "Bpk." dan "Ibu" dan tentukan apakah 
+  // ini blok mempelai pria atau wanita berdasarkan konteks teks (Putra/Putri)
+  let parentBlockIndex = 0;
   $('.elementor-heading-title').each(function () {
     let html = $(this).html();
     if (!html) return;
 
-    if (html.includes('Bpk. Mempelai') && html.includes('Ibu Mempelai')) {
-      if (mempelai.male_father_name) {
-        html = html.replace(/Bpk\. Mempelai/g, mempelai.male_father_name);
+    // Deteksi blok orang tua: mengandung "Bpk." DAN "Ibu"
+    if (html.includes('Bpk.') && html.includes('Ibu')) {
+      parentBlockIndex++;
+      const lowerHtml = html.toLowerCase();
+      
+      // Tentukan blok ini milik mempelai wanita atau pria
+      const isFemalBlock = lowerHtml.includes('putri');
+      const isMaleBlock = lowerHtml.includes('putra');
+      
+      if (isFemalBlock || (!isMaleBlock && parentBlockIndex === 1)) {
+        // Blok orang tua WANITA (atau default blok pertama jika tak ada petunjuk)
+        if (mempelai.female_father_name) {
+          html = html.replace(/Bpk\.\s*[\w\s]+?(?=\s*(?:&amp;|&|\s+Ibu))/i, mempelai.female_father_name);
+        }
+        if (mempelai.female_mother_name) {
+          html = html.replace(/Ibu\s+[\w\s]+$/i, mempelai.female_mother_name);
+        }
+        // Ganti urutan anak wanita (Putri Kelima, Putri Pertama, dll)
+        if (mempelai.female_family_sequence) {
+          html = html.replace(/Putri\s+(Pertama|Kedua|Ketiga|Keempat|Kelima|Keenam|Ketujuh|Bungsu)\s+dari/i, mempelai.female_family_sequence + ' dari');
+        }
+        $(this).html(html);
+        console.log(`[Heuristic] Diganti orang tua WANITA (blok ${parentBlockIndex})`);
+      } else if (isMaleBlock || parentBlockIndex === 2) {
+        // Blok orang tua PRIA
+        if (mempelai.male_father_name) {
+          html = html.replace(/Bpk\.\s*[\w\s]+?(?=\s*(?:&amp;|&|\s+Ibu))/i, mempelai.male_father_name);
+        }
+        if (mempelai.male_mother_name) {
+          html = html.replace(/Ibu\s+[\w\s]+$/i, mempelai.male_mother_name);
+        }
+        // Ganti urutan anak pria (Putra Pertama, dll)
+        if (mempelai.male_family_sequence) {
+          html = html.replace(/Putra\s+(Pertama|Kedua|Ketiga|Keempat|Kelima|Keenam|Ketujuh|Bungsu)\s+dari/i, mempelai.male_family_sequence + ' dari');
+        }
+        $(this).html(html);
+        console.log(`[Heuristic] Diganti orang tua PRIA (blok ${parentBlockIndex})`);
       }
-      if (mempelai.male_mother_name) {
-        html = html.replace(/Ibu Mempelai/g, mempelai.male_mother_name);
-      }
-      if (mempelai.male_family_sequence && html.includes('Putra Pertama')) {
-        html = html.replace('Putra Pertama', mempelai.male_family_sequence);
-      }
-      if (mempelai.female_family_sequence && html.includes('Putri Pertama')) {
-        html = html.replace('Putri Pertama', mempelai.female_family_sequence);
-      }
-      $(this).html(html);
     }
   });
 
@@ -445,10 +476,13 @@ function compileTemplate(templateSlug, settings) {
       const text = $(this).text().trim();
       if (text.includes('Maha suci Allah') || 
           text.includes('sakinah, mawaddah') ||
+          text.includes('Dan di antara tanda-tanda') ||
+          text.includes('Q.S.') || text.includes('QS.') ||
           text.length > 80) {
         // Ini kemungkinan besar elemen quotes
         const currentText = $(this).text();
-        if (currentText.includes('Maha suci') || currentText.includes('mawaddah')) {
+        if (currentText.includes('Maha suci') || currentText.includes('mawaddah') ||
+            currentText.includes('Dan di antara tanda-tanda') || currentText.includes('Q.S.') || currentText.includes('QS.')) {
           $(this).text(quotes.content);
         }
       }
@@ -484,7 +518,7 @@ function compileTemplate(templateSlug, settings) {
   }
 
   if (judul.judul_countdown) {
-    const countdownDefaults = ['Menghitung Hari', 'Counting Days'];
+    const countdownDefaults = ['Menghitung Hari', 'Counting Days', 'Save The Date'];
     countdownDefaults.forEach(d => replaceHeadingText($, d, judul.judul_countdown));
   }
 
@@ -504,39 +538,23 @@ function compileTemplate(templateSlug, settings) {
   // =========================================
   
   if (mempelai.male_instagram || mempelai.female_instagram) {
+    let igIdx = 0;
     $('a[href*="instagram.com"]').each(function() {
-      const href = $(this).attr('href') || '';
-      // Ganti username di link instagram
-      if (mempelai.male_instagram && (href.includes('username_pria') || href.includes('instagram.com'))) {
+      igIdx++;
+      // Blok pertama = mempelai wanita, blok kedua = pria (sesuai urutan DOM)
+      if (igIdx === 1 && mempelai.female_instagram) {
+        $(this).attr('href', `https://instagram.com/${mempelai.female_instagram}`);
+        $(this).find('.elementor-button-text').text(`@${mempelai.female_instagram}`);
+      } else if (igIdx === 2 && mempelai.male_instagram) {
         $(this).attr('href', `https://instagram.com/${mempelai.male_instagram}`);
+        $(this).find('.elementor-button-text').text(`@${mempelai.male_instagram}`);
       }
     });
   }
 
   // =========================================
-  // 7. INJEKSI NAMA ORANG TUA WANITA (FIX)
+  // 7. (Digabung ke blok orang tua di atas)
   // =========================================
-  
-  // Handle orang tua wanita secara terpisah (blok kedua di template)
-  let parentBlockCount = 0;
-  $('.elementor-heading-title').each(function () {
-    let html = $(this).html();
-    if (!html) return;
-
-    if (html.includes('Bpk.') && html.includes('Ibu')) {
-      parentBlockCount++;
-      // Block kedua = orang tua wanita
-      if (parentBlockCount === 2) {
-        if (mempelai.female_father_name) {
-          html = html.replace(/Bpk\.\s*\w+/g, mempelai.female_father_name);
-        }
-        if (mempelai.female_mother_name) {
-          html = html.replace(/Ibu\s*\w+/g, mempelai.female_mother_name);
-        }
-        $(this).html(html);
-      }
-    }
-  });
 
   // =========================================
   // 8. INJEKSI FOTO PROFIL MEMPELAI (HEURISTIK)
@@ -779,33 +797,47 @@ function compileTemplate(templateSlug, settings) {
   
   // Rewrite path relatif CSS/JS/Gambar ke aset lokal Joyvite
   // File statis sudah diekspos di server.js melalui rute /joyvite-assets
-  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-content\//g, `$1="/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
-  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, `$1="/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
+  
+  // Deteksi apakah template berasal dari web.menujuacara.id (cek htmlPath)
+  const isWebDomain = htmlPath.includes('web.menujuacara.id');
+  const domainFolder = isWebDomain ? 'web.menujuacara.id' : 'menujuacara.id';
+  
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-content\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/wp-content/`);
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']\.\.\/wp-includes\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/wp-includes/`);
+  
+  // Rewrite path wp-content/wp-includes yang TANPA ../ prefix (langsung relatif dari index.html)
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']wp-content\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/wp-content/`);
+  finalHtml = finalHtml.replace(/(href|src|srcset)=["']wp-includes\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/wp-includes/`);
   
   // Rewrite inline styles URL patterns
-  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, `url(/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
-  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, `url('/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
-  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, `url("/joyvite-assets/${templateSlug}/menujuacara.id/wp-content/`);
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-content\//g, `url(/joyvite-assets/${templateSlug}/${domainFolder}/wp-content/`);
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-content\//g, `url('/joyvite-assets/${templateSlug}/${domainFolder}/wp-content/`);
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-content\//g, `url("/joyvite-assets/${templateSlug}/${domainFolder}/wp-content/`);
 
-  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, `url(/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
-  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, `url('/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
-  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, `url("/joyvite-assets/${templateSlug}/menujuacara.id/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\(\.\.\/wp-includes\//g, `url(/joyvite-assets/${templateSlug}/${domainFolder}/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\('\.\.\/wp-includes\//g, `url('/joyvite-assets/${templateSlug}/${domainFolder}/wp-includes/`);
+  finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, `url("/joyvite-assets/${templateSlug}/${domainFolder}/wp-includes/`);
   
-  // Rewrite fonts & CDN relative paths
-  finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/fonts\.gstatic\.com\//g, '$1="https://fonts.gstatic.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/cdnjs\.cloudflare\.com\//g, '$1="https://cdnjs.cloudflare.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["']\.\.\/\.\.\/unpkg\.com\//g, '$1="https://unpkg.com/');
+  // Rewrite fonts & CDN relative paths (semua kedalaman ../../ dan ../../../)
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.gstatic\.com\//g, '$1="https://fonts.gstatic.com/');
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.cdnfonts\.com\//g, '$1="https://fonts.cdnfonts.com/');
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+cdnjs\.cloudflare\.com\//g, '$1="https://cdnjs.cloudflare.com/');
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+unpkg\.com\//g, '$1="https://unpkg.com/');
   
   // Rewrite data-thumbnail untuk gallery (absolute ke localhost assets)
   finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, `data-thumbnail="/joyvite-assets/${templateSlug}/menujuacara.id/`);
+  finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/web\.menujuacara\.id\//g, `data-thumbnail="/joyvite-assets/${templateSlug}/web.menujuacara.id/`);
 
-  // Rewrite social media & external links
-  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/instagram\.com\//g, '$1="https://instagram.com/');
-  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/www\.google\.com\//g, '$1="https://www.google.com/');
-  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/accounts\.google\.com\//g, '$1="https://accounts.google.com/');
-  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/api\.whatsapp\.com\//g, '$1="https://api.whatsapp.com/');
-  finalHtml = finalHtml.replace(/(href)="\.\.\/\.\.\/maps\.google\.com\//g, '$1="https://maps.google.com/');
+  // Rewrite social media & external links (semua kedalaman relatif)
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+instagram\.com\//g, '$1="https://instagram.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+www\.instagram\.com\//g, '$1="https://www.instagram.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+www\.google\.com\//g, '$1="https://www.google.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+accounts\.google\.com\//g, '$1="https://accounts.google.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+api\.whatsapp\.com\//g, '$1="https://api.whatsapp.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+maps\.google\.com\//g, '$1="https://maps.google.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+kipainvitation\.com\//g, '$1="https://kipainvitation.com/');
+  finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+wa\.me\//g, '$1="https://wa.me/');
 
   // Semua logic CSS/JS override yang mengganggu animasi native WeddingPress telah dihapuskan.
   // Karena bypass NGINX (/joyvite-assets) berhasil, template akan memuat CSS bawaannya sendiri.
