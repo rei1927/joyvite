@@ -508,6 +508,30 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
+  // 4B. INJEKSI FOTO SAMPUL DEPAN (COVER PHOTO)
+  // =========================================
+  if (mempelai.cover_photo) {
+      let foundCover = false;
+      // Heuristic 1: Gambar pertama di section pertama yang memiliki background (hero)
+      $('.elementor-section').first().find('img').each(function() {
+          const src = $(this).attr('src') || '';
+          const lowerSrc = src.toLowerCase();
+          // Pastikan bukan elemen hiasan kecil/bunga/background abstrak
+          if (!foundCover && !lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && 
+              !lowerSrc.includes('daun') && !lowerSrc.includes('leaf') &&
+              !lowerSrc.includes('ornament') && !lowerSrc.includes('bg') && 
+              !lowerSrc.includes('shape') && !lowerSrc.includes('mask') &&
+              !lowerSrc.includes('animasi') && !lowerSrc.includes('bingkai') &&
+              !lowerSrc.includes('wreath')) {
+              
+              applyAdaptiveStyle(this, mempelai.cover_photo);
+              console.log('[Heuristic] Foto SAMPUL DEPAN terganti.');
+              foundCover = true;
+          }
+      });
+  }
+
+  // =========================================
   // 5. INJEKSI JUDUL KUSTOM (DIPERLUAS)
   // =========================================
   

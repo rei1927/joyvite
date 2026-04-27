@@ -27,6 +27,7 @@
             .border-start { border-left: none !important; border-top: 1px solid var(--border-color); padding-top: 20px; }
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 </head>
 <body>
     <!-- SIDEBAR -->
@@ -207,5 +208,26 @@
     <!-- jQuery Validate Plugin Form (Simulation) -->
     <!-- Custom JS -->
     <script src="js/script.js?v=4"></script>
+    <!-- Cropper Modal -->
+    <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header border-bottom-0">
+            <h5 class="modal-title fw-bold" id="cropModalLabel">Sesuaikan Foto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-0 bg-light text-center" style="max-height: 60vh; overflow: hidden;">
+            <img id="crop-image" src="" style="max-width: 100%; display: block; margin: 0 auto;">
+          </div>
+          <div class="modal-footer border-top-0 justify-content-between">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-primary" id="btn-crop-save">
+                <i class="fa-solid fa-crop-simple me-2"></i>Crop & Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </body>
 </html>

@@ -102,10 +102,14 @@ $(document).ready(function() {
                 $(`input[name="theme_type"][value="${data.template}"]`).prop('checked', true);
             }
 
-            // Preview Images (Mempelai Page)
+            // Preview Images (Mempelai Page & Desain Page)
             if (settings.mempelai) {
                 if (settings.mempelai.male_profile_photo) $('#male-account-upload-img').attr('src', settings.mempelai.male_profile_photo);
                 if (settings.mempelai.female_profile_photo) $('#female-account-upload-img').attr('src', settings.mempelai.female_profile_photo);
+                if (settings.mempelai.cover_photo) {
+                    $('#cover-upload-img').attr('src', settings.mempelai.cover_photo).show();
+                    $('#cover-upload-placeholder').hide();
+                }
             }
 
             // Update Link URL di Dashboard (Index Page)
@@ -174,30 +178,81 @@ $(document).ready(function() {
     loadWeddingSettings();
 
     // ==========================================
-    // LOGIKA HALAMAN MEMPELAI (Image Preview)
+    // LOGIKA CROPPER (Image Preview & Crop)
     // ==========================================
     
-    // Preview Gambar Pria
-    $('#male-account-upload').on('change', function(e) {
+    let cropper = null;
+    let currentCropTargetImg = '';
+    let currentFileInput = '';
+
+    function openCropper(file, targetImgId, inputId) {
         var reader = new FileReader();
-        var files = e.target.files;
-        if (files && files[0]) {
-            reader.onload = function() {
-                $('#male-account-upload-img').attr('src', reader.result);
-            };
-            reader.readAsDataURL(files[0]);
+        reader.onload = function(e) {
+            $('#crop-image').attr('src', e.target.result);
+            $('#cropModal').modal('show');
+            currentCropTargetImg = targetImgId;
+            currentFileInput = inputId;
+        };
+        reader.readAsDataURL(file);
+    }
+
+    $('#cropModal').on('shown.bs.modal', function () {
+        if (cropper) {
+            cropper.destroy();
+        }
+        cropper = new Cropper(document.getElementById('crop-image'), {
+            viewMode: 1,
+            autoCropArea: 1,
+            responsive: true,
+            background: false
+        });
+    }).on('hidden.bs.modal', function () {
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
         }
     });
 
-    // Preview Gambar Wanita
+    $('#btn-crop-save').on('click', function() {
+        if (cropper) {
+            // Get cropped canvas and compress slightly
+            const canvas = cropper.getCroppedCanvas({
+                maxWidth: 1080,
+                maxHeight: 1920
+            });
+            const base64Data = canvas.toDataURL('image/jpeg', 0.85);
+            
+            // Set to preview
+            $(currentCropTargetImg).attr('src', base64Data).show();
+            
+            // If it's cover photo, hide the placeholder
+            if (currentCropTargetImg === '#cover-upload-img') {
+                $('#cover-upload-placeholder').hide();
+            }
+            
+            // Clear the actual file input so the submit logic uses the base64 src instead
+            $(currentFileInput).val('');
+            
+            $('#cropModal').modal('hide');
+        }
+    });
+
+    // Event listeners for file inputs
+    $('#male-account-upload').on('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            openCropper(e.target.files[0], '#male-account-upload-img', '#male-account-upload');
+        }
+    });
+
     $('#female-account-upload').on('change', function(e) {
-        var reader = new FileReader();
-        var files = e.target.files;
-        if (files && files[0]) {
-            reader.onload = function() {
-                $('#female-account-upload-img').attr('src', reader.result);
-            };
-            reader.readAsDataURL(files[0]);
+        if (e.target.files && e.target.files[0]) {
+            openCropper(e.target.files[0], '#female-account-upload-img', '#female-account-upload');
+        }
+    });
+
+    $('#cover-upload').on('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            openCropper(e.target.files[0], '#cover-upload-img', '#cover-upload');
         }
     });
 
@@ -218,7 +273,7 @@ $(document).ready(function() {
             for (let [key, value] of formData.entries()) {
                 let parsedValue = value;
                 
-                // Jika input bertipe File dan ADA file yang diunggah
+                // Jika input bertipe File dan ADA file yang diunggah secara native
                 if (value instanceof File && value.name) {
                     let fileData = new FormData();
                     fileData.append('file', value);
@@ -226,20 +281,28 @@ $(document).ready(function() {
                     const uploadJson = await uploadRes.json();
                     if(uploadJson.url) parsedValue = uploadJson.url; // Ganti blob menjadi S3 URL
                 } 
-                // Jika input File TAPI KOSONG (user menekan save tanpa upload gambar baru)
+                // Jika input File TAPI KOSONG (karena dikosongkan setelah crop atau tidak diubah)
                 else if (value instanceof File && !value.name) {
-                    // Cek jika ini adalah form mempelai (Halaman Mempelai)
-                    if (key === 'male_profile_photo') {
-                        const existingSrc = $('#male-account-upload-img').attr('src');
-                        if (existingSrc && !existingSrc.includes('ui-avatars.com')) parsedValue = existingSrc;
-                        else parsedValue = '';
-                    } else if (key === 'female_profile_photo') {
-                        const existingSrc = $('#female-account-upload-img').attr('src');
-                        if (existingSrc && !existingSrc.includes('ui-avatars.com')) parsedValue = existingSrc;
-                        else parsedValue = '';
-                    } 
-                    // Kita akan mendeteksi form array (seperti Cerita Cinta: story_photo) di pengecekan Array di bawah
-                    else {
+                    let existingSrc = '';
+                    if (key === 'male_profile_photo') existingSrc = $('#male-account-upload-img').attr('src');
+                    else if (key === 'female_profile_photo') existingSrc = $('#female-account-upload-img').attr('src');
+                    else if (key === 'cover_photo') existingSrc = $('#cover-upload-img').attr('src');
+                    
+                    if (existingSrc && !existingSrc.includes('ui-avatars.com')) {
+                        // Jika src berupa base64 (hasil crop), upload ke S3 dulu!
+                        if (existingSrc.startsWith('data:image/')) {
+                            const res = await fetch(existingSrc);
+                            const blob = await res.blob();
+                            let fileData = new FormData();
+                            fileData.append('file', blob, 'cropped_image.jpg');
+                            const uploadRes = await fetch('https://login.joyvite.id/api/upload', { method: 'POST', body: fileData });
+                            const uploadJson = await uploadRes.json();
+                            if(uploadJson.url) parsedValue = uploadJson.url;
+                        } else {
+                            parsedValue = existingSrc; // URL gambar yang sudah ada sebelumnya
+                        }
+                    } else {
+                        // Kita akan mendeteksi form array (seperti Cerita Cinta: story_photo) di pengecekan Array di bawah
                         parsedValue = '';
                     }
                 }
@@ -273,11 +336,11 @@ $(document).ready(function() {
             // 2. Format menjadi Nested Settings Object yang sesuai Joyvite Engine
             var nestedSettings = {};
             
-            // a. Jika Halaman Mempelai
-            if (flatData['male_name'] || flatData['female_name']) {
+            // a. Jika Halaman Mempelai atau Desain (Cover Photo masuk ke Mempelai JSON)
+            if (flatData['male_name'] || flatData['female_name'] || flatData['cover_photo'] !== undefined) {
                 nestedSettings.mempelai = {};
                 for (let k in flatData) {
-                    if (k.startsWith('male_') || k.startsWith('female_')) {
+                    if (k.startsWith('male_') || k.startsWith('female_') || k === 'cover_photo') {
                         nestedSettings.mempelai[k] = flatData[k];
                     }
                 }

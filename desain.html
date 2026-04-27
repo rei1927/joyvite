@@ -109,6 +109,7 @@
             cursor: not-allowed;
         }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 </head>
 <body>
     <nav class="sidebar">
@@ -179,19 +180,16 @@
                     <div class="card-body p-4">
                         <h4 class="card-title fw-bold mb-4">Sampul Depan (Cover Utama)</h4>
                         <div class="row">
-                            <div class="col-md-6">
+                            <div class="col-md-12">
                                 <label class="form-label fw-semibold">Pilih Gambar Sampul <span class="text-danger">*</span></label>
-                                <div class="border rounded p-3 mb-3 text-center bg-light" style="border-style: dashed !important;">
-                                    <i class="fa-solid fa-image fa-3x text-muted mb-2 opacity-50"></i>
-                                    <p class="text-muted small mb-3">Ukuran yang disarankan: 1080 x 1920px (Potret)</p>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-4">Browser / Unggah</button>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label fw-semibold">Warna Nuansa Utama (Primary Color)</label>
-                                <div class="input-group mb-3">
-                                    <input type="color" class="form-control form-control-color bg-light border-end-0" value="#ec4899" title="Pilih warna nuansa">
-                                    <input type="text" class="form-control bg-light" value="#ec4899">
+                                <div class="border rounded p-3 mb-3 text-center bg-light position-relative" style="border-style: dashed !important; min-height: 250px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                                    <img id="cover-upload-img" src="" alt="Cover Preview" class="img-fluid rounded mb-3" style="max-height: 400px; display: none; object-fit: cover;">
+                                    <div id="cover-upload-placeholder">
+                                        <i class="fa-solid fa-image fa-3x text-muted mb-2 opacity-50"></i>
+                                        <p class="text-muted small mb-3">Ukuran yang disarankan: 1080 x 1920px (Potret)</p>
+                                    </div>
+                                    <input type="file" id="cover-upload" hidden name="cover_photo" accept="image/*">
+                                    <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-4" onclick="document.getElementById('cover-upload').click()">Browser / Unggah</button>
                                 </div>
                             </div>
                         </div>
@@ -462,5 +460,26 @@
             });
         });
     </script>
+    <!-- Cropper Modal -->
+    <div class="modal fade" id="cropModal" tabindex="-1" aria-labelledby="cropModalLabel" aria-hidden="true" data-bs-backdrop="static">
+      <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+          <div class="modal-header border-bottom-0">
+            <h5 class="modal-title fw-bold" id="cropModalLabel">Sesuaikan Foto</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+          <div class="modal-body p-0 bg-light text-center" style="max-height: 60vh; overflow: hidden;">
+            <img id="crop-image" src="" style="max-width: 100%; display: block; margin: 0 auto;">
+          </div>
+          <div class="modal-footer border-top-0 justify-content-between">
+            <button type="button" class="btn btn-light" data-bs-dismiss="modal">Batal</button>
+            <button type="button" class="btn btn-primary" id="btn-crop-save">
+                <i class="fa-solid fa-crop-simple me-2"></i>Crop & Simpan
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </body>
 </html>
