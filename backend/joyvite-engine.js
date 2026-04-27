@@ -522,7 +522,10 @@ function compileTemplate(templateSlug, settings) {
               !lowerSrc.includes('ornament') && !lowerSrc.includes('bg') && 
               !lowerSrc.includes('shape') && !lowerSrc.includes('mask') &&
               !lowerSrc.includes('animasi') && !lowerSrc.includes('bingkai') &&
-              !lowerSrc.includes('wreath')) {
+              !lowerSrc.includes('wreath') && !lowerSrc.includes('frame') &&
+              !lowerSrc.includes('border') && !lowerSrc.includes('gunungan') &&
+              !lowerSrc.includes('wayang') && !lowerSrc.includes('pohon') &&
+              !lowerSrc.includes('semak')) {
               
               applyAdaptiveStyle(this, mempelai.cover_photo);
               console.log('[Heuristic] Foto SAMPUL DEPAN terganti.');
