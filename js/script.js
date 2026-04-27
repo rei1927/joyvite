@@ -200,8 +200,15 @@ $(document).ready(function() {
         if (cropper) {
             cropper.destroy();
         }
+        
+        let ratio = NaN;
+        if (currentFileInput === '#cover-upload') {
+            ratio = 683 / 1024;
+        }
+        
         cropper = new Cropper(document.getElementById('crop-image'), {
             viewMode: 1,
+            aspectRatio: ratio,
             autoCropArea: 1,
             responsive: true,
             background: false
