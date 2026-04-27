@@ -519,13 +519,17 @@ function compileTemplate(templateSlug, settings) {
           // Pastikan bukan elemen hiasan kecil/bunga/background abstrak
           if (!foundCover && !lowerSrc.includes('bunga') && !lowerSrc.includes('flower') && 
               !lowerSrc.includes('daun') && !lowerSrc.includes('leaf') &&
-              !lowerSrc.includes('ornament') && !lowerSrc.includes('bg') && 
+              !lowerSrc.includes('ornament') && !lowerSrc.includes('ornamen') &&
+              !lowerSrc.includes('bg') && !lowerSrc.includes('background') &&
               !lowerSrc.includes('shape') && !lowerSrc.includes('mask') &&
               !lowerSrc.includes('animasi') && !lowerSrc.includes('bingkai') &&
               !lowerSrc.includes('wreath') && !lowerSrc.includes('frame') &&
               !lowerSrc.includes('border') && !lowerSrc.includes('gunungan') &&
               !lowerSrc.includes('wayang') && !lowerSrc.includes('pohon') &&
-              !lowerSrc.includes('semak')) {
+              !lowerSrc.includes('semak') && !lowerSrc.includes('tato') &&
+              !lowerSrc.includes('texture') && !lowerSrc.includes('pattern') &&
+              !lowerSrc.includes('awan') && !lowerSrc.includes('cloud') &&
+              !lowerSrc.includes('burung') && !lowerSrc.includes('bird')) {
               
               applyAdaptiveStyle(this, mempelai.cover_photo);
               console.log('[Heuristic] Foto SAMPUL DEPAN terganti.');
