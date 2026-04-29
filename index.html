@@ -89,6 +89,7 @@
             <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-image me-3"></i> Galeri Foto <span class="badge-new">Baru</span></a></li>
             <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-credit-card me-3"></i> Atur Rekening</a></li>
             <li class="nav-item"><a class="nav-link" href="#"><i class="fa-regular fa-comment-dots me-3"></i> Kirim Masukan</a></li>
+            <li class="nav-item mt-4"><a class="nav-link text-danger" href="#" id="btnLogout"><i class="fa-solid fa-right-from-bracket me-3"></i> Keluar</a></li>
         </ul>
     </nav>
 
@@ -313,17 +314,35 @@
             }
         }
 
-        // On Load, read from localStorage
-        const savedSlug = localStorage.getItem('joyvite_slug');
-        if (savedSlug) {
-            updateDashboardLink(savedSlug);
-        } else {
-            $('#weddingUrl').html(`<i class="fa-solid fa-link"></i> https://undangan-baru.joyvite.id`);
-        }
+        // On Load, read from API session
+        fetch(window.location.hostname.includes('joyvite.id') ? 'https://login.joyvite.id/api/me' : '/api/me')
+            .then(res => res.json())
+            .then(data => {
+                if (data.loggedIn && data.slug) {
+                    updateDashboardLink(data.slug);
+                } else {
+                    $('#weddingUrl').html(`<i class="fa-solid fa-link"></i> https://undangan-baru.joyvite.id`);
+                }
+            })
+            .catch(() => {
+                $('#weddingUrl').html(`<i class="fa-solid fa-link"></i> https://undangan-baru.joyvite.id`);
+            });
 
         // Listen for save event from any forms
         $(document).on('joyvite:saved', function(e, newSlug) {
             updateDashboardLink(newSlug);
+        });
+
+        // Handle Logout
+        $('#btnLogout').on('click', function(e) {
+            e.preventDefault();
+            if (confirm('Apakah Anda yakin ingin keluar?')) {
+                fetch(window.location.hostname.includes('joyvite.id') ? 'https://login.joyvite.id/api/logout' : '/api/logout', {
+                    method: 'POST'
+                }).then(() => {
+                    window.location.href = '/login';
+                });
+            }
         });
     });
     </script>

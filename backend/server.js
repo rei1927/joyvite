@@ -218,17 +218,39 @@ app.get('/login', (req, res) => {
   res.sendFile(path.join(dashboardPath, 'login.html'));
 });
 
-// API LOGIN MOCKUP
+// Daftar akun mockup — di masa depan, ganti dengan tabel User di PostgreSQL
+const MOCK_USERS = {
+  'test@joyvite.id': { password: 'test123', slug: 'acacac-acacac' }
+};
+
+// API LOGIN — set cookie dengan slug user
 app.post('/api/login', (req, res) => {
   const { email, password } = req.body;
+  const user = MOCK_USERS[email];
   
-  if (email === 'test@joyvite.id' && password === 'test123') {
-    // Set HTTP-Only Cookie berlaku 24 jam
-    res.setHeader('Set-Cookie', 'joyvite_auth=authenticated; Path=/; Max-Age=86400; HttpOnly');
-    return res.json({ success: true, message: 'Login berhasil!' });
+  if (user && user.password === password) {
+    // Cookie menyimpan slug user, berlaku 7 hari, HttpOnly agar aman dari XSS
+    res.setHeader('Set-Cookie', `joyvite_auth=${user.slug}; Path=/; Max-Age=604800; HttpOnly`);
+    return res.json({ success: true, message: 'Login berhasil!', slug: user.slug });
   }
   
   return res.status(401).json({ success: false, message: 'Email atau kata sandi salah.' });
+});
+
+// API ME — kembalikan slug user dari cookie session
+app.get('/api/me', (req, res) => {
+  const cookies = req.headers.cookie || '';
+  const match = cookies.match(/joyvite_auth=([^;]+)/);
+  if (match && match[1] && match[1] !== 'deleted') {
+    return res.json({ loggedIn: true, slug: match[1] });
+  }
+  return res.status(401).json({ loggedIn: false });
+});
+
+// API LOGOUT — hapus cookie dan redirect ke login
+app.post('/api/logout', (req, res) => {
+  res.setHeader('Set-Cookie', 'joyvite_auth=deleted; Path=/; Max-Age=0; HttpOnly');
+  return res.json({ success: true, message: 'Logout berhasil.' });
 });
 
 // AUTHENTICATION MIDDLEWARE
@@ -237,17 +259,18 @@ app.use((req, res, next) => {
   // Hanya jalankan proteksi jika sedang mengakses dashboard
   if (host === 'login.joyvite.id' || host === 'localhost' || host === 'www.joyvite.id') {
      
-     // Pengecualian rute publik (Assets & API Login)
-     const publicRoutes = ['/login', '/api/login', '/css', '/js', '/img', '/node_modules', '/favicon'];
+     // Pengecualian rute publik (Assets & API Login/Logout/Me)
+     const publicRoutes = ['/login', '/api/login', '/api/logout', '/api/me', '/css', '/js', '/img', '/node_modules', '/favicon'];
      const isPublic = publicRoutes.some(p => req.path === p || req.path.startsWith(`${p}/`));
      
      if (isPublic) {
         return next();
      }
 
-     // Cek Cookie
+     // Cek Cookie — slug harus ada dan bukan 'deleted'
      const cookies = req.headers.cookie || '';
-     if (!cookies.includes('joyvite_auth=authenticated')) {
+     const authMatch = cookies.match(/joyvite_auth=([^;]+)/);
+     if (!authMatch || !authMatch[1] || authMatch[1] === 'deleted') {
         return res.redirect('/login');
      }
   }

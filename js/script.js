@@ -50,8 +50,17 @@ $(document).ready(function() {
     // ==========================================
     async function loadWeddingSettings() {
         try {
-            let currentSlug = localStorage.getItem('joyvite_slug') || 'mockup-test-account';
-            const apiUrl = `https://login.joyvite.id/api/settings/${currentSlug}`;
+            // Dapatkan slug dari sesi login server (cookie)
+            const meRes = await fetch(window.location.hostname.includes('joyvite.id') ? 'https://login.joyvite.id/api/me' : '/api/me');
+            const meData = await meRes.json();
+            
+            if (!meData.loggedIn || !meData.slug) {
+                return; // Not logged in
+            }
+            
+            window.joyviteSlug = meData.slug; // Simpan di memory untuk dipakai waktu save
+            
+            const apiUrl = `https://login.joyvite.id/api/settings/${window.joyviteSlug}`;
             
             const res = await fetch(apiUrl);
             if (!res.ok) return; // Belum ada data
@@ -114,8 +123,8 @@ $(document).ready(function() {
 
             // Update Link URL di Dashboard (Index Page)
             if ($('#weddingUrl').length) {
-                $('#weddingUrl').html('<i class="fa-solid fa-link"></i> https://' + currentSlug + '.joyvite.id');
-                $('#weddingUrl').attr('href', 'https://' + currentSlug + '.joyvite.id');
+                $('#weddingUrl').html('<i class="fa-solid fa-link"></i> https://' + window.joyviteSlug + '.joyvite.id');
+                $('#weddingUrl').attr('href', 'https://' + window.joyviteSlug + '.joyvite.id');
                 $('#weddingUrl').attr('target', '_blank');
             }
 
@@ -468,18 +477,12 @@ $(document).ready(function() {
                 };
             }
 
-            // 3. AUTO GENERATOR SUBDOMAIN SLUG
-            let currentSlug = localStorage.getItem('joyvite_slug');
-            // Jika form mempelai punya nickname, auto generate slug baru
-            if (flatData['male_nickname'] && flatData['female_nickname']) {
-                currentSlug = (flatData['male_nickname'] + '-' + flatData['female_nickname'])
-                    .toLowerCase()
-                    .replace(/[^a-z0-9-]/g, '')
-                    .replace(/\s+/g, '-');
-                localStorage.setItem('joyvite_slug', currentSlug);
+            // 3. GUNAKAN SLUG DARI SESI LOGIN
+            let currentSlug = window.joyviteSlug;
+            
+            if (!currentSlug) {
+                throw new Error("Sesi tidak valid. Harap muat ulang halaman.");
             }
-            // Fallback
-            if (!currentSlug) currentSlug = 'undangan-baru-' + Math.floor(Math.random() * 1000);
 
             // 4. Kirim seluruh JSON ke pangkalan data PostgreSQL Joyvite
             const dbRes = await fetch('https://login.joyvite.id/api/settings', {
