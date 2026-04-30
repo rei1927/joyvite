@@ -31,7 +31,7 @@ services:
     ports:
       - "3500:3000"
     volumes:
-      - joyvite-templates:/app/templates
+      - ./TEMPLATE/Scraped_Templates:/app/templates/Scraped_Templates
     depends_on:
       - joyvite-postgres
     restart: unless-stopped
@@ -40,7 +40,6 @@ services:
 
 volumes:
   joyvite-pgdata:
-  joyvite-templates:
 
 networks:
   joyvite-net:
