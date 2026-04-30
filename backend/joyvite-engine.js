@@ -123,13 +123,16 @@ function compileTemplate(templateSlug, settings) {
     }
     
     let aspectStyle = '';
+    let transformStyle = '';
     
     if (targetW && targetH) {
         // Gunakan width 100% agar responsif menyesuaikan layar mobile.
-        // Gunakan max-width asli foto agar tidak membesar tak terbatas di layar desktop.
-        // Gunakan aspect-ratio milik frame agar bentuknya 100% sinkron dengan frame.
-        const clampW = $img.attr('width') || targetW;
-        aspectStyle = `width: 100% !important; max-width: ${clampW}px !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
+        // Gunakan max-width dari frame (targetW) agar gambar tidak pernah lebih besar dari frame.
+        // Gunakan aspect-ratio milik frame agar bentuknya 100% sinkron.
+        aspectStyle = `width: 100% !important; max-width: ${targetW}px !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
+        
+        // Kecilkan sedikit (scale 92%) agar foto pas masuk ke bagian "dalam" frame
+        transformStyle = `transform: scale(0.92) !important;`;
     }
 
     $img.attr('src', newSrc);
@@ -137,7 +140,7 @@ function compileTemplate(templateSlug, settings) {
     
     // Hanya tambahkan object-fit cover, JANGAN timpa style asli template
     // Ini menjaga border-radius, clip-path, mask, dll dari CSS Elementor
-    const newProps = `object-fit: cover !important; object-position: center !important; ${aspectStyle}`;
+    const newProps = `object-fit: cover !important; object-position: center !important; ${aspectStyle} ${transformStyle}`;
     if (!existingStyle.includes('object-fit')) {
       $img.attr('style', existingStyle + (existingStyle ? ' ' : '') + newProps);
     }
