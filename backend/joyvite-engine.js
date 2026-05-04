@@ -117,6 +117,16 @@ function compileTemplate(templateSlug, settings) {
         if ($frameImg.length > 0) {
             targetW = $frameImg.attr('width') || targetW;
             targetH = $frameImg.attr('height') || targetH;
+            
+            // Perbaiki cacat desain template asli di mode tablet/iPad:
+            // Template asli menambatkan bingkai ke kanan (right: 0px), yang membuatnya
+            // bergeser menjauh dari foto saat layar melebar. Kita paksa bingkai untuk
+            // selalu berada tepat di tengah (center) secara horizontal.
+            const $frameWidget = $frameImg.closest('.elementor-widget');
+            if ($frameWidget.length > 0) {
+                const existingFrameStyle = $frameWidget.attr('style') || '';
+                $frameWidget.attr('style', existingFrameStyle + ' right: auto !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; display: flex; justify-content: center;');
+            }
         }
     }
     
