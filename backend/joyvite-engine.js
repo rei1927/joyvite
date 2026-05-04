@@ -101,50 +101,17 @@ function compileTemplate(templateSlug, settings) {
     const $img = $(imgElement);
     const existingStyle = $img.attr('style') || '';
     
-    // Dapatkan width & height asli 
-    let targetW = $img.attr('width');
-    let targetH = $img.attr('height');
-    
-    // CARI FRAME DI CONTAINER YANG SAMA
-    // Template Javanese Serenity meletakkan frame (absolute) dan photo (static) di container yang sama
-    const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
-    if ($parent.length > 0) {
-        const $frameImg = $parent.find('img').filter(function() {
-            const src = $(this).attr('src') || '';
-            const lowerSrc = src.toLowerCase();
-            return lowerSrc.includes('frame') || lowerSrc.includes('bingkai');
-        }).first();
-        
-        if ($frameImg.length > 0) {
-            targetW = $frameImg.attr('width') || targetW;
-            targetH = $frameImg.attr('height') || targetH;
-            console.log(`[Adaptive] Menggunakan dimensi frame: ${targetW}x${targetH}`);
-        }
-    }
-    
-    let aspectStyle = '';
-    let transformStyle = '';
-    
-    if (targetW && targetH) {
-        // Gunakan width 100% agar responsif menyesuaikan layar mobile.
-        // Gunakan max-width dari frame (targetW) agar gambar tidak pernah lebih besar dari frame.
-        // Gunakan aspect-ratio milik frame agar bentuknya 100% sinkron.
-        aspectStyle = `width: 100% !important; max-width: ${targetW}px !important; height: auto !important; aspect-ratio: ${targetW}/${targetH} !important;`;
-        
-        // Kecilkan sedikit (scale 92%) agar foto pas masuk ke bagian "dalam" frame
-        transformStyle = `transform: scale(0.92) !important;`;
-    }
-
+    // Ganti sumber gambar
     $img.attr('src', newSrc);
     $img.removeAttr('srcset sizes');
     
-    // Hanya tambahkan object-fit cover, JANGAN timpa style asli template
-    // Ini menjaga border-radius, clip-path, mask, dll dari CSS Elementor
-    const newProps = `object-fit: cover !important; object-position: center !important; ${aspectStyle} ${transformStyle}`;
+    // Hanya tambahkan object-fit cover agar gambar user mengisi area dengan proporsional.
+    // JANGAN override width/height/max-width — biarkan CSS template Elementor yang mengatur
+    // ukuran (misal: width:51%, mask, aspect-ratio dll).
     if (!existingStyle.includes('object-fit')) {
-      $img.attr('style', existingStyle + (existingStyle ? ' ' : '') + newProps);
+      $img.attr('style', existingStyle + (existingStyle ? ' ' : '') + 'object-fit: cover !important; object-position: center !important;');
     }
-    console.log(`[Adaptive] Replaced image src, preserved original styles.`);
+    console.log(`[Adaptive] Replaced image src, preserved original template styles.`);
   }
 
   const mempelai = settings.mempelai || {};
