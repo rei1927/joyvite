@@ -101,12 +101,10 @@ function compileTemplate(templateSlug, settings) {
     const $img = $(imgElement);
     const existingStyle = $img.attr('style') || '';
     
-    // Default ambil aspect ratio dari foto itu sendiri
     let targetW = $img.attr('width');
     let targetH = $img.attr('height');
     
     // CARI FRAME DI CONTAINER YANG SAMA
-    // Kita ingin bentuk foto *sama persis* dengan bentuk bingkai
     const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
     if ($parent.length > 0) {
         const $frameImg = $parent.find('img').filter(function() {
@@ -115,17 +113,25 @@ function compileTemplate(templateSlug, settings) {
         }).first();
         
         if ($frameImg.length > 0) {
+            // Dapatkan dimensi frame untuk disamakan dengan foto
             targetW = $frameImg.attr('width') || targetW;
             targetH = $frameImg.attr('height') || targetH;
             
-            // Perbaiki cacat desain template asli di mode tablet/iPad:
-            // Template asli menambatkan bingkai ke kanan (right: 0px), yang membuatnya
-            // bergeser menjauh dari foto saat layar melebar. Kita paksa bingkai untuk
-            // selalu berada tepat di tengah (center) secara horizontal.
             const $frameWidget = $frameImg.closest('.elementor-widget');
+            const $photoContainer = $img.closest('.elementor-widget-container');
+            
+            // KUNCI: Pindahkan frame ke dalam container foto agar mereka terkunci selamanya (tidak bisa bergeser)
+            $photoContainer.attr('style', ($photoContainer.attr('style') || '') + ' position: relative !important; display: flex; justify-content: center; align-items: center;');
+            
+            const $clonedFrame = $frameImg.clone();
+            // Buat frame melayang tepat di atas foto
+            $clonedFrame.attr('style', 'position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; object-fit: contain !important; z-index: 10 !important; pointer-events: none;');
+            
+            $photoContainer.append($clonedFrame);
+            
+            // Hapus widget frame asli agar tidak dobel dan tidak mengacaukan layout
             if ($frameWidget.length > 0) {
-                const existingFrameStyle = $frameWidget.attr('style') || '';
-                $frameWidget.attr('style', existingFrameStyle + ' right: auto !important; left: 50% !important; transform: translateX(-50%) !important; width: 100% !important; display: flex; justify-content: center;');
+                $frameWidget.remove();
             }
         }
     }
@@ -134,12 +140,10 @@ function compileTemplate(templateSlug, settings) {
     $img.attr('src', newSrc);
     $img.removeAttr('srcset sizes');
     
-    let newProps = 'object-fit: cover !important; object-position: center !important;';
+    // Setel foto user agar bentuknya persis seperti frame, lalu dikecilkan 0.96 agar masuk ke lubang
+    let newProps = 'object-fit: cover !important; object-position: center !important; width: 100% !important; display: block !important;';
     
     if (targetW && targetH) {
-        // Samakan aspect-ratio persis dengan frame, lalu kecilkan sedikit secara visual (0.96).
-        // mask-size: 100% 100% memaksa siluet mengisi kotak.
-        // translateY(-4%) menaikkan foto agar pas di lubang bingkai yang posisinya agak ke atas.
         newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.96) translateY(-4%) !important;`;
     }
     
