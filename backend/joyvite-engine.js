@@ -101,11 +101,10 @@ function compileTemplate(templateSlug, settings) {
     const $img = $(imgElement);
     const existingStyle = $img.attr('style') || '';
     
-    // Ambil aspect ratio asli dari atribut HTML foto bawaan template (841x1261)
-    const targetW = $img.attr('width');
-    const targetH = $img.attr('height');
+    let targetW = $img.attr('width');
+    let targetH = $img.attr('height');
     
-    // CARI FRAME DI CONTAINER YANG SAMA untuk memperbaiki posisi horizontal di iPad
+    // CARI FRAME DI CONTAINER YANG SAMA
     const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
     if ($parent.length > 0) {
         const $frameImg = $parent.find('img').filter(function() {
@@ -114,11 +113,13 @@ function compileTemplate(templateSlug, settings) {
         }).first();
         
         if ($frameImg.length > 0) {
+            // Kita HARUS mengambil dimensi frame (744x1024) agar bentuk foto persis seperti bingkai
+            targetW = $frameImg.attr('width') || targetW;
+            targetH = $frameImg.attr('height') || targetH;
+            
             const $frameWidget = $frameImg.closest('.elementor-widget');
             
             // Perbaiki cacat template asli: Bingkai di-set right: 0px sehingga lari ke kanan di iPad.
-            // Kita paksa agar bingkai selalu berada tepat di tengah (center) secara horizontal.
-            // Foto dan bingkai tetap sebagai widget terpisah (jangan disatukan, karena frame adalah solid coklat).
             if ($frameWidget.length > 0) {
                 const existingFrameStyle = $frameWidget.attr('style') || '';
                 $frameWidget.attr('style', existingFrameStyle + ' right: auto !important; left: 50% !important; transform: translateX(-50%) !important;');
@@ -130,13 +131,12 @@ function compileTemplate(templateSlug, settings) {
     $img.attr('src', newSrc);
     $img.removeAttr('srcset sizes');
     
-    // Setel foto user agar bentuknya persis seperti proporsi aslinya (1:1.5)
-    // Jangan ubah width, jangan ubah display. Biarkan CSS Elementor bekerja.
-    // Foto HARUS berada di atas bingkai (karena bingkai ternyata solid coklat tanpa lubang).
+    // Setel foto user agar bentuknya persis seperti frame, lalu dikecilkan 0.96 agar masuk ke lubang.
+    // mask-size: 100% 100% memastikan siluet ditarik penuh ke atas/bawah agar tidak ada celah.
     let newProps = 'object-fit: cover !important; object-position: center !important; z-index: 1 !important; position: relative !important;';
     
     if (targetW && targetH) {
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important;`;
+        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.96) translateY(-4%) !important;`;
     }
     
     if (!existingStyle.includes('object-fit')) {
