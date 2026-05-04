@@ -99,19 +99,64 @@ function compileTemplate(templateSlug, settings) {
   // HARUS didefinisikan SETELAH $ (Cheerio) tersedia
   function applyAdaptiveStyle(imgElement, newSrc) {
     const $img = $(imgElement);
-    const existingStyle = $img.attr('style') || '';
     
-    // Ganti sumber gambar
+    // Ganti sumber gambar & hapus atribut yang bisa konflik
     $img.attr('src', newSrc);
-    $img.removeAttr('srcset sizes');
+    $img.removeAttr('srcset sizes width height');
     
-    // Hanya tambahkan object-fit cover agar gambar user mengisi area dengan proporsional.
-    // JANGAN override width/height/max-width — biarkan CSS template Elementor yang mengatur
-    // ukuran (misal: width:51%, mask, aspect-ratio dll).
-    if (!existingStyle.includes('object-fit')) {
-      $img.attr('style', existingStyle + (existingStyle ? ' ' : '') + 'object-fit: cover !important; object-position: center !important;');
+    // Cari frame di container yang sama untuk mencocokkan ukuran
+    const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
+    let frameWidthCSS = null;
+    
+    if ($parent.length > 0) {
+        const $frameImg = $parent.find('img').filter(function() {
+            const src = ($(this).attr('src') || '').toLowerCase();
+            return src.includes('frame') || src.includes('bingkai');
+        }).first();
+        
+        if ($frameImg.length > 0) {
+            // Cari elemen widget pembungkus frame untuk mendapatkan Elementor ID
+            const $frameWidget = $frameImg.closest('.elementor-widget');
+            if ($frameWidget.length > 0) {
+                // Extract Elementor element ID (misal: elementor-element-6a774d93)
+                const classList = ($frameWidget.attr('class') || '').split(/\s+/);
+                let frameElId = null;
+                classList.forEach(cls => {
+                    const match = cls.match(/^elementor-element-([a-f0-9]+)$/);
+                    if (match && cls !== 'elementor-element') {
+                        frameElId = match[1];
+                    }
+                });
+                
+                if (frameElId) {
+                    // Cari CSS rule untuk frame width di semua <style> dan <link> yang di-inline
+                    // Scan semua elemen style di halaman untuk menemukan width rule
+                    $('style').each(function() {
+                        const cssText = $(this).html() || '';
+                        // Cari pattern: elementor-element-XXXX img{width:XX%}
+                        const regex = new RegExp(`elementor-element-${frameElId}[^}]*img\\s*\\{[^}]*width:\\s*([\\d.]+%)`,'g');
+                        let match;
+                        while ((match = regex.exec(cssText)) !== null) {
+                            frameWidthCSS = match[1]; // Ambil yang terakhir (biasanya mobile/responsive)
+                        }
+                    });
+                    console.log(`[Adaptive] Frame element: ${frameElId}, CSS width: ${frameWidthCSS}`);
+                }
+            }
+        }
     }
-    console.log(`[Adaptive] Replaced image src, preserved original template styles.`);
+    
+    // Bangun inline style
+    let style = 'object-fit: cover !important; object-position: center !important;';
+    
+    if (frameWidthCSS) {
+        // Paksa foto mengikuti ukuran frame persis
+        style += ` width: ${frameWidthCSS} !important;`;
+        console.log(`[Adaptive] Foto dipaksa mengikuti ukuran frame: width: ${frameWidthCSS}`);
+    }
+    
+    $img.attr('style', style);
+    console.log(`[Adaptive] Replaced image src with frame-matched sizing.`);
   }
 
   const mempelai = settings.mempelai || {};
