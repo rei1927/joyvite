@@ -130,8 +130,9 @@ function compileTemplate(templateSlug, settings) {
     
     if (targetW && targetH) {
         // Samakan aspect-ratio persis dengan frame, lalu kecilkan sedikit secara visual
-        // Skala 0.96 membuat foto (55%) menjadi hampir persis seukuran bingkai (53%)
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; transform: scale(0.96) !important;`;
+        // Tambahkan mask-size: 100% 100% agar mask (siluet) dipaksa mengisi penuh kotak tanpa menyisakan gap atas/bawah.
+        // Tambahkan translateY(-4%) karena lubang bingkai tidak benar-benar di tengah (lebih ke atas).
+        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.96) translateY(-4%) !important;`;
     }
     
     if (!existingStyle.includes('object-fit')) {
