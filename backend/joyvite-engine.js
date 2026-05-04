@@ -130,8 +130,8 @@ function compileTemplate(templateSlug, settings) {
     
     if (targetW && targetH) {
         // Samakan aspect-ratio persis dengan frame, lalu kecilkan sedikit secara visual
-        // agar foto benar-benar pas di bagian dalam/lubang dari frame coklat.
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; transform: scale(0.90) !important;`;
+        // Skala 0.96 membuat foto (55%) menjadi hampir persis seukuran bingkai (53%)
+        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; transform: scale(0.96) !important;`;
     }
     
     if (!existingStyle.includes('object-fit')) {
