@@ -99,13 +99,11 @@ function compileTemplate(templateSlug, settings) {
   // HARUS didefinisikan SETELAH $ (Cheerio) tersedia
   function applyAdaptiveStyle(imgElement, newSrc) {
     const $img = $(imgElement);
-    const existingStyle = $img.attr('style') || '';
-    
-    let targetW = $img.attr('width');
-    let targetH = $img.attr('height');
     
     // CARI FRAME DI CONTAINER YANG SAMA
     const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
+    let hasMerged = false;
+    
     if ($parent.length > 0) {
         const $frameImg = $parent.find('img').filter(function() {
             const src = ($(this).attr('src') || '').toLowerCase();
@@ -113,34 +111,48 @@ function compileTemplate(templateSlug, settings) {
         }).first();
         
         if ($frameImg.length > 0) {
-            // Kita HARUS mengambil dimensi frame (744x1024) agar bentuk foto persis seperti bingkai
-            targetW = $frameImg.attr('width') || targetW;
-            targetH = $frameImg.attr('height') || targetH;
+            const targetW = $frameImg.attr('width');
+            const targetH = $frameImg.attr('height');
             
             const $frameWidget = $frameImg.closest('.elementor-widget');
+            const $photoContainer = $img.closest('.elementor-widget-container');
             
-            // Perbaiki cacat template asli: Bingkai di-set right: 0px sehingga lari ke kanan di iPad.
+            // 1. Jadikan container foto relative
+            $photoContainer.attr('style', ($photoContainer.attr('style') || '') + ' position: relative !important; display: flex; justify-content: center; align-items: center;');
+            
+            // 2. Kloning frame dan jadikan base relative (100% dari widget)
+            const $clonedFrame = $frameImg.clone();
+            $clonedFrame.attr('style', 'width: 100% !important; height: auto !important; position: relative !important; z-index: 0 !important; display: block !important;');
+            
+            // 3. Masukkan frame ke belakang foto
+            $photoContainer.prepend($clonedFrame);
+            
+            // 4. Ubah foto menjadi absolute, berada tepat di tengah frame, dan 85% dari ukuran frame agar masuk ke lubang coklat
+            // top: 48% untuk menaikkan sedikit karena lubang bingkai tidak persis di tengah vertikal.
+            $img.attr('style', `position: absolute !important; top: 48% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 85% !important; height: auto !important; z-index: 1 !important; object-fit: cover !important; aspect-ratio: ${targetW}/${targetH} !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important;`);
+            
+            // 5. Hapus widget frame asli
             if ($frameWidget.length > 0) {
-                const existingFrameStyle = $frameWidget.attr('style') || '';
-                $frameWidget.attr('style', existingFrameStyle + ' right: auto !important; left: 50% !important; transform: translateX(-50%) !important;');
+                $frameWidget.remove();
             }
+            
+            hasMerged = true;
         }
     }
     
-    // Ganti sumber gambar & hapus atribut responsive yang bisa konflik
+    // Ganti sumber gambar
     $img.attr('src', newSrc);
     $img.removeAttr('srcset sizes');
     
-    // Setel foto user agar bentuknya persis seperti frame, lalu dikecilkan 0.96 agar masuk ke lubang.
-    // mask-size: 100% 100% memastikan siluet ditarik penuh ke atas/bawah agar tidak ada celah.
-    let newProps = 'object-fit: cover !important; object-position: center !important; z-index: 1 !important; position: relative !important;';
-    
-    if (targetW && targetH) {
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.82) translateY(-6%) !important;`;
-    }
-    
-    if (!existingStyle.includes('object-fit')) {
-      $img.attr('style', existingStyle + (existingStyle ? ' ' : '') + newProps);
+    // Fallback jika tidak menemukan frame
+    if (!hasMerged) {
+        const targetW = $img.attr('width');
+        const targetH = $img.attr('height');
+        let newProps = 'object-fit: cover !important; object-position: center !important; z-index: 1 !important; position: relative !important;';
+        if (targetW && targetH) {
+            newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important;`;
+        }
+        $img.attr('style', ($img.attr('style') || '') + ' ' + newProps);
     }
   }
 
