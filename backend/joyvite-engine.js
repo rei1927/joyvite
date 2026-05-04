@@ -127,8 +127,8 @@ function compileTemplate(templateSlug, settings) {
             // 3. Masukkan frame ke belakang foto
             $photoContainer.prepend($clonedFrame);
             
-            // 4. Ubah foto menjadi absolute, berada tepat di tengah frame, dan 80% dari ukuran frame
-            $img.attr('style', `position: absolute !important; top: 48% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 80% !important; height: auto !important; z-index: 1 !important; object-fit: cover !important; aspect-ratio: ${targetW}/${targetH} !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important;`);
+            // 4. Ubah foto menjadi absolute, berada tepat di tengah frame, dan ukuran 53% (sedikit lebih kecil dari frame 55%)
+            $img.attr('style', `position: absolute !important; top: 50% !important; left: 50% !important; transform: translate(-50%, -50%) !important; width: 53% !important; height: auto !important; z-index: 1 !important; object-fit: cover !important; aspect-ratio: ${targetW}/${targetH} !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important;`);
             
             // 5. Hapus widget frame asli
             if ($frameWidget.length > 0) {
