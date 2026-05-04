@@ -136,7 +136,7 @@ function compileTemplate(templateSlug, settings) {
     let newProps = 'object-fit: cover !important; object-position: center !important; z-index: 1 !important; position: relative !important;';
     
     if (targetW && targetH) {
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.96) translateY(-4%) !important;`;
+        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.93) translateY(-2%) !important;`;
     }
     
     if (!existingStyle.includes('object-fit')) {
