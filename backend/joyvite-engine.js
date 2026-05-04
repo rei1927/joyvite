@@ -101,23 +101,36 @@ function compileTemplate(templateSlug, settings) {
     const $img = $(imgElement);
     const existingStyle = $img.attr('style') || '';
     
-    // Ambil aspect ratio asli dari atribut HTML foto bawaan template (bukan bingkai)
-    // Ini krusial agar layout flexbox Elementor dan posisi absolute bingkai
-    // tidak rusak/bergeser di berbagai ukuran layar (mobile vs desktop).
-    const targetW = $img.attr('width');
-    const targetH = $img.attr('height');
+    // Default ambil aspect ratio dari foto itu sendiri
+    let targetW = $img.attr('width');
+    let targetH = $img.attr('height');
+    
+    // CARI FRAME DI CONTAINER YANG SAMA
+    // Kita ingin bentuk foto *sama persis* dengan bentuk bingkai
+    const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
+    if ($parent.length > 0) {
+        const $frameImg = $parent.find('img').filter(function() {
+            const src = ($(this).attr('src') || '').toLowerCase();
+            return src.includes('frame') || src.includes('bingkai');
+        }).first();
+        
+        if ($frameImg.length > 0) {
+            targetW = $frameImg.attr('width') || targetW;
+            targetH = $frameImg.attr('height') || targetH;
+        }
+    }
     
     // Ganti sumber gambar & hapus atribut responsive yang bisa konflik
     $img.attr('src', newSrc);
     $img.removeAttr('srcset sizes');
     
-    // Bangun style baru.
-    // Hanya gunakan aspect-ratio dan object-fit agar foto user mengikuti bentuk dan proporsi
-    // foto asli template, sehingga "efek 3D" (keluar dari bingkai) tetap presisi.
     let newProps = 'object-fit: cover !important; object-position: center !important;';
     
     if (targetW && targetH) {
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important;`;
+        // Samakan aspect-ratio persis dengan frame, lalu kecilkan sedikit secara visual (0.96).
+        // mask-size: 100% 100% memaksa siluet mengisi kotak.
+        // translateY(-4%) menaikkan foto agar pas di lubang bingkai yang posisinya agak ke atas.
+        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.96) translateY(-4%) !important;`;
     }
     
     if (!existingStyle.includes('object-fit')) {
