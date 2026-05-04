@@ -101,38 +101,23 @@ function compileTemplate(templateSlug, settings) {
     const $img = $(imgElement);
     const existingStyle = $img.attr('style') || '';
     
-    // Default ambil aspect ratio dari foto itu sendiri
-    let targetW = $img.attr('width');
-    let targetH = $img.attr('height');
-    
-    // CARI FRAME DI CONTAINER YANG SAMA
-    // Kita ingin bentuk foto *sama persis* dengan bentuk frame
-    const $parent = $img.closest('.e-con, .elementor-container, .elementor-section');
-    if ($parent.length > 0) {
-        const $frameImg = $parent.find('img').filter(function() {
-            const src = ($(this).attr('src') || '').toLowerCase();
-            return src.includes('frame') || src.includes('bingkai');
-        }).first();
-        
-        if ($frameImg.length > 0) {
-            targetW = $frameImg.attr('width') || targetW;
-            targetH = $frameImg.attr('height') || targetH;
-        }
-    }
+    // Ambil aspect ratio asli dari atribut HTML foto bawaan template (bukan bingkai)
+    // Ini krusial agar layout flexbox Elementor dan posisi absolute bingkai
+    // tidak rusak/bergeser di berbagai ukuran layar (mobile vs desktop).
+    const targetW = $img.attr('width');
+    const targetH = $img.attr('height');
     
     // Ganti sumber gambar & hapus atribut responsive yang bisa konflik
     $img.attr('src', newSrc);
     $img.removeAttr('srcset sizes');
     
     // Bangun style baru.
-    // KUNCI: Jangan sentuh width/max-width karena Elementor mengatur itu (misal: width: 55%).
+    // Hanya gunakan aspect-ratio dan object-fit agar foto user mengikuti bentuk dan proporsi
+    // foto asli template, sehingga "efek 3D" (keluar dari bingkai) tetap presisi.
     let newProps = 'object-fit: cover !important; object-position: center !important;';
     
     if (targetW && targetH) {
-        // Samakan aspect-ratio persis dengan frame, lalu kecilkan sedikit secara visual
-        // Tambahkan mask-size: 100% 100% agar mask (siluet) dipaksa mengisi penuh kotak tanpa menyisakan gap atas/bawah.
-        // Tambahkan translateY(-4%) karena lubang bingkai tidak benar-benar di tengah (lebih ke atas).
-        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important; -webkit-mask-size: 100% 100% !important; mask-size: 100% 100% !important; transform: scale(0.96) translateY(-4%) !important;`;
+        newProps += ` aspect-ratio: ${targetW}/${targetH} !important; height: auto !important;`;
     }
     
     if (!existingStyle.includes('object-fit')) {
