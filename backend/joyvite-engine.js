@@ -785,6 +785,75 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
+  // 4C. INJEKSI LOVE STORY
+  // =========================================
+  {
+    const love_story = settings.love_story || [];
+    const love_story_cover = settings.love_story_cover || null;
+
+    if (love_story.length > 0) {
+      // Cari elemen H2 "Love Story"
+      let $loveStoryHeading = null;
+      $('.elementor-heading-title').each(function() {
+        if ($(this).text().trim().toLowerCase() === 'love story') {
+          $loveStoryHeading = $(this);
+          return false; // break loop
+        }
+      });
+
+      if ($loveStoryHeading) {
+        let $firstContainer = $loveStoryHeading.closest('.e-con');
+        
+        if ($firstContainer.length) {
+          // Ganti Cover Image (jika ada)
+          if (love_story_cover) {
+            const $coverImg = $firstContainer.find('img').first();
+            if ($coverImg.length) {
+              applyAdaptiveStyle($coverImg[0], love_story_cover);
+              console.log('[Engine] Love Story Cover terganti.');
+            }
+          }
+          
+          // Timeline nodes adalah sibling setelah $firstContainer
+          let $timelineNodes = $firstContainer.nextAll('.e-con');
+          
+          if ($timelineNodes.length > 0) {
+            // Ambil elemen pertama sebagai template
+            let $templateNode = $timelineNodes.first().clone();
+            
+            // Hapus semua timeline lama
+            $timelineNodes.remove();
+            
+            // Injeksi data baru
+            love_story.forEach((story, idx) => {
+              let $newNode = $templateNode.clone();
+              let $headings = $newNode.find('.elementor-heading-title');
+              
+              // Asumsi template: 3 baris H2 (Judul, Tanggal, Deskripsi)
+              if ($headings.length >= 3) {
+                $($headings[0]).text(story.title);
+                $($headings[1]).text(story.date);
+                $($headings[2]).text(story.description);
+              } else if ($headings.length === 2) {
+                 $($headings[0]).text(`${story.title} - ${story.date}`);
+                 $($headings[1]).text(story.description);
+              } else if ($headings.length === 1) {
+                 $($headings[0]).html(`<b>${story.title}</b><br>${story.date}<br>${story.description}`);
+              }
+              
+              // Insert after prev node
+              $firstContainer.after($newNode);
+              $firstContainer = $newNode;
+            });
+            
+            console.log(`[Engine] Berhasil menginjeksi ${love_story.length} Love Story timeline.`);
+          }
+        }
+      }
+    }
+  }
+
+  // =========================================
   // 4B. INJEKSI FOTO SAMPUL DEPAN (COVER PHOTO)
   // =========================================
   if (mempelai.cover_photo) {

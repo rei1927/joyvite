@@ -474,8 +474,13 @@ $(document).ready(function() {
             }
 
             // e. Jika Halaman Cerita Cinta
+            // e. Jika Halaman Cerita Cinta
             if (flatData['story_title']) {
                 nestedSettings.love_story = [];
+                if (flatData['story_cover']) {
+                    nestedSettings.love_story_cover = flatData['story_cover'];
+                }
+                
                 let titles = Array.isArray(flatData['story_title']) ? flatData['story_title'] : [flatData['story_title']];
                 for (let i = 0; i < titles.length; i++) {
                     let getVal = (key) => Array.isArray(flatData[key]) ? flatData[key][i] : flatData[key];

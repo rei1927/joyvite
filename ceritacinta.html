@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/all.min.css">
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <!-- Cropper CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
     
     <style>
         .breadcrumb-item a { color: var(--text-muted); text-decoration: none; font-size: 0.9rem; }
@@ -118,6 +120,31 @@
                     <p class="mb-0 fs-6">Isi fase perjalanan kisah cinta Anda. Fitur ini kompatibel dengan mayoritas template Premium & Art. Anda juga bisa melampirkan 1 foto kenangan kecil di tiap cerita.</p>
                 </div>
 
+                <!-- Cover Photo Section -->
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="card-title fw-bold mb-3"><i class="fa-solid fa-image text-primary me-2"></i> Foto Utama Cerita Cinta</h5>
+                        <p class="text-muted small mb-3">Foto besar ini akan tampil di samping atau di atas timeline cerita cinta Anda (khusus tema yang mendukung, rasio 2:3).</p>
+                        <div class="d-flex align-items-center gap-4">
+                            <div class="upload-area text-center p-3 rounded" style="border: 2px dashed #cbd5e1; cursor: pointer; width: 140px; height: 210px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; position: relative; overflow: hidden;" onclick="document.getElementById('coverPhotoInput').click()">
+                                <i class="fa-solid fa-camera fa-2x text-muted mb-2" id="coverIcon"></i>
+                                <span class="small text-muted fw-semibold" id="coverText">Pilih Foto</span>
+                                <img id="coverPreview" src="" alt="Cover" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;">
+                            </div>
+                            <div class="flex-grow-1">
+                                <p class="mb-1 fw-bold text-dark">Ketentuan Foto</p>
+                                <ul class="text-muted small ps-3 mb-0">
+                                    <li>Format JPG, JPEG, atau PNG</li>
+                                    <li>Maksimal ukuran 5MB</li>
+                                    <li>Gunakan foto portrait (vertikal) yang jelas</li>
+                                </ul>
+                            </div>
+                        </div>
+                        <input type="file" id="coverPhotoInput" accept="image/*" class="d-none">
+                        <input type="hidden" name="story_cover" id="storyCoverData">
+                    </div>
+                </div>
+
                 <div id="timeline-container">
                     <!-- Default First Timeline Card -->
                     <div class="card shadow-sm border-0 rounded-3 mb-4 timeline-card position-relative">
@@ -181,6 +208,30 @@
     <script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
     
+    <!-- Cropper Modal -->
+    <div class="modal fade" id="cropModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Sesuaikan Foto</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="img-container" style="max-height: 500px; width: 100%;">
+                        <img id="imageToCrop" src="" style="max-width: 100%;">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                    <button type="button" class="btn btn-primary" id="cropSaveBtn">Simpan Crop</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cropper JS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+
     <script>
         let counter = 1;
 
@@ -228,7 +279,7 @@
             container.appendChild(clone);
         });
 
-        // Image Preview Handler
+        // Image Preview Handler for Timeline
         function previewImage(input) {
             if (input.files && input.files[0]) {
                 const reader = new FileReader();
@@ -242,6 +293,59 @@
                 reader.readAsDataURL(input.files[0]);
             }
         }
+
+        // Cover Photo Cropper Logic
+        let cropper;
+        const coverInput = document.getElementById('coverPhotoInput');
+        const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
+        const imageToCrop = document.getElementById('imageToCrop');
+
+        coverInput.addEventListener('change', function (e) {
+            const files = e.target.files;
+            if (files && files.length > 0) {
+                const file = files[0];
+                const reader = new FileReader();
+                reader.onload = function (event) {
+                    imageToCrop.src = event.target.result;
+                    cropModal.show();
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
+            cropper = new Cropper(imageToCrop, {
+                aspectRatio: 2 / 3, // 768 / 1152
+                viewMode: 1,
+                autoCropArea: 1,
+            });
+        });
+
+        document.getElementById('cropModal').addEventListener('hidden.bs.modal', function () {
+            if (cropper) {
+                cropper.destroy();
+                cropper = null;
+            }
+            coverInput.value = ''; // Reset input
+        });
+
+        document.getElementById('cropSaveBtn').addEventListener('click', function () {
+            if (cropper) {
+                const canvas = cropper.getCroppedCanvas({
+                    width: 768,
+                    height: 1152,
+                });
+                const base64Image = canvas.toDataURL('image/jpeg');
+                
+                document.getElementById('storyCoverData').value = base64Image;
+                document.getElementById('coverPreview').src = base64Image;
+                document.getElementById('coverPreview').style.display = 'block';
+                document.getElementById('coverIcon').style.display = 'none';
+                document.getElementById('coverText').style.display = 'none';
+                
+                cropModal.hide();
+            }
+        });
     </script>
     <script src="js/script.js?v=5"></script>
 </body>
