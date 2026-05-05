@@ -394,21 +394,24 @@ function compileTemplate(templateSlug, settings) {
           return EVENT_TITLE_KEYWORDS.some(kw => $(this).text().trim().toLowerCase().includes(kw));
         });
 
+        const hideEl = ($el) => $el.attr('style', ($el.attr('style') || '') + ';display:none!important');
+
         if ($ancestor.length && titlesInAncestor.length === 1) {
-          // Ancestor hanya berisi 1 event → hide keseluruhan ancestor
-          $ancestor.hide();
+          // Ancestor hanya berisi 1 event → sembunyikan keseluruhan ancestor
+          hideEl($ancestor);
         } else {
-          // Ancestor berisi beberapa event → hide column yang mengandung title ekstra saja
+          // Ancestor berisi beberapa event → sembunyikan column yang berisi title ekstra saja
           const $col = $extraTitle.closest('.elementor-column, .e-col');
           if ($col.length) {
-            $col.hide();
+            hideEl($col);
           } else {
-            $extraTitle.closest('.elementor-widget').hide();
+            hideEl($extraTitle.closest('.elementor-widget'));
           }
         }
         console.log(`[Engine] Sembunyikan event section ke-${i + 1} (tidak ada data user)`);
       }
     }
+
 
     // ======== B. Fallback: Injeksi Global untuk template tanpa judul acara ========
     // (untuk template yang tidak memiliki heading "Akad Nikah" eksplisit)
