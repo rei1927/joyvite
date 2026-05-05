@@ -382,6 +382,34 @@ function compileTemplate(templateSlug, settings) {
       }
     });
 
+    // ======== Hapus event sections template yang tidak punya data user ========
+    // Misal: template punya 2 card (Akad + Resepsi), tapi user hanya isi 1 acara
+    if (foundEventSections.length > events.length) {
+      for (let i = events.length; i < foundEventSections.length; i++) {
+        const $extraTitle = foundEventSections[i];
+        const $ancestor = $extraTitle.closest('.elementor-section, .elementor-container, .e-con');
+
+        // Cek berapa judul acara yang ada dalam ancestor yang sama
+        const titlesInAncestor = $ancestor.find('.elementor-heading-title').filter(function() {
+          return EVENT_TITLE_KEYWORDS.some(kw => $(this).text().trim().toLowerCase().includes(kw));
+        });
+
+        if ($ancestor.length && titlesInAncestor.length === 1) {
+          // Ancestor hanya berisi 1 event → hide keseluruhan ancestor
+          $ancestor.hide();
+        } else {
+          // Ancestor berisi beberapa event → hide column yang mengandung title ekstra saja
+          const $col = $extraTitle.closest('.elementor-column, .e-col');
+          if ($col.length) {
+            $col.hide();
+          } else {
+            $extraTitle.closest('.elementor-widget').hide();
+          }
+        }
+        console.log(`[Engine] Sembunyikan event section ke-${i + 1} (tidak ada data user)`);
+      }
+    }
+
     // ======== B. Fallback: Injeksi Global untuk template tanpa judul acara ========
     // (untuk template yang tidak memiliki heading "Akad Nikah" eksplisit)
     if (foundEventSections.length === 0) {
