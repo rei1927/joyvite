@@ -43,46 +43,39 @@
         </div>
 
         <div class="content-body px-4 pb-5">
-            <div class="card shadow-sm border-0 rounded-3 mb-4">
-                <div class="card-body p-4">
-                    <div class="d-flex justify-content-between align-items-center mb-4">
-                        <h5 class="fw-bold mb-0">Foto Pre-Wedding</h5>
-                        <button class="btn btn-primary rounded-pill px-3"><i class="fa-solid fa-plus me-1"></i> Unggah Baru</button>
-                    </div>
+            <form id="wedding-form">
+                <div class="card shadow-sm border-0 rounded-3 mb-4">
+                    <div class="card-body p-4">
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <h5 class="fw-bold mb-0">Foto Pre-Wedding</h5>
+                            <button type="button" class="btn btn-primary rounded-pill px-3" onclick="$('#uploadGalleryBtn').click()"><i class="fa-solid fa-plus me-1"></i> Unggah Baru</button>
+                            <input type="file" id="uploadGalleryBtn" accept="image/*" style="display: none;">
+                        </div>
 
-                    <div class="row g-3">
-                        <div class="col-6 col-md-4 col-lg-3">
-                            <div class="position-relative border rounded bg-light" style="height: 150px; background-image: url('https://ui-avatars.com/api/?name=P1'); background-size: cover; background-position: center;">
-                                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding:0"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                        <div class="col-6 col-md-4 col-lg-3">
-                            <div class="position-relative border rounded bg-light" style="height: 150px; background-image: url('https://ui-avatars.com/api/?name=P2'); background-size: cover; background-position: center;">
-                                <button class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle" style="width: 30px; height: 30px; padding:0"><i class="fa-solid fa-xmark"></i></button>
-                            </div>
-                        </div>
-                        <!-- Placeholder unggah -->
-                        <div class="col-6 col-md-4 col-lg-3">
-                            <div class="border rounded bg-light d-flex justify-content-center align-items-center flex-column text-muted" style="height: 150px; border-style: dashed !important; cursor: pointer;">
-                                <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2"></i>
-                                <span class="small font-weight-bold">Tambah Foto</span>
+                        <div class="row g-3" id="gallery-grid">
+                            <!-- Placeholder unggah -->
+                            <div class="col-6 col-md-4 col-lg-3" id="upload-placeholder-box">
+                                <div class="border rounded bg-light d-flex justify-content-center align-items-center flex-column text-muted" style="height: 150px; border-style: dashed !important; cursor: pointer;" onclick="$('#uploadGalleryBtn').click()">
+                                    <i class="fa-solid fa-cloud-arrow-up fa-2x mb-2"></i>
+                                    <span class="small font-weight-bold">Tambah Foto</span>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="card shadow-sm border-0 rounded-3">
-                <div class="card-body p-4">
-                    <h5 class="fw-bold mb-3">Tautan Video Gallery</h5>
-                    <div class="input-group">
-                        <span class="input-group-text bg-white"><i class="fa-brands fa-youtube text-danger"></i></span>
-                        <input type="url" name="galeri_video_url" class="form-control bg-light border-start-0" placeholder="https://youtube.com/watch?v=....">
-                        <button class="btn btn-dark px-4">Simpan</button>
+                <div class="card shadow-sm border-0 rounded-3">
+                    <div class="card-body p-4">
+                        <h5 class="fw-bold mb-3">Tautan Video Gallery</h5>
+                        <div class="input-group">
+                            <span class="input-group-text bg-white"><i class="fa-brands fa-youtube text-danger"></i></span>
+                            <input type="url" name="galeri_video_url" class="form-control bg-light border-start-0" placeholder="https://youtube.com/watch?v=....">
+                            <button type="submit" class="btn btn-dark px-4">Simpan</button>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Mendukung format tautan Youtube untuk Video Cinematic Anda.</small>
                     </div>
-                    <small class="text-muted mt-2 d-block">Mendukung format tautan Youtube untuk Video Cinematic Anda.</small>
                 </div>
-            </div>
+            </form>
         </div>
     </div>
 

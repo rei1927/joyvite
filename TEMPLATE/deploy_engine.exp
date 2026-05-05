@@ -1,0 +1,7 @@
+#!/usr/bin/expect -f
+set timeout 120
+spawn ssh -o StrictHostKeyChecking=no root@192.168.0.102 "rm -rf /tmp/joyvite-update && git clone https://github.com/rei1927/joyvite.git /tmp/joyvite-update && cp /tmp/joyvite-update/backend/joyvite-engine.js /var/lib/docker/volumes/portainer_data/_data/compose/11/backend/joyvite-engine.js && docker restart joyvite-backend && sleep 5 && docker ps --filter name=joyvite-backend --format '{{.Names}} {{.Status}}'"
+expect {
+    "password:" { send "Alamatgue123\r"; exp_continue }
+    eof { }
+}

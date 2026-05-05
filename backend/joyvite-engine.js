@@ -847,6 +847,65 @@ function compileTemplate(templateSlug, settings) {
     $('iframe[src*="youtube"]').attr('src', embedUrl);
   }
 
+  // 12b. INJEKSI GALERI FOTO
+  if (galeri.photos && galeri.photos.length > 0) {
+    // Cari container galeri Elementor
+    const $galleryContainer = $('.elementor-image-gallery, .e-gallery-container');
+    if ($galleryContainer.length > 0) {
+        // Ambil elemen anak pertama sebagai template cetakan
+        const $galleryItemTemplate = $galleryContainer.find('.e-gallery-item, .gallery-item').first().clone();
+        
+        if ($galleryItemTemplate.length > 0) {
+            // Kosongkan container
+            $galleryContainer.empty();
+            
+            // Replikasi cetakan untuk setiap foto
+            galeri.photos.forEach((photoUrl) => {
+                const $newItem = $galleryItemTemplate.clone();
+                
+                // Jika ini adalah elemen <a> (biasanya lightbox), ganti href
+                if ($newItem.is('a')) {
+                    $newItem.attr('href', photoUrl);
+                } else if ($newItem.find('a').length > 0) {
+                    $newItem.find('a').attr('href', photoUrl);
+                }
+                
+                // Cari elemen img di dalam cetakan
+                const $img = $newItem.find('img, .e-gallery-image');
+                if ($img.length > 0) {
+                    // Update src untuk <img> biasa
+                    if ($img.is('img')) {
+                        $img.attr('src', photoUrl);
+                        $img.removeAttr('srcset sizes');
+                        // Pastikan proporsional
+                        const currentStyle = $img.attr('style') || '';
+                        if (!currentStyle.includes('object-fit')) {
+                            $img.attr('style', (currentStyle ? currentStyle + ' ' : '') + 'object-fit: cover !important;');
+                        }
+                    }
+                    
+                    // Update attribute khusus Elementor Pro Gallery
+                    if ($img.attr('data-thumbnail') !== undefined) {
+                        $img.attr('data-thumbnail', photoUrl);
+                    }
+                }
+                
+                $galleryContainer.append($newItem);
+            });
+        }
+    }
+  } else {
+      // Jika TIDAK ADA foto galeri yang diunggah, hapus widget galeri dari DOM
+      $('.elementor-widget-gallery, .elementor-widget-image-gallery').remove();
+      // Opsional: Hapus title "Gallery" jika section-nya khusus untuk gallery
+      $('.elementor-heading-title').each(function() {
+          const text = $(this).text().trim().toLowerCase();
+          if (text === 'gallery' || text === 'galeri') {
+              $(this).closest('.elementor-widget-heading').remove();
+          }
+      });
+  }
+
   // =========================================
   // 13. INJEKSI MUSIK BACKGROUND
   // =========================================

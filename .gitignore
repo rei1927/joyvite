@@ -6,3 +6,4 @@ TEMPLATE/Scraped_Templates/
 TEMPLATE/node_modules/
 TEMPLATE/*.log
 TEMPLATE/tema-*/
+node_modules

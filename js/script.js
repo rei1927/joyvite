@@ -176,6 +176,19 @@ $(document).ready(function() {
                         }
                     }, 50);
                 });
+            // AUTO-POPULATE ARRAY: Galeri Foto
+            if (settings.galeri && settings.galeri.photos && settings.galeri.photos.length > 0) {
+                settings.galeri.photos.forEach((photoUrl) => {
+                    const html = `
+                        <div class="col-6 col-md-4 col-lg-3 gallery-item-box">
+                            <div class="position-relative border rounded bg-light" style="height: 150px; background-image: url('${photoUrl}'); background-size: cover; background-position: center;">
+                                <input type="hidden" name="galeri_photo[]" value="${photoUrl}">
+                                <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle delete-gallery-photo" style="width: 30px; height: 30px; padding:0"><i class="fa-solid fa-xmark"></i></button>
+                            </div>
+                        </div>
+                    `;
+                    $('#upload-placeholder-box').before(html);
+                });
             }
 
         } catch (error) {
@@ -269,6 +282,61 @@ $(document).ready(function() {
     $('#cover-upload').on('change', function(e) {
         if (e.target.files && e.target.files[0]) {
             openCropper(e.target.files[0], '#cover-upload-img', '#cover-upload');
+        }
+    });
+
+    // Galeri Foto Upload Langsung (AJAX)
+    $('#uploadGalleryBtn').on('change', async function(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Ubah UI placeholder menjadi loading
+        const placeholder = $('#upload-placeholder-box').find('.bg-light');
+        const originalHtml = placeholder.html();
+        placeholder.html('<div class="spinner-border text-primary" role="status"></div><span class="small mt-2">Mengunggah...</span>');
+
+        try {
+            let fileData = new FormData();
+            fileData.append('file', file);
+            const uploadRes = await fetch(window.location.hostname.includes('joyvite.id') ? 'https://login.joyvite.id/api/upload' : '/api/upload', { 
+                method: 'POST', 
+                body: fileData 
+            });
+            const uploadJson = await uploadRes.json();
+            
+            if (uploadJson.url) {
+                const photoUrl = uploadJson.url;
+                const html = `
+                    <div class="col-6 col-md-4 col-lg-3 gallery-item-box">
+                        <div class="position-relative border rounded bg-light" style="height: 150px; background-image: url('${photoUrl}'); background-size: cover; background-position: center;">
+                            <input type="hidden" name="galeri_photo[]" value="${photoUrl}">
+                            <button type="button" class="btn btn-sm btn-danger position-absolute top-0 end-0 m-2 rounded-circle delete-gallery-photo" style="width: 30px; height: 30px; padding:0"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+                    </div>
+                `;
+                $('#upload-placeholder-box').before(html);
+                
+                // Reset input file agar bisa upload file yang sama lagi jika dihapus
+                $('#uploadGalleryBtn').val('');
+                
+                // Auto-save form
+                $('#wedding-form').submit();
+            }
+        } catch (err) {
+            console.error('Upload failed:', err);
+            alert('Gagal mengunggah foto.');
+        } finally {
+            placeholder.html(originalHtml);
+        }
+    });
+
+    // Galeri Foto Hapus
+    $(document).on('click', '.delete-gallery-photo', function(e) {
+        e.preventDefault();
+        if(confirm('Hapus foto ini dari galeri?')) {
+            $(this).closest('.gallery-item-box').remove();
+            // Auto-save form
+            $('#wedding-form').submit();
         }
     });
 
@@ -470,11 +538,19 @@ $(document).ready(function() {
             }
 
             
-            // Galeri video URL
-            if (flatData['galeri_video_url']) {
-                nestedSettings.galeri = {
-                    video_url: flatData['galeri_video_url']
-                };
+            // l. Galeri Foto & Video
+            if (flatData['galeri_video_url'] !== undefined || flatData['galeri_photo'] !== undefined) {
+                if (!nestedSettings.galeri) nestedSettings.galeri = {};
+                if (flatData['galeri_video_url'] !== undefined) {
+                    nestedSettings.galeri.video_url = flatData['galeri_video_url'];
+                }
+                if (flatData['galeri_photo'] !== undefined) {
+                    nestedSettings.galeri.photos = Array.isArray(flatData['galeri_photo']) 
+                        ? flatData['galeri_photo'] 
+                        : [flatData['galeri_photo']];
+                } else {
+                    nestedSettings.galeri.photos = [];
+                }
             }
 
             // 3. GUNAKAN SLUG DARI SESI LOGIN

@@ -1,0 +1,6 @@
+#!/usr/bin/expect -f
+set timeout 180
+spawn ssh -o StrictHostKeyChecking=no root@pve.dayamedialangit.co.id {pct exec 100 -- bash -c "rm -rf /tmp/joyvite-update && git clone https://github.com/rei1927/joyvite.git /tmp/joyvite-update && cd /tmp/joyvite-update && docker-compose build --no-cache joyvite-backend && docker-compose up -d joyvite-backend"}
+expect "password:"
+send "Alamatgue123\r"
+expect eof
