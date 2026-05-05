@@ -735,14 +735,35 @@ function compileTemplate(templateSlug, settings) {
           text.includes('Dan di antara tanda-tanda') ||
           text.includes('Q.S.') || text.includes('QS.') ||
           text.length > 80) {
-        // Ini kemungkinan besar elemen quotes
-        const currentText = $(this).text();
-        if (currentText.includes('Maha suci') || currentText.includes('mawaddah') ||
-            currentText.includes('Dan di antara tanda-tanda') || currentText.includes('Q.S.') || currentText.includes('QS.')) {
-          $(this).text(quotes.content);
+        
+        // Pastikan ini adalah elemen teks panjang
+        if (text.includes('Maha suci') || text.includes('mawaddah') ||
+            text.includes('Dan di antara tanda-tanda') || text.includes('Q.S.') || text.includes('QS.')) {
+          
+          // Format line breaks
+          let formattedContent = quotes.content.replace(/\n/g, '<br>');
+          let fullQuote = formattedContent;
+          if (quotes.author) {
+            fullQuote += '<br><br>' + quotes.author;
+          }
+          
+          $(this).html(fullQuote);
         }
       }
     });
+  }
+
+  // Injeksi Inisial Mempelai pada elemen khusus (.init1 dan .init2)
+  if (mempelai.male_nickname || mempelai.female_nickname) {
+    const maleInit = mempelai.male_nickname ? mempelai.male_nickname.charAt(0).toUpperCase() : 'P';
+    const femaleInit = mempelai.female_nickname ? mempelai.female_nickname.charAt(0).toUpperCase() : 'W';
+    
+    // Asumsi template Javanese Serenity: init1 = Wanita (Syifa), init2 = Pria (Arif) atau sebaliknya
+    // Jika tidak ada spesifikasi, kita isi secara general
+    if ($('.init1').length && $('.init2').length) {
+      $('.init1 .elementor-heading-title').text(femaleInit);
+      $('.init2 .elementor-heading-title').text(maleInit);
+    }
   }
 
   // =========================================
