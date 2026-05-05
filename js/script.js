@@ -221,24 +221,33 @@ $(document).ready(function() {
     }
 
     $('#cropModal').on('shown.bs.modal', function () {
-        if (cropper) {
-            cropper.destroy();
+        const initCropper = () => {
+            if (cropper) {
+                cropper.destroy();
+            }
+            
+            let ratio = NaN;
+            if (currentFileInput === '#cover-upload') {
+                ratio = 683 / 1024;
+            } else if (currentFileInput === '#coverPhotoInput') {
+                ratio = 2 / 3;
+            }
+            
+            cropper = new Cropper(document.getElementById('crop-image'), {
+                viewMode: 1,
+                aspectRatio: ratio,
+                autoCropArea: 1,
+                responsive: true,
+                background: false
+            });
+        };
+
+        const img = document.getElementById('crop-image');
+        if (img.complete && img.naturalHeight !== 0) {
+            initCropper();
+        } else {
+            img.onload = initCropper;
         }
-        
-        let ratio = NaN;
-        if (currentFileInput === '#cover-upload') {
-            ratio = 683 / 1024;
-        } else if (currentFileInput === '#coverPhotoInput') {
-            ratio = 2 / 3;
-        }
-        
-        cropper = new Cropper(document.getElementById('crop-image'), {
-            viewMode: 1,
-            aspectRatio: ratio,
-            autoCropArea: 1,
-            responsive: true,
-            background: false
-        });
     }).on('hidden.bs.modal', function () {
         if (cropper) {
             cropper.destroy();
