@@ -849,61 +849,63 @@ function compileTemplate(templateSlug, settings) {
 
   // 12b. INJEKSI GALERI FOTO
   if (galeri.photos && galeri.photos.length > 0) {
-    // Cari container galeri Elementor
-    const $galleryContainer = $('.elementor-image-gallery, .e-gallery-container');
+    // Cari container galeri Elementor Pro (prioritas) atau Elementor Basic
+    const $galleryContainer = $('.elementor-gallery__container, .elementor-image-gallery');
+    
     if ($galleryContainer.length > 0) {
-        // Ambil elemen anak pertama sebagai template cetakan
-        const $galleryItemTemplate = $galleryContainer.find('.e-gallery-item, .gallery-item').first().clone();
+        // Ambil semua item yang sudah ada di template sebagai referensi
+        const $existingItems = $galleryContainer.find('.e-gallery-item, .gallery-item');
         
-        if ($galleryItemTemplate.length > 0) {
-            // Kosongkan container
-            $galleryContainer.empty();
+        // Kita pakai item pertama sebagai cetakan untuk item ekstra
+        const $templateItem = $existingItems.first().clone();
+        
+        // Edit item yang sudah ada (1-by-1)
+        galeri.photos.forEach((photoUrl, index) => {
+            let $item;
             
-            // Replikasi cetakan untuk setiap foto
-            galeri.photos.forEach((photoUrl) => {
-                const $newItem = $galleryItemTemplate.clone();
-                
-                // Jika ini adalah elemen <a> (biasanya lightbox), ganti href
-                if ($newItem.is('a')) {
-                    $newItem.attr('href', photoUrl);
-                } else if ($newItem.find('a').length > 0) {
-                    $newItem.find('a').attr('href', photoUrl);
-                }
-                
-                // Cari elemen img di dalam cetakan
-                const $img = $newItem.find('img, .e-gallery-image');
+            if (index < $existingItems.length) {
+                // Gunakan item yang sudah ada di template
+                $item = $existingItems.eq(index);
+            } else {
+                // Buat item baru dengan clone
+                $item = $templateItem.clone();
+                $galleryContainer.append($item);
+            }
+            
+            // Update href lightbox di tag <a>
+            if ($item.is('a')) {
+                $item.attr('href', photoUrl);
+            } else {
+                $item.find('a').attr('href', photoUrl);
+            }
+            
+            // Cari div gambar Elementor Pro (.e-gallery-image)
+            const $imgDiv = $item.is('.e-gallery-image') ? $item : $item.find('.e-gallery-image');
+            if ($imgDiv.length > 0) {
+                // Update data-thumbnail agar Elementor JS tahu URL-nya
+                $imgDiv.attr('data-thumbnail', photoUrl);
+                // KRITIS: Set background-image inline langsung — ini yang membuat gambar muncul
+                // tanpa bergantung pada lazy-load JS Elementor
+                $imgDiv.attr('style', `background-image: url('${photoUrl}'); background-size: cover; background-position: center center;`);
+                // Tambahkan class "loaded" agar CSS lazy-load tidak menyembunyikan gambar
+                $imgDiv.addClass('e-gallery-image-loaded');
+            } else {
+                // Fallback untuk <img> biasa
+                const $img = $item.find('img');
                 if ($img.length > 0) {
-                    // Update src untuk <img> biasa
-                    if ($img.is('img')) {
-                        $img.attr('src', photoUrl);
-                        $img.removeAttr('srcset sizes');
-                        // Pastikan proporsional
-                        const currentStyle = $img.attr('style') || '';
-                        if (!currentStyle.includes('object-fit')) {
-                            $img.attr('style', (currentStyle ? currentStyle + ' ' : '') + 'object-fit: cover !important;');
-                        }
-                    }
-                    
-                    // Update attribute khusus Elementor Pro Gallery
-                    if ($img.attr('data-thumbnail') !== undefined) {
-                        $img.attr('data-thumbnail', photoUrl);
-                    }
-                    
-                    // Paksa update background-image karena Elementor JS mungkin sudah jalan
-                    // atau tidak akan me-re-render clone ini
-                    if ($img.hasClass('e-gallery-image') || $img.css('background-image') !== 'none') {
-                        $img.css('background-image', `url('${photoUrl}')`);
-                    }
-                    
-                    // Hapus class lazy-load yang membuat gambar transparan/hilang
-                    $img.addClass('e-gallery-image-loaded');
+                    $img.attr('src', photoUrl);
+                    $img.removeAttr('srcset sizes');
+                    $img.css('object-fit', 'cover');
                 }
-                
-                // Pastikan item tidak disembunyikan oleh CSS animasi
-                $newItem.removeClass('e-gallery-item--hidden');
-                
-                $galleryContainer.append($newItem);
-            });
+            }
+            
+            // Pastikan item tidak disembunyikan oleh CSS animasi Elementor
+            $item.removeClass('e-gallery-item--hidden');
+        });
+        
+        // Hapus item sisa yang tidak terpakai (jika foto lebih sedikit dari template)
+        if (galeri.photos.length < $existingItems.length) {
+            $existingItems.slice(galeri.photos.length).remove();
         }
     }
   } else {
