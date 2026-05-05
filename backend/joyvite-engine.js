@@ -296,20 +296,39 @@ function compileTemplate(templateSlug, settings) {
         });
       }
 
-      // --- Injeksi Tanggal Angka (misal "05") ---
+      // --- Injeksi Tanggal ke Elementor Counter Widget ---
       if (evt.date) {
         const d = new Date(evt.date);
         if (!isNaN(d)) {
-          const dayNum = String(d.getDate()); // 1-2 digit, tanpa leading zero
-          eachHeading(function() {
-            const t = $(this).text().trim();
-            if (!$(this).attr('data-jv-processed') && t.match(/^\d{1,2}$/) && parseInt(t) >= 1 && parseInt(t) <= 31) {
-              $(this).text(dayNum);
-              $(this).attr('data-jv-processed', 'date');
-              console.log(`[Engine] Tanggal Angka[${sectionIdx}] -> ${dayNum}`);
-              return false;
-            }
-          });
+          const dayInt = d.getDate(); // misal: 28 atau 1
+          // Tentukan prefix (puluhan) dan nilai counter (satuan atau full number)
+          let counterPrefix, counterValue;
+          if (dayInt < 10) {
+            // 1 digit: prefix kosong, nilai = angka penuh (misal "1")
+            counterPrefix = '';
+            counterValue = String(dayInt);
+          } else {
+            // 2 digit: prefix = angka puluhan (misal "2"), nilai = satuan (misal "8")
+            counterPrefix = String(Math.floor(dayInt / 10));
+            counterValue = String(dayInt % 10);
+          }
+
+          // Cari counter widget yang paling dekat dengan $titleEl (dalam section ancestor)
+          const $counterScope = $titleEl.closest('.elementor-section, .elementor-container, .e-con, .elementor-column');
+          // Cari semua counter widget dalam scope dan ambil sesuai sectionIdx
+          const $allCounters = $counterScope.find('.elementor-widget-counter');
+          const $counter = $allCounters.eq(sectionIdx < $allCounters.length ? sectionIdx : 0);
+
+          if ($counter.length) {
+            // Update prefix
+            $counter.find('.elementor-counter-number-prefix').text(counterPrefix);
+            // Update nilai counter (text + data attrs agar tidak di-animate ke nilai lama)
+            const $num = $counter.find('.elementor-counter-number');
+            $num.text(counterValue);
+            $num.attr('data-to-value', counterValue);
+            $num.attr('data-from-value', counterValue);
+            console.log(`[Engine] Counter[${sectionIdx}] prefix="${counterPrefix}" val="${counterValue}"`);
+          }
 
           // --- Injeksi Bulan + Tahun (misal "Oktober 2025") ---
           const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
@@ -324,6 +343,7 @@ function compileTemplate(templateSlug, settings) {
           });
         }
       }
+
 
       // --- Injeksi Nama Gedung / Lokasi ---
       // Tandai $titleEl agar tidak ikut terdeteksi sebagai venue
@@ -410,16 +430,12 @@ function compileTemplate(templateSlug, settings) {
         }
       });
 
-      // Update countdown
+      // Update countdown widget (hanya untuk countdown, bukan counter tanggal)
       $('[data-date]').attr('data-date', formatCountdownDate(primaryEvent.date));
-      const day = new Date(primaryEvent.date).getDate();
-      $('[data-to-value]').each(function() {
-        const currentVal = $(this).attr('data-to-value');
-        if (parseInt(currentVal) <= 31) {
-          $(this).attr('data-to-value', day.toString());
-        }
-      });
+      // CATATAN: [data-to-value] untuk counter tanggal sudah dihandle per-event di atas
+      // Jangan set global karena akan menimpa counter Acara 2 dengan data Acara 1
     }
+
 
     // ======== D. Injeksi iframe Google Maps global ========
     if (primaryEvent.gmaps) {
