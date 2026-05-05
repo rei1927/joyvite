@@ -240,31 +240,45 @@ function compileTemplate(templateSlug, settings) {
 
     console.log(`[Engine] Ditemukan ${foundEventSections.length} section acara di template.`);
 
-    // Injeksi per section acara
+    // Kumpulkan SEMUA heading-title dalam urutan DOM untuk pendekatan positional
+    const allHeadings = [];
+    $('.elementor-heading-title').each(function() { allHeadings.push(this); });
+
+    // Injeksi per section acara - gunakan positional range
     foundEventSections.forEach(($titleEl, sectionIdx) => {
       const evt = events[sectionIdx];
-      if (!evt) return; // Tidak ada data user untuk section ini, biarkan template
+      if (!evt) return;
 
-      // Ganti judul acara
+      // Ganti judul acara & tandai
       if (evt.type) {
         $titleEl.text(evt.type);
+        $titleEl.attr('data-jv-processed', 'title');
         console.log(`[Engine] Judul Acara[${sectionIdx}] -> ${evt.type}`);
       }
 
-      // Cari "section ancestor" terdekat dari heading ini untuk membatasi pencarian
-      // Coba level: elementor-section > elementor-column > elementor-widget
-      const $section = $titleEl.closest('.elementor-section, .elementor-container, .e-con');
-      const $searchScope = $section.length > 0 ? $section : $titleEl.closest('.elementor-column');
+      // Cari index posisi title ini dalam allHeadings
+      const titleIdx = allHeadings.indexOf($titleEl[0]);
+      // Cari index posisi event title BERIKUTNYA (batas atas pencarian)
+      const nextTitleIdx = sectionIdx + 1 < foundEventSections.length
+        ? allHeadings.indexOf(foundEventSections[sectionIdx + 1][0])
+        : allHeadings.length;
+
+      // Buat jQuery collection dari heading milik event ini saja
+      const scopedHeadings = allHeadings.slice(titleIdx + 1, nextTitleIdx);
+      const $searchScope = { find: (sel) => $(scopedHeadings).filter(sel) };
+      // Helper khusus untuk iterasi scopedHeadings sebagai headings
+      const eachHeading = (cb) => { $(scopedHeadings).each(cb); };
+
 
       // --- Injeksi Waktu ---
       const timeText = formatTimeText(evt);
       if (timeText) {
-        $searchScope.find('.elementor-heading-title').each(function() {
+        eachHeading(function() {
           const t = $(this).text().trim().toLowerCase();
           if (t.match(/\b\d{2}[\:\.\s]\d{2}\b/) || t.includes('pukul') || t.match(/\bjam\s+\d{1,2}\b/)) {
             $(this).text(timeText);
             console.log(`[Engine] Waktu[${sectionIdx}] -> ${timeText}`);
-            return false; // stop, ambil pertama
+            return false;
           }
         });
       }
@@ -272,7 +286,7 @@ function compileTemplate(templateSlug, settings) {
       // --- Injeksi Nama Hari ---
       const dayName = formatDayName(evt.date);
       if (dayName) {
-        $searchScope.find('.elementor-heading-title').each(function() {
+        eachHeading(function() {
           const t = $(this).text().trim();
           if (t.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)$/i)) {
             $(this).text(dayName);
@@ -286,12 +300,12 @@ function compileTemplate(templateSlug, settings) {
       if (evt.date) {
         const d = new Date(evt.date);
         if (!isNaN(d)) {
-          const dayNum = String(d.getDate()).padStart(2, '0');
-          $searchScope.find('.elementor-heading-title').each(function() {
+          const dayNum = String(d.getDate()); // 1-2 digit, tanpa leading zero
+          eachHeading(function() {
             const t = $(this).text().trim();
-            // Teks yang HANYA berisi angka 1-31 (tanggal)
-            if (t.match(/^\d{1,2}$/) && parseInt(t) >= 1 && parseInt(t) <= 31) {
+            if (!$(this).attr('data-jv-processed') && t.match(/^\d{1,2}$/) && parseInt(t) >= 1 && parseInt(t) <= 31) {
               $(this).text(dayNum);
+              $(this).attr('data-jv-processed', 'date');
               console.log(`[Engine] Tanggal Angka[${sectionIdx}] -> ${dayNum}`);
               return false;
             }
@@ -300,7 +314,7 @@ function compileTemplate(templateSlug, settings) {
           // --- Injeksi Bulan + Tahun (misal "Oktober 2025") ---
           const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
           const monthYear = `${months[d.getMonth()]} ${d.getFullYear()}`;
-          $searchScope.find('.elementor-heading-title').each(function() {
+          eachHeading(function() {
             const t = $(this).text().trim();
             if (t.match(/^(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+\d{4}$/i)) {
               $(this).text(monthYear);
@@ -312,37 +326,37 @@ function compileTemplate(templateSlug, settings) {
       }
 
       // --- Injeksi Nama Gedung / Lokasi ---
+      // Tandai $titleEl agar tidak ikut terdeteksi sebagai venue
+      $titleEl.attr('data-jv-processed', 'title');
       if (evt.place_name) {
-        $searchScope.find('.elementor-heading-title').each(function() {
+        eachHeading(function() {
+          if ($(this).attr('data-jv-processed')) return; // skip yang sudah diproses
           const t = $(this).text().trim().toLowerCase();
-          // Heuristik: heading yang mengandung nama lokasi (gedung, hotel, masjid, dst)
-          // dan bukan judul acara, bukan waktu, bukan tanggal
           const isTime = t.match(/\b\d{2}[\:\.\s]\d{2}\b/) || t.includes('pukul');
           const isDate = t.match(/\d{4}/) || t.match(/^(senin|selasa|rabu|kamis|jumat|sabtu|minggu)$/i) || t.match(/^\d{1,2}$/);
           const isEventTitle = EVENT_TITLE_KEYWORDS.some(kw => t.includes(kw));
-          if (!isTime && !isDate && !isEventTitle && t.length > 2 && t.length < 80) {
+          if (!isTime && !isDate && !isEventTitle && t.length > 1 && t.length < 80) {
             $(this).text(evt.place_name);
+            $(this).attr('data-jv-processed', 'venue');
             console.log(`[Engine] NamaGedung[${sectionIdx}] -> ${evt.place_name}`);
-            return false; // ambil pertama yang cocok
+            return false;
           }
         });
       }
 
       // --- Injeksi Link Tombol "Lokasi Acara" (Google Maps) ---
+      // Gunakan section ancestor dari $titleEl untuk button (button bukan heading)
       if (evt.gmaps) {
-        $searchScope.find('a.elementor-button').each(function() {
+        const $btnScope = $titleEl.closest('.elementor-section, .elementor-container, .e-con, .elementor-column');
+        $btnScope.find('a.elementor-button').each(function() {
           const btnText = $(this).text().trim().toLowerCase();
           if (btnText.includes('lokasi') || btnText.includes('maps') || btnText.includes('peta')) {
-            $(this).attr('href', evt.gmaps);
-            console.log(`[Engine] Link Maps[${sectionIdx}] -> ${evt.gmaps}`);
-            return false;
-          }
-        });
-        // Juga update iframe maps jika ada di section ini
-        $searchScope.find('iframe').each(function() {
-          const src = $(this).attr('src') || '';
-          if (src.includes('maps') || src.includes('google')) {
-            $(this).attr('src', evt.gmaps);
+            if (!$(this).attr('data-jv-processed')) {
+              $(this).attr('href', evt.gmaps);
+              $(this).attr('data-jv-processed', 'maps');
+              console.log(`[Engine] Link Maps[${sectionIdx}] -> ${evt.gmaps}`);
+              return false;
+            }
           }
         });
       }
