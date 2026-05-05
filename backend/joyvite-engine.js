@@ -190,64 +190,213 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
-  // 1. INJEKSI WAKTU & LOKASI ACARA (HARUS DULUAN)
-  // Agar teks "Kediaman Mempelai Wanita/Pria" belum terusik
-  // oleh replacement kata "Mempelai" di blok orang tua
+  // 1. INJEKSI WAKTU & LOKASI ACARA
+  // Strategi: temukan section/blok tiap acara berdasarkan
+  // judul acara (Akad Nikah, Resepsi, dll) lalu injeksi
+  // semua data dalam blok tersebut.
   // =========================================
-  
+
+  // Helper: format waktu menjadi string "Pukul HH.MM WIB - HH.MM WIB" dll
+  function formatTimeText(evt) {
+    if (!evt || !evt.time_start) return null;
+    const start = evt.time_start.replace(':', '.');
+    if (evt.until_finish) return `Pukul ${start} WIB - Selesai`;
+    if (evt.time_end) {
+      const end = evt.time_end.replace(':', '.');
+      return `Pukul ${start} - ${end} WIB`;
+    }
+    return `Pukul ${start} WIB`;
+  }
+
+  // Helper: format tanggal dengan hari nama
+  function formatDayName(dateStr) {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '';
+    const days = ['Minggu','Senin','Selasa','Rabu','Kamis','Jumat','Sabtu'];
+    return days[d.getDay()];
+  }
+
   if (events.length > 0) {
     const primaryEvent = events[0];
     const secondaryEvent = events.length > 1 ? events[1] : null;
 
-    // ======== A. Heuristik Injeksi Waktu ========
-    let timeIndex = 0;
-    
-    // Cari teks yang memiliki format Jam (misal "08:00", "08.00 WIB", dll) pada elemen heading atau teks
-    $('.elementor-heading-title, .elementor-text-editor, .elementor-button-text').each(function () {
-      const text = $(this).text().trim();
-      const lowerText = text.toLowerCase();
-      
-      // Deteksi format jam HH:MM atau HH.MM
-      if (lowerText.match(/\b\d{2}[\:\.]\d{2}\b/) || lowerText.includes('pukul') || lowerText.match(/\bjam\s+\d{1,2}\b/)) {
-         timeIndex++;
-         
-         if (timeIndex === 1 && primaryEvent.time_start) {
-             const timeText = primaryEvent.until_finish 
-               ? `Pukul ${primaryEvent.time_start} WIB - Selesai`
-               : `Pukul ${primaryEvent.time_start} WIB`;
-             $(this).text(timeText);
-             console.log(`[Heuristic] Diganti Jam Akad: -> ${timeText}`);
-         } else if (timeIndex === 2 && secondaryEvent && secondaryEvent.time_start) {
-             const timeText = secondaryEvent.until_finish 
-               ? `Pukul ${secondaryEvent.time_start} WIB - Selesai`
-               : `Pukul ${secondaryEvent.time_start} WIB`;
-             $(this).text(timeText);
-             console.log(`[Heuristic] Diganti Jam Resepsi: -> ${timeText}`);
-         }
+    // ======== A. Injeksi berbasis section acara ========
+    // Temukan semua heading yang merupakan judul acara (Akad Nikah, Resepsi, dll)
+    // lalu cari elemen waktu, lokasi, dan maps di dalam widget/section yang sama
+
+    // Kata kunci judul acara yang umum
+    const EVENT_TITLE_KEYWORDS = ['akad', 'resepsi', 'midodareni', 'siraman', 'sungkeman', 'pemberkatan', 'pengajian', 'walimah', 'ijab'];
+
+    let foundEventSections = [];
+
+    // Cari semua heading yang merupakan judul acara
+    $('.elementor-heading-title').each(function() {
+      const text = $(this).text().trim().toLowerCase();
+      if (EVENT_TITLE_KEYWORDS.some(kw => text.includes(kw)) && text.length < 60) {
+        foundEventSections.push($(this));
       }
     });
 
-    // ======== B. Heuristik Injeksi Tanggal ========
+    console.log(`[Engine] Ditemukan ${foundEventSections.length} section acara di template.`);
+
+    // Injeksi per section acara
+    foundEventSections.forEach(($titleEl, sectionIdx) => {
+      const evt = events[sectionIdx];
+      if (!evt) return; // Tidak ada data user untuk section ini, biarkan template
+
+      // Ganti judul acara
+      if (evt.type) {
+        $titleEl.text(evt.type);
+        console.log(`[Engine] Judul Acara[${sectionIdx}] -> ${evt.type}`);
+      }
+
+      // Cari "section ancestor" terdekat dari heading ini untuk membatasi pencarian
+      // Coba level: elementor-section > elementor-column > elementor-widget
+      const $section = $titleEl.closest('.elementor-section, .elementor-container, .e-con');
+      const $searchScope = $section.length > 0 ? $section : $titleEl.closest('.elementor-column');
+
+      // --- Injeksi Waktu ---
+      const timeText = formatTimeText(evt);
+      if (timeText) {
+        $searchScope.find('.elementor-heading-title').each(function() {
+          const t = $(this).text().trim().toLowerCase();
+          if (t.match(/\b\d{2}[\:\.\s]\d{2}\b/) || t.includes('pukul') || t.match(/\bjam\s+\d{1,2}\b/)) {
+            $(this).text(timeText);
+            console.log(`[Engine] Waktu[${sectionIdx}] -> ${timeText}`);
+            return false; // stop, ambil pertama
+          }
+        });
+      }
+
+      // --- Injeksi Nama Hari ---
+      const dayName = formatDayName(evt.date);
+      if (dayName) {
+        $searchScope.find('.elementor-heading-title').each(function() {
+          const t = $(this).text().trim();
+          if (t.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu)$/i)) {
+            $(this).text(dayName);
+            console.log(`[Engine] Hari[${sectionIdx}] -> ${dayName}`);
+            return false;
+          }
+        });
+      }
+
+      // --- Injeksi Tanggal Angka (misal "05") ---
+      if (evt.date) {
+        const d = new Date(evt.date);
+        if (!isNaN(d)) {
+          const dayNum = String(d.getDate()).padStart(2, '0');
+          $searchScope.find('.elementor-heading-title').each(function() {
+            const t = $(this).text().trim();
+            // Teks yang HANYA berisi angka 1-31 (tanggal)
+            if (t.match(/^\d{1,2}$/) && parseInt(t) >= 1 && parseInt(t) <= 31) {
+              $(this).text(dayNum);
+              console.log(`[Engine] Tanggal Angka[${sectionIdx}] -> ${dayNum}`);
+              return false;
+            }
+          });
+
+          // --- Injeksi Bulan + Tahun (misal "Oktober 2025") ---
+          const months = ['Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
+          const monthYear = `${months[d.getMonth()]} ${d.getFullYear()}`;
+          $searchScope.find('.elementor-heading-title').each(function() {
+            const t = $(this).text().trim();
+            if (t.match(/^(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)\s+\d{4}$/i)) {
+              $(this).text(monthYear);
+              console.log(`[Engine] BulanTahun[${sectionIdx}] -> ${monthYear}`);
+              return false;
+            }
+          });
+        }
+      }
+
+      // --- Injeksi Nama Gedung / Lokasi ---
+      if (evt.place_name) {
+        $searchScope.find('.elementor-heading-title').each(function() {
+          const t = $(this).text().trim().toLowerCase();
+          // Heuristik: heading yang mengandung nama lokasi (gedung, hotel, masjid, dst)
+          // dan bukan judul acara, bukan waktu, bukan tanggal
+          const isTime = t.match(/\b\d{2}[\:\.\s]\d{2}\b/) || t.includes('pukul');
+          const isDate = t.match(/\d{4}/) || t.match(/^(senin|selasa|rabu|kamis|jumat|sabtu|minggu)$/i) || t.match(/^\d{1,2}$/);
+          const isEventTitle = EVENT_TITLE_KEYWORDS.some(kw => t.includes(kw));
+          if (!isTime && !isDate && !isEventTitle && t.length > 2 && t.length < 80) {
+            $(this).text(evt.place_name);
+            console.log(`[Engine] NamaGedung[${sectionIdx}] -> ${evt.place_name}`);
+            return false; // ambil pertama yang cocok
+          }
+        });
+      }
+
+      // --- Injeksi Link Tombol "Lokasi Acara" (Google Maps) ---
+      if (evt.gmaps) {
+        $searchScope.find('a.elementor-button').each(function() {
+          const btnText = $(this).text().trim().toLowerCase();
+          if (btnText.includes('lokasi') || btnText.includes('maps') || btnText.includes('peta')) {
+            $(this).attr('href', evt.gmaps);
+            console.log(`[Engine] Link Maps[${sectionIdx}] -> ${evt.gmaps}`);
+            return false;
+          }
+        });
+        // Juga update iframe maps jika ada di section ini
+        $searchScope.find('iframe').each(function() {
+          const src = $(this).attr('src') || '';
+          if (src.includes('maps') || src.includes('google')) {
+            $(this).attr('src', evt.gmaps);
+          }
+        });
+      }
+    });
+
+    // ======== B. Fallback: Injeksi Global untuk template tanpa judul acara ========
+    // (untuk template yang tidak memiliki heading "Akad Nikah" eksplisit)
+    if (foundEventSections.length === 0) {
+      console.log('[Engine] Tidak ada section acara eksplisit, pakai fallback global...');
+
+      // Injeksi waktu global
+      let timeIndex = 0;
+      $('.elementor-heading-title, .elementor-text-editor').each(function () {
+        const text = $(this).text().trim().toLowerCase();
+        if (text.match(/\b\d{2}[\:\.]\\d{2}\b/) || text.includes('pukul')) {
+          timeIndex++;
+          const evt = timeIndex === 1 ? primaryEvent : (timeIndex === 2 ? secondaryEvent : null);
+          const timeText = formatTimeText(evt);
+          if (timeText) { $(this).text(timeText); }
+        }
+      });
+
+      // Injeksi nama gedung global
+      let locationIndex = 0;
+      $('.elementor-heading-title, .spancontent, .elementor-text-editor, p').each(function () {
+        const text = $(this).text().trim();
+        const lowerText = text.toLowerCase();
+        if ((lowerText.includes('kediaman') || lowerText.includes('gedung') || lowerText.includes('hotel') || lowerText.includes('jl.') || lowerText.includes('jalan ') || lowerText.includes('masjid')) && text.length < 100) {
+          locationIndex++;
+          if (locationIndex === 1 && primaryEvent.place_name) $(this).text(primaryEvent.place_name);
+          else if (locationIndex === 2 && secondaryEvent && secondaryEvent.place_name) $(this).text(secondaryEvent.place_name);
+        }
+      });
+    }
+
+    // ======== C. Injeksi Tanggal Global (Countdown & Cover) ========
     if (primaryEvent.date) {
       const dateStr = formatIndonesianDate(primaryEvent.date, additional.format_tanggal);
       let isFirstDate = true;
       $('.elementor-heading-title, .elementor-text-editor').each(function () {
         const text = $(this).text().trim();
-        // Deteksi format tanggal Indonesia (Senin, 17 Agustus 1945) atau format numerik (17/08/1945)
-        if (text.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),?\s+\d+/i) || 
-            text.match(/^\d{1,2}\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)/i) || 
+        if (text.match(/^(Senin|Selasa|Rabu|Kamis|Jumat|Sabtu|Minggu),?\s+\d+/i) ||
+            text.match(/^\d{1,2}\s+(Januari|Februari|Maret|April|Mei|Juni|Juli|Agustus|September|Oktober|November|Desember)/i) ||
             text.match(/^\d{2}\s*\/\s*\d{2}\s*\/\s*\d{4}/)) {
-          
           if (isFirstDate && additional.tanggal_pada_cover === false) {
-             $(this).text('');
+            $(this).text('');
           } else {
-             $(this).text(dateStr);
+            $(this).text(dateStr);
           }
           isFirstDate = false;
         }
       });
-      
-      // Update data atribut countdown
+
+      // Update countdown
       $('[data-date]').attr('data-date', formatCountdownDate(primaryEvent.date));
       const day = new Date(primaryEvent.date).getDate();
       $('[data-to-value]').each(function() {
@@ -258,33 +407,9 @@ function compileTemplate(templateSlug, settings) {
       });
     }
 
-    // ======== C. Heuristik Injeksi Lokasi Acara ========
-    let locationIndex = 0;
-    
-    // Biasanya nama lokasi berada di elemen spancontent, text-editor, atau heading tertentu sesudah jam
-    // Kita juga bisa mencari kata kunci "Gedung", "Hotel", "Kediaman", "Jalan", "Jl."
-    $('.elementor-heading-title, .spancontent, .elementor-text-editor, .weddingpress-location-text, p').each(function () {
-      const text = $(this).text().trim();
-      const lowerText = text.toLowerCase();
-      
-      if (lowerText.includes('kediaman') || lowerText.includes('gedung') || lowerText.includes('hotel') || lowerText.includes('jl.') || lowerText.includes('jalan ') || lowerText.includes('masjid')) {
-        // Skip jika teks ini terlalu panjang (misal deskripsi full alamat map) dan kita hanya mau ganti nama lokasinya
-        // Namun, jika teks mengandung koma/alamat persis, kita timpa keseluruhannya
-        if (text.length > 5 && text.length < 100 && !lowerText.includes('akad') && !lowerText.includes('resepsi')) {
-            locationIndex++;
-            if (locationIndex === 1 && primaryEvent.place_name) {
-                $(this).text(primaryEvent.place_name);
-                console.log(`[Heuristic] Diganti Alamat Akad: -> ${primaryEvent.place_name}`);
-            } else if (locationIndex === 2 && secondaryEvent && secondaryEvent.place_name) {
-                $(this).text(secondaryEvent.place_name);
-                console.log(`[Heuristic] Diganti Alamat Resepsi: -> ${secondaryEvent.place_name}`);
-            }
-        }
-      }
-    });
-
+    // ======== D. Injeksi iframe Google Maps global ========
     if (primaryEvent.gmaps) {
-      $('iframe[src*="maps.google"]').attr('src', primaryEvent.gmaps);
+      $('iframe[src*="maps.google"], iframe[src*="google.com/maps"]').attr('src', primaryEvent.gmaps);
     }
   }
 
