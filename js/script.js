@@ -176,6 +176,8 @@ $(document).ready(function() {
                         }
                     }, 50);
                 });
+            }
+            
             // AUTO-POPULATE ARRAY: Galeri Foto
             if (settings.galeri && settings.galeri.photos && settings.galeri.photos.length > 0) {
                 settings.galeri.photos.forEach((photoUrl) => {
