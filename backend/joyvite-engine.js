@@ -300,34 +300,32 @@ function compileTemplate(templateSlug, settings) {
       if (evt.date) {
         const d = new Date(evt.date);
         if (!isNaN(d)) {
-          const dayInt = d.getDate(); // misal: 28 atau 1
-          // Tentukan prefix (puluhan) dan nilai counter (satuan atau full number)
-          let counterPrefix, counterValue;
-          if (dayInt < 10) {
-            // 1 digit: prefix kosong, nilai = angka penuh (misal "1")
-            counterPrefix = '';
-            counterValue = String(dayInt);
-          } else {
-            // 2 digit: prefix = angka puluhan (misal "2"), nilai = satuan (misal "8")
-            counterPrefix = String(Math.floor(dayInt / 10));
-            counterValue = String(dayInt % 10);
+          const dayStr = String(d.getDate()); // "28" atau "1", tanpa padding
+
+          // Cari counter widget terdekat SETELAH $titleEl dalam DOM
+          // dengan menelusuri sibling widget setelah posisi title
+          const $titleWidget = $titleEl.closest('.elementor-widget');
+          let $counter = $();
+          // Cek sibling-sibling setelah titleWidget yang merupakan counter
+          $titleWidget.nextAll('.elementor-widget-counter').each(function() {
+            $counter = $(this);
+            return false; // ambil pertama saja
+          });
+          // Fallback: cari dalam scope yang lebih luas
+          if (!$counter.length) {
+            const $colScope = $titleEl.closest('.elementor-column, .elementor-section, .elementor-container, .e-con');
+            // Gunakan positional: cari counter berdasarkan index acara dalam scope
+            $counter = $colScope.find('.elementor-widget-counter').eq(0);
           }
 
-          // Cari counter widget yang paling dekat dengan $titleEl (dalam section ancestor)
-          const $counterScope = $titleEl.closest('.elementor-section, .elementor-container, .e-con, .elementor-column');
-          // Cari semua counter widget dalam scope dan ambil sesuai sectionIdx
-          const $allCounters = $counterScope.find('.elementor-widget-counter');
-          const $counter = $allCounters.eq(sectionIdx < $allCounters.length ? sectionIdx : 0);
-
           if ($counter.length) {
-            // Update prefix
-            $counter.find('.elementor-counter-number-prefix').text(counterPrefix);
-            // Update nilai counter (text + data attrs agar tidak di-animate ke nilai lama)
+            // Taruh tanggal penuh sebagai prefix, kosongkan counter animated
+            $counter.find('.elementor-counter-number-prefix').text(dayStr);
             const $num = $counter.find('.elementor-counter-number');
-            $num.text(counterValue);
-            $num.attr('data-to-value', counterValue);
-            $num.attr('data-from-value', counterValue);
-            console.log(`[Engine] Counter[${sectionIdx}] prefix="${counterPrefix}" val="${counterValue}"`);
+            $num.text('');
+            $num.attr('data-to-value', '0');
+            $num.attr('data-from-value', '0');
+            console.log(`[Engine] Counter[${sectionIdx}] tanggal="${dayStr}"`);
           }
 
           // --- Injeksi Bulan + Tahun (misal "Oktober 2025") ---
@@ -343,6 +341,7 @@ function compileTemplate(templateSlug, settings) {
           });
         }
       }
+
 
 
       // --- Injeksi Nama Gedung / Lokasi ---
