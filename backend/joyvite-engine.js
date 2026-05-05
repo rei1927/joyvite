@@ -395,33 +395,39 @@ function compileTemplate(templateSlug, settings) {
 
         const hideEl = ($el) => $el.attr('style', ($el.attr('style') || '') + ';display:none!important');
 
-        if ($ancestor.length && titlesInAncestor.length === 1) {
-          // Ancestor hanya berisi 1 event → sembunyikan keseluruhan ancestor
-          hideEl($ancestor);
-        } else {
-          // Cek di level kolom
-          const $col = $extraTitle.closest('.elementor-column, .e-col');
-          const titlesInCol = $col.find('.elementor-heading-title').filter(function() {
-            return EVENT_TITLE_KEYWORDS.some(kw => $(this).text().trim().toLowerCase().includes(kw));
-          });
+        // Helper untuk mendeteksi elemen yang merupakan judul acara (baik yang masih asli maupun yang sudah direplace)
+        const isEventTitleFn = function() {
+          const $t = $(this);
+          if ($t.attr('data-jv-processed') === 'title') return true; // Sudah di-replace oleh user data
+          return EVENT_TITLE_KEYWORDS.some(kw => $t.text().trim().toLowerCase().includes(kw)); // Masih bawaan template
+        };
 
-          if ($col.length && titlesInCol.length === 1) {
-            // Kolom hanya berisi 1 event ekstra → aman hide keseluruhan kolom
-            hideEl($col);
+        if ($ancestor.length) {
+          const titlesInAncestor = $ancestor.find('.elementor-heading-title').filter(isEventTitleFn);
+          if (titlesInAncestor.length === 1) {
+            // Ancestor hanya berisi 1 event → sembunyikan keseluruhan ancestor
+            hideEl($ancestor);
           } else {
-            // Dalam satu kolom/container terdapat >1 acara (ditumpuk/stacked)
-            // Sembunyikan HANYA widget judul ekstra ini dan widget-widget di bawahnya 
-            // sampai ketemu judul acara berikutnya atau habis
-            const $widget = $extraTitle.closest('.elementor-widget');
-            hideEl($widget);
-            $widget.nextAll('.elementor-widget').each(function() {
-              const $nextWidget = $(this);
-              const isNextTitle = $nextWidget.find('.elementor-heading-title').filter(function() {
-                return EVENT_TITLE_KEYWORDS.some(kw => $(this).text().trim().toLowerCase().includes(kw));
-              }).length > 0;
-              if (isNextTitle) return false; // stop jika ketemu judul acara lain
-              hideEl($nextWidget);
-            });
+            // Cek di level kolom
+            const $col = $extraTitle.closest('.elementor-column, .e-col');
+            const titlesInCol = $col.find('.elementor-heading-title').filter(isEventTitleFn);
+
+            if ($col.length && titlesInCol.length === 1) {
+              // Kolom hanya berisi 1 event ekstra → aman hide keseluruhan kolom
+              hideEl($col);
+            } else {
+              // Dalam satu kolom/container terdapat >1 acara (ditumpuk/stacked)
+              // Sembunyikan HANYA widget judul ekstra ini dan widget-widget di bawahnya 
+              // sampai ketemu judul acara berikutnya atau habis
+              const $widget = $extraTitle.closest('.elementor-widget');
+              hideEl($widget);
+              $widget.nextAll('.elementor-widget').each(function() {
+                const $nextWidget = $(this);
+                const isNextTitle = $nextWidget.find('.elementor-heading-title').filter(isEventTitleFn).length > 0;
+                if (isNextTitle) return false; // stop jika ketemu judul acara lain
+                hideEl($nextWidget);
+              });
+            }
           }
         }
         console.log(`[Engine] Sembunyikan event section ke-${i + 1} (tidak ada data user)`);
