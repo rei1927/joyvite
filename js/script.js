@@ -228,6 +228,8 @@ $(document).ready(function() {
         let ratio = NaN;
         if (currentFileInput === '#cover-upload') {
             ratio = 683 / 1024;
+        } else if (currentFileInput === '#coverPhotoInput') {
+            ratio = 2 / 3;
         }
         
         cropper = new Cropper(document.getElementById('crop-image'), {
@@ -259,6 +261,8 @@ $(document).ready(function() {
             // If it's cover photo, hide the placeholder
             if (currentCropTargetImg === '#cover-upload-img') {
                 $('#cover-upload-placeholder').hide();
+            } else if (currentCropTargetImg === '#coverPreview') {
+                $('#coverIcon, #coverText').hide();
             }
             
             // Clear the actual file input so the submit logic uses the base64 src instead
@@ -284,6 +288,13 @@ $(document).ready(function() {
     $('#cover-upload').on('change', function(e) {
         if (e.target.files && e.target.files[0]) {
             openCropper(e.target.files[0], '#cover-upload-img', '#cover-upload');
+        }
+    });
+
+    $('#coverPhotoInput').on('change', function(e) {
+        if (e.target.files && e.target.files[0]) {
+            // Rasio sudah di-handle di event modal di bawah
+            openCropper(e.target.files[0], '#coverPreview', '#coverPhotoInput');
         }
     });
 
@@ -373,6 +384,7 @@ $(document).ready(function() {
                     if (key === 'male_profile_photo') existingSrc = $('#male-account-upload-img').attr('src');
                     else if (key === 'female_profile_photo') existingSrc = $('#female-account-upload-img').attr('src');
                     else if (key === 'cover_photo') existingSrc = $('#cover-upload-img').attr('src');
+                    else if (key === 'story_cover') existingSrc = $('#coverPreview').attr('src');
                     
                     if (existingSrc && !existingSrc.includes('ui-avatars.com')) {
                         // Jika src berupa base64 (hasil crop), upload ke S3 dulu!

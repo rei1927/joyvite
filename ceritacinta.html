@@ -140,8 +140,7 @@
                                 </ul>
                             </div>
                         </div>
-                        <input type="file" id="coverPhotoInput" accept="image/*" class="d-none">
-                        <input type="hidden" name="story_cover" id="storyCoverData">
+                        <input type="file" id="coverPhotoInput" accept="image/*" class="d-none" name="story_cover">
                     </div>
                 </div>
 
@@ -208,30 +207,6 @@
     <script src="node_modules/@popperjs/core/dist/umd/popper.min.js"></script>
     <script src="node_modules/bootstrap/dist/js/bootstrap.min.js"></script>
     
-    <!-- Cropper Modal -->
-    <div class="modal fade" id="cropModal" tabindex="-1" data-bs-backdrop="static">
-        <div class="modal-dialog modal-dialog-centered modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Sesuaikan Foto</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-center">
-                    <div class="img-container" style="max-height: 500px; width: 100%;">
-                        <img id="imageToCrop" src="" style="max-width: 100%;">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                    <button type="button" class="btn btn-primary" id="cropSaveBtn">Simpan Crop</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Cropper JS -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-
     <script>
         let counter = 1;
 
@@ -294,58 +269,6 @@
             }
         }
 
-        // Cover Photo Cropper Logic
-        let cropper;
-        const coverInput = document.getElementById('coverPhotoInput');
-        const cropModal = new bootstrap.Modal(document.getElementById('cropModal'));
-        const imageToCrop = document.getElementById('imageToCrop');
-
-        coverInput.addEventListener('change', function (e) {
-            const files = e.target.files;
-            if (files && files.length > 0) {
-                const file = files[0];
-                const reader = new FileReader();
-                reader.onload = function (event) {
-                    imageToCrop.src = event.target.result;
-                    cropModal.show();
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        document.getElementById('cropModal').addEventListener('shown.bs.modal', function () {
-            cropper = new Cropper(imageToCrop, {
-                aspectRatio: 2 / 3, // 768 / 1152
-                viewMode: 1,
-                autoCropArea: 1,
-            });
-        });
-
-        document.getElementById('cropModal').addEventListener('hidden.bs.modal', function () {
-            if (cropper) {
-                cropper.destroy();
-                cropper = null;
-            }
-            coverInput.value = ''; // Reset input
-        });
-
-        document.getElementById('cropSaveBtn').addEventListener('click', function () {
-            if (cropper) {
-                const canvas = cropper.getCroppedCanvas({
-                    width: 768,
-                    height: 1152,
-                });
-                const base64Image = canvas.toDataURL('image/jpeg');
-                
-                document.getElementById('storyCoverData').value = base64Image;
-                document.getElementById('coverPreview').src = base64Image;
-                document.getElementById('coverPreview').style.display = 'block';
-                document.getElementById('coverIcon').style.display = 'none';
-                document.getElementById('coverText').style.display = 'none';
-                
-                cropModal.hide();
-            }
-        });
     </script>
     <script src="js/script.js?v=5"></script>
 </body>
