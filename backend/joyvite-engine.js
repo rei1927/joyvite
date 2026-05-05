@@ -888,7 +888,19 @@ function compileTemplate(templateSlug, settings) {
                     if ($img.attr('data-thumbnail') !== undefined) {
                         $img.attr('data-thumbnail', photoUrl);
                     }
+                    
+                    // Paksa update background-image karena Elementor JS mungkin sudah jalan
+                    // atau tidak akan me-re-render clone ini
+                    if ($img.hasClass('e-gallery-image') || $img.css('background-image') !== 'none') {
+                        $img.css('background-image', `url('${photoUrl}')`);
+                    }
+                    
+                    // Hapus class lazy-load yang membuat gambar transparan/hilang
+                    $img.addClass('e-gallery-image-loaded');
                 }
+                
+                // Pastikan item tidak disembunyikan oleh CSS animasi
+                $newItem.removeClass('e-gallery-item--hidden');
                 
                 $galleryContainer.append($newItem);
             });
