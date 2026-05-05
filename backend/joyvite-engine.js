@@ -319,13 +319,16 @@ function compileTemplate(templateSlug, settings) {
           }
 
           if ($counter.length) {
-            // Taruh tanggal penuh sebagai prefix, kosongkan counter animated
-            $counter.find('.elementor-counter-number-prefix').text(dayStr);
+            // Jika tanggal 1 digit (1-9), beri prefix "0". Jika 2 digit (10-31), kosongkan prefix.
+            const prefixStr = d.getDate() < 10 ? '0' : '';
+            $counter.find('.elementor-counter-number-prefix').text(prefixStr);
+            
+            // Masukkan angka asli ke animasi counter
             const $num = $counter.find('.elementor-counter-number');
-            $num.text('');
-            $num.attr('data-to-value', '0');
-            $num.attr('data-from-value', '0');
-            console.log(`[Engine] Counter[${sectionIdx}] tanggal="${dayStr}"`);
+            $num.text(dayStr);
+            $num.attr('data-to-value', dayStr);
+            $num.attr('data-from-value', dayStr); // opsional, mencegah start dari 0 jika dinginkan
+            console.log(`[Engine] Counter[${sectionIdx}] prefix="${prefixStr}" val="${dayStr}"`);
           }
 
           // --- Injeksi Bulan + Tahun (misal "Oktober 2025") ---
