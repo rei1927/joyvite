@@ -1347,6 +1347,18 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
+  // 14. PENYESUAIAN STYLING SPESIFIK TEMPLATE
+  // =========================================
+  {
+    // Perbesar elemen konten utama "The Wedding Of" (data-id="1351b293" / id="kontenS1a")
+    const $kontenS1a = $('#kontenS1a, [data-id="1351b293"]');
+    if ($kontenS1a.length) {
+      const existingStyle = $kontenS1a.attr('style') || '';
+      $kontenS1a.attr('style', existingStyle + ';transform:scale(1.5);transform-origin:top center;margin-bottom:25%;');
+    }
+  }
+
+  // =========================================
   // FINAL: Rewrite asset URLs agar berfungsi dari domain klien
   // Template scraping menyimpan file dengan path relatif (../wp-content/...)
   // Kita rewrite ke absolute URL menuju sumber asli menujuacara.id
