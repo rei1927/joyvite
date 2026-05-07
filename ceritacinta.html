@@ -123,6 +123,7 @@
                             <p class="text-muted small mb-0">Jika dinonaktifkan, seluruh section Love Story akan dihilangkan dari undangan.</p>
                         </div>
                         <div class="form-check form-switch">
+                            <input type="hidden" name="love_story_enabled" value="false">
                             <input class="form-check-input" type="checkbox" role="switch" id="loveStoryToggle" name="love_story_enabled" value="true" checked style="width: 3rem; height: 1.5rem; cursor: pointer;">
                         </div>
                     </div>
@@ -208,9 +209,22 @@
     <script>
         let counter = 1;
 
-        // Toggle On/Off: show/hide love story content
+        // Toggle On/Off: show/hide love story content and manage required fields
         document.getElementById('loveStoryToggle').addEventListener('change', function() {
-            document.getElementById('loveStoryContent').style.display = this.checked ? '' : 'none';
+            var content = document.getElementById('loveStoryContent');
+            if (this.checked) {
+                content.style.display = '';
+                content.querySelectorAll('[data-was-required]').forEach(function(el) {
+                    el.setAttribute('required', '');
+                    el.removeAttribute('data-was-required');
+                });
+            } else {
+                content.style.display = 'none';
+                content.querySelectorAll('[required]').forEach(function(el) {
+                    el.removeAttribute('required');
+                    el.setAttribute('data-was-required', 'true');
+                });
+            }
         });
 
         // Add New Timeline Element
@@ -267,6 +281,6 @@
     </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
-    <script src="js/script.js?v=6"></script>
+    <script src="js/script.js?v=7"></script>
 </body>
 </html>

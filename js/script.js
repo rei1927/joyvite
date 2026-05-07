@@ -154,8 +154,7 @@ $(document).ready(function() {
 
             // AUTO-POPULATE: Love Story Toggle
             if (settings.love_story_enabled === false) {
-                $('#loveStoryToggle').prop('checked', false);
-                $('#loveStoryContent').hide();
+                $('#loveStoryToggle').prop('checked', false).trigger('change');
             }
 
             // AUTO-POPULATE: Love Story Cover Photo

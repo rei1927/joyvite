@@ -798,8 +798,13 @@ function compileTemplate(templateSlug, settings) {
       let $loveStorySection = null;
       $('.elementor-heading-title').each(function() {
         if ($(this).text().trim().toLowerCase() === 'love story') {
-          // Naik ke parent container terbesar yang membungkus seluruh section
-          $loveStorySection = $(this).closest('.e-con.e-child').closest('.e-con.e-child');
+          // Naik ke parent container paling atas (e-child langsung dibawah e-parent)
+          let $el = $(this).closest('.e-con.e-child');
+          // Terus naik selama parent masih e-con.e-child
+          while ($el.parent().closest('.e-con.e-child').length) {
+            $el = $el.parent().closest('.e-con.e-child');
+          }
+          $loveStorySection = $el;
           return false;
         }
       });
