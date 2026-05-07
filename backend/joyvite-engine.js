@@ -794,17 +794,18 @@ function compileTemplate(templateSlug, settings) {
 
     // Jika fitur dimatikan, hapus seluruh section Love Story dari undangan
     if (!love_story_enabled) {
-      // Cari container utama Love Story berdasarkan heading "Love Story"
       let $loveStorySection = null;
       $('.elementor-heading-title').each(function() {
         if ($(this).text().trim().toLowerCase() === 'love story') {
-          // Naik ke parent container paling atas (e-child langsung dibawah e-parent)
-          let $el = $(this).closest('.e-con.e-child');
-          // Terus naik selama parent masih e-con.e-child
-          while ($el.parent().closest('.e-con.e-child').length) {
-            $el = $el.parent().closest('.e-con.e-child');
+          // Dari heading, naik 3 level e-con.e-child untuk sampai ke section wrapper
+          let $el = $(this).closest('.e-con.e-child');                      // level 1: inner content
+          if ($el.length) $el = $el.parent().closest('.e-con.e-child');     // level 2: content wrapper
+          if ($el.length) $el = $el.parent().closest('.e-con.e-child');     // level 3: section wrapper (target)
+          
+          // Safety: hanya hapus jika punya sibling (artinya bukan root container)
+          if ($el.length && $el.siblings('.e-con').length > 0) {
+            $loveStorySection = $el;
           }
-          $loveStorySection = $el;
           return false;
         }
       });
