@@ -794,25 +794,42 @@ function compileTemplate(templateSlug, settings) {
 
     // Jika fitur dimatikan, hapus seluruh section Love Story dari undangan
     if (!love_story_enabled) {
+      console.log('[Engine] love_story_enabled = false, akan menghapus section Love Story...');
       let $loveStorySection = null;
+      
       $('.elementor-heading-title').each(function() {
         if ($(this).text().trim().toLowerCase() === 'love story') {
-          // Dari heading, naik 3 level e-con.e-child untuk sampai ke section wrapper
-          let $el = $(this).closest('.e-con.e-child');                      // level 1: inner content
-          if ($el.length) $el = $el.parent().closest('.e-con.e-child');     // level 2: content wrapper
-          if ($el.length) $el = $el.parent().closest('.e-con.e-child');     // level 3: section wrapper (target)
+          console.log('[Engine] Found Love Story heading');
           
-          // Safety: hanya hapus jika punya sibling (artinya bukan root container)
-          if ($el.length && $el.siblings('.e-con').length > 0) {
-            $loveStorySection = $el;
+          // Naik level per level
+          let $level1 = $(this).closest('.e-con.e-child');
+          console.log('[Engine] Level 1:', $level1.length ? $level1.attr('data-id') : 'NONE');
+          
+          let $level2 = $level1.length ? $level1.parent().closest('.e-con.e-child') : $();
+          console.log('[Engine] Level 2:', $level2.length ? $level2.attr('data-id') : 'NONE');
+          
+          let $level3 = $level2.length ? $level2.parent().closest('.e-con.e-child') : $();
+          console.log('[Engine] Level 3:', $level3.length ? $level3.attr('data-id') : 'NONE');
+          
+          if ($level3.length) {
+            console.log('[Engine] Level 3 siblings count:', $level3.siblings('.e-con').length);
+            $loveStorySection = $level3;
+          } else if ($level2.length) {
+            // Fallback: coba level 2
+            console.log('[Engine] Fallback ke Level 2');
+            $loveStorySection = $level2;
           }
+          
           return false;
         }
       });
       
       if ($loveStorySection && $loveStorySection.length) {
+        console.log('[Engine] MENGHAPUS section data-id:', $loveStorySection.attr('data-id'));
         $loveStorySection.remove();
-        console.log('[Engine] Love Story section DIHAPUS (dinonaktifkan user).');
+        console.log('[Engine] Love Story section BERHASIL dihapus.');
+      } else {
+        console.log('[Engine] GAGAL menemukan section Love Story untuk dihapus!');
       }
     } else if (love_story.length > 0) {
       // Cari elemen H2 "Love Story"
