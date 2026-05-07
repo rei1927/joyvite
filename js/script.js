@@ -152,6 +152,18 @@ $(document).ready(function() {
                 });
             }
 
+            // AUTO-POPULATE: Love Story Toggle
+            if (settings.love_story_enabled === false) {
+                $('#loveStoryToggle').prop('checked', false);
+                $('#loveStoryContent').hide();
+            }
+
+            // AUTO-POPULATE: Love Story Cover Photo
+            if (settings.love_story_cover) {
+                $('#coverPreview').attr('src', settings.love_story_cover).show();
+                $('#coverIcon, #coverText').hide();
+            }
+
             // AUTO-POPULATE ARRAY: Cerita Cinta (love_story)
             if (settings.love_story && settings.love_story.length > 0) {
                 settings.love_story.forEach((story, idx) => {
@@ -161,19 +173,9 @@ $(document).ready(function() {
                         const block = $('.timeline-card').eq(idx);
                         block.find('input[name="story_title[]"]').val(story.title);
                         if (story.date) {
-                            const d = new Date(story.date);
-                            if (!isNaN(d)) block.find('input[name="story_date[]"]').val(d.toISOString().split('T')[0]);
+                            block.find('input[name="story_date[]"]').val(story.date);
                         }
                         block.find('textarea[name="story_desc[]"]').val(story.description);
-                        
-                        // Populate Photo UI Preview jika ada
-                        if (story.photo) {
-                            const img = block.find('img');
-                            const icon = block.find('i.fa-camera');
-                            img.attr('src', story.photo);
-                            img.css('display', 'block');
-                            icon.css('display', 'none');
-                        }
                     }, 50);
                 });
             }
@@ -503,22 +505,25 @@ $(document).ready(function() {
             }
 
             // e. Jika Halaman Cerita Cinta
-            // e. Jika Halaman Cerita Cinta
-            if (flatData['story_title']) {
+            if (flatData['story_title'] || flatData['love_story_enabled'] !== undefined) {
+                // Simpan status toggle
+                nestedSettings.love_story_enabled = flatData['love_story_enabled'] === 'true';
+                
                 nestedSettings.love_story = [];
                 if (flatData['story_cover']) {
                     nestedSettings.love_story_cover = flatData['story_cover'];
                 }
                 
-                let titles = Array.isArray(flatData['story_title']) ? flatData['story_title'] : [flatData['story_title']];
-                for (let i = 0; i < titles.length; i++) {
-                    let getVal = (key) => Array.isArray(flatData[key]) ? flatData[key][i] : flatData[key];
-                    nestedSettings.love_story.push({
-                        title: getVal('story_title'),
-                        date: getVal('story_date'),
-                        description: getVal('story_desc'),
-                        photo: getVal('story_photo') || ''
-                    });
+                if (flatData['story_title']) {
+                    let titles = Array.isArray(flatData['story_title']) ? flatData['story_title'] : [flatData['story_title']];
+                    for (let i = 0; i < titles.length; i++) {
+                        let getVal = (key) => Array.isArray(flatData[key]) ? flatData[key][i] : flatData[key];
+                        nestedSettings.love_story.push({
+                            title: getVal('story_title'),
+                            date: getVal('story_date'),
+                            description: getVal('story_desc')
+                        });
+                    }
                 }
             }
 

@@ -115,79 +115,77 @@
         <div class="content-body px-4 pb-5">
             <form id="wedding-form" action="javascript:void(0)" method="POST" enctype="multipart/form-data">
                 
-                <div class="alert alert-secondary mb-4 p-3 border-0" style="background-color: #f1f5f9; color: #475569" role="alert">
-                    <h5 class="alert-heading fw-bold mb-1" style="color: #334155"><i class="fa-solid fa-circle-info me-2"></i>Informasi</h5>
-                    <p class="mb-0 fs-6">Isi fase perjalanan kisah cinta Anda. Fitur ini kompatibel dengan mayoritas template Premium & Art. Anda juga bisa melampirkan 1 foto kenangan kecil di tiap cerita.</p>
-                </div>
-
-                <!-- Cover Photo Section -->
+                <!-- ON/OFF Toggle -->
                 <div class="card shadow-sm border-0 rounded-3 mb-4">
-                    <div class="card-body p-4">
-                        <h5 class="card-title fw-bold mb-3"><i class="fa-solid fa-image text-primary me-2"></i> Foto Utama Cerita Cinta</h5>
-                        <p class="text-muted small mb-3">Foto besar ini akan tampil di samping atau di atas timeline cerita cinta Anda (khusus tema yang mendukung, rasio 2:3).</p>
-                        <div class="d-flex align-items-center gap-4">
-                            <div class="upload-area text-center p-3 rounded" style="border: 2px dashed #cbd5e1; cursor: pointer; width: 140px; height: 210px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; position: relative; overflow: hidden;" onclick="document.getElementById('coverPhotoInput').click()">
-                                <i class="fa-solid fa-camera fa-2x text-muted mb-2" id="coverIcon"></i>
-                                <span class="small text-muted fw-semibold" id="coverText">Pilih Foto</span>
-                                <img id="coverPreview" src="" alt="Cover" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;">
-                            </div>
-                            <div class="flex-grow-1">
-                                <p class="mb-1 fw-bold text-dark">Ketentuan Foto</p>
-                                <ul class="text-muted small ps-3 mb-0">
-                                    <li>Format JPG, JPEG, atau PNG</li>
-                                    <li>Maksimal ukuran 5MB</li>
-                                    <li>Gunakan foto portrait (vertikal) yang jelas</li>
-                                </ul>
-                            </div>
+                    <div class="card-body p-4 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="fw-bold mb-1"><i class="fa-solid fa-toggle-on text-primary me-2"></i> Aktifkan Cerita Cinta</h5>
+                            <p class="text-muted small mb-0">Jika dinonaktifkan, seluruh section Love Story akan dihilangkan dari undangan.</p>
                         </div>
-                        <input type="file" id="coverPhotoInput" accept="image/*" class="d-none" name="story_cover">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" role="switch" id="loveStoryToggle" name="love_story_enabled" value="true" checked style="width: 3rem; height: 1.5rem; cursor: pointer;">
+                        </div>
                     </div>
                 </div>
 
-                <div id="timeline-container">
-                    <!-- Default First Timeline Card -->
-                    <div class="card shadow-sm border-0 rounded-3 mb-4 timeline-card position-relative">
+                <div id="loveStoryContent">
+                    <div class="alert alert-secondary mb-4 p-3 border-0" style="background-color: #f1f5f9; color: #475569" role="alert">
+                        <h5 class="alert-heading fw-bold mb-1" style="color: #334155"><i class="fa-solid fa-circle-info me-2"></i>Informasi</h5>
+                        <p class="mb-0 fs-6">Isi fase perjalanan kisah cinta Anda. Fitur ini kompatibel dengan mayoritas template Premium & Art.</p>
+                    </div>
+
+                    <!-- Cover Photo Section -->
+                    <div class="card shadow-sm border-0 rounded-3 mb-4">
                         <div class="card-body p-4">
-                            <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-calendar-heart text-danger me-2"></i> Fase 1</h5>
-                            
-                            <div class="row align-items-center">
-                                <!-- Photo Upload Column -->
-                                <div class="col-md-3 col-lg-2 mb-3 mb-md-0 d-flex flex-column align-items-center">
-                                    <label class="form-label fw-semibold text-center w-100 mb-2">Foto Unik</label>
-                                    <label class="upload-placeholder shadow-sm">
-                                        <input type="file" name="story_photo[]" accept="image/*" class="d-none" onchange="previewImage(this)">
-                                        <i class="fa-solid fa-camera fa-2x text-muted"></i>
-                                        <img src="" alt="preview">
-                                    </label>
-                                    <small class="text-muted mt-2 text-center" style="font-size: 0.75rem;">Maks 2MB (Opsional)</small>
+                            <h5 class="card-title fw-bold mb-3"><i class="fa-solid fa-image text-primary me-2"></i> Foto Utama Cerita Cinta</h5>
+                            <p class="text-muted small mb-3">Foto besar ini akan tampil di samping atau di atas timeline cerita cinta Anda (khusus tema yang mendukung, rasio 2:3).</p>
+                            <div class="d-flex align-items-center gap-4">
+                                <div class="upload-area text-center p-3 rounded" style="border: 2px dashed #cbd5e1; cursor: pointer; width: 140px; height: 210px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #f8fafc; position: relative; overflow: hidden;" onclick="document.getElementById('coverPhotoInput').click()">
+                                    <i class="fa-solid fa-camera fa-2x text-muted mb-2" id="coverIcon"></i>
+                                    <span class="small text-muted fw-semibold" id="coverText">Pilih Foto</span>
+                                    <img id="coverPreview" src="" alt="Cover" style="display: none; width: 100%; height: 100%; object-fit: cover; position: absolute; top:0; left:0;">
                                 </div>
-                                
-                                <!-- Content Column -->
-                                <div class="col-md-9 col-lg-10">
-                                    <div class="row">
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-semibold">Judul Cerita <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control bg-light" name="story_title[]" placeholder="Misal: Awal Bertemu" required>
-                                        </div>
-                                        <div class="col-md-6 mb-3">
-                                            <label class="form-label fw-semibold">Tahun / Tanggal <span class="text-danger">*</span></label>
-                                            <input type="text" class="form-control bg-light" name="story_date[]" placeholder="Misal: 14 Februari 2021" required>
-                                        </div>
-                                        <div class="col-12">
-                                            <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
-                                            <textarea class="form-control bg-light" name="story_desc[]" rows="2" placeholder="Ceritakan momen bersejarah ini secara singkat..." required></textarea>
-                                        </div>
+                                <div class="flex-grow-1">
+                                    <p class="mb-1 fw-bold text-dark">Ketentuan Foto</p>
+                                    <ul class="text-muted small ps-3 mb-0">
+                                        <li>Format JPG, JPEG, atau PNG</li>
+                                        <li>Maksimal ukuran 5MB</li>
+                                        <li>Gunakan foto portrait (vertikal) yang jelas</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <input type="file" id="coverPhotoInput" accept="image/*" class="d-none" name="story_cover">
+                        </div>
+                    </div>
+
+                    <div id="timeline-container">
+                        <!-- Default First Timeline Card -->
+                        <div class="card shadow-sm border-0 rounded-3 mb-4 timeline-card position-relative">
+                            <div class="card-body p-4">
+                                <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-calendar-heart text-danger me-2"></i> Fase 1</h5>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold">Judul Cerita <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control bg-light" name="story_title[]" placeholder="Misal: Awal Bertemu" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label class="form-label fw-semibold">Tahun / Tanggal <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control bg-light" name="story_date[]" placeholder="Misal: 14 Februari 2021" required>
+                                    </div>
+                                    <div class="col-12">
+                                        <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
+                                        <textarea class="form-control bg-light" name="story_desc[]" rows="2" placeholder="Ceritakan momen bersejarah ini secara singkat..." required></textarea>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
 
-                <!-- ADD BUTTON -->
-                <button type="button" id="addTimelineBtn" class="btn btn-outline-primary w-100 rounded-3 py-2 mb-4 border-dashed" style="border-style: dashed; background-color: rgba(var(--primary-rgb), 0.05);">
-                    <i class="fa-solid fa-plus me-2"></i> Tambah Fase Cerita Lainnya
-                </button>
+                    <!-- ADD BUTTON -->
+                    <button type="button" id="addTimelineBtn" class="btn btn-outline-primary w-100 rounded-3 py-2 mb-4 border-dashed" style="border-style: dashed; background-color: rgba(var(--primary-rgb), 0.05);">
+                        <i class="fa-solid fa-plus me-2"></i> Tambah Fase Cerita Lainnya
+                    </button>
+                </div>
 
                 <!-- SUBMIT BUTTON -->
                 <div class="row">
@@ -210,6 +208,11 @@
     <script>
         let counter = 1;
 
+        // Toggle On/Off: show/hide love story content
+        document.getElementById('loveStoryToggle').addEventListener('change', function() {
+            document.getElementById('loveStoryContent').style.display = this.checked ? '' : 'none';
+        });
+
         // Add New Timeline Element
         document.getElementById('addTimelineBtn').addEventListener('click', function() {
             counter++;
@@ -222,52 +225,24 @@
                 </button>
                 <div class="card-body p-4">
                     <h5 class="fw-bold text-dark mb-3"><i class="fa-solid fa-calendar-heart text-danger me-2"></i> Fase ${counter}</h5>
-                    <div class="row align-items-center">
-                        <div class="col-md-3 col-lg-2 mb-3 mb-md-0 d-flex flex-column align-items-center">
-                            <label class="form-label fw-semibold text-center w-100 mb-2">Foto Unik</label>
-                            <label class="upload-placeholder shadow-sm">
-                                <input type="file" name="story_photo[]" accept="image/*" class="d-none" onchange="previewImage(this)">
-                                <i class="fa-solid fa-camera fa-2x text-muted"></i>
-                                <img src="" alt="preview">
-                            </label>
-                            <small class="text-muted mt-2 text-center" style="font-size: 0.75rem;">Maks 2MB (Opsional)</small>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Judul Cerita <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light" name="story_title[]" placeholder="Misal: Lamaran" required>
                         </div>
-                        <div class="col-md-9 col-lg-10">
-                            <div class="row">
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Judul Cerita <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control bg-light" name="story_title[]" placeholder="Misal: Lamaran" required>
-                                </div>
-                                <div class="col-md-6 mb-3">
-                                    <label class="form-label fw-semibold">Tahun / Tanggal <span class="text-danger">*</span></label>
-                                    <input type="text" class="form-control bg-light" name="story_date[]" placeholder="Misal: 25 Agustus 2023" required>
-                                </div>
-                                <div class="col-12">
-                                    <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
-                                    <textarea class="form-control bg-light" name="story_desc[]" rows="2" placeholder="Ceritakan momen ini..." required></textarea>
-                                </div>
-                            </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">Tahun / Tanggal <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control bg-light" name="story_date[]" placeholder="Misal: 25 Agustus 2023" required>
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label fw-semibold">Deskripsi Singkat <span class="text-danger">*</span></label>
+                            <textarea class="form-control bg-light" name="story_desc[]" rows="2" placeholder="Ceritakan momen ini..." required></textarea>
                         </div>
                     </div>
                 </div>
             `;
             container.appendChild(clone);
         });
-
-        // Image Preview Handler for Timeline
-        function previewImage(input) {
-            if (input.files && input.files[0]) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = input.parentElement.querySelector('img');
-                    const icon = input.parentElement.querySelector('i');
-                    img.src = e.target.result;
-                    img.style.display = 'block';
-                    icon.style.display = 'none';
-                }
-                reader.readAsDataURL(input.files[0]);
-            }
-        }
 
     </script>
     <!-- Cropper Modal -->

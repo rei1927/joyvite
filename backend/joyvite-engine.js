@@ -790,8 +790,25 @@ function compileTemplate(templateSlug, settings) {
   {
     const love_story = settings.love_story || [];
     const love_story_cover = settings.love_story_cover || null;
+    const love_story_enabled = settings.love_story_enabled !== false; // default true
 
-    if (love_story.length > 0) {
+    // Jika fitur dimatikan, hapus seluruh section Love Story dari undangan
+    if (!love_story_enabled) {
+      // Cari container utama Love Story berdasarkan heading "Love Story"
+      let $loveStorySection = null;
+      $('.elementor-heading-title').each(function() {
+        if ($(this).text().trim().toLowerCase() === 'love story') {
+          // Naik ke parent container terbesar yang membungkus seluruh section
+          $loveStorySection = $(this).closest('.e-con.e-child').closest('.e-con.e-child');
+          return false;
+        }
+      });
+      
+      if ($loveStorySection && $loveStorySection.length) {
+        $loveStorySection.remove();
+        console.log('[Engine] Love Story section DIHAPUS (dinonaktifkan user).');
+      }
+    } else if (love_story.length > 0) {
       // Cari elemen H2 "Love Story"
       let $loveStoryHeading = null;
       $('.elementor-heading-title').each(function() {
@@ -824,7 +841,7 @@ function compileTemplate(templateSlug, settings) {
             // Hapus semua timeline lama
             $timelineNodes.remove();
             
-            // Injeksi data baru
+            // Injeksi data baru — hanya sesuai jumlah fase user
             love_story.forEach((story, idx) => {
               let $newNode = $templateNode.clone();
               let $headings = $newNode.find('.elementor-heading-title');
