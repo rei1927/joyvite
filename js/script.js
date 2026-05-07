@@ -210,12 +210,20 @@ $(document).ready(function() {
     let currentFileInput = '';
 
     function openCropper(file, targetImgId, inputId) {
+        console.log('[Cropper] openCropper called:', file.name, file.size, 'target:', targetImgId, 'input:', inputId);
+        currentCropTargetImg = targetImgId;
+        currentFileInput = inputId;
         var reader = new FileReader();
         reader.onload = function(e) {
-            $('#crop-image').attr('src', e.target.result);
+            console.log('[Cropper] FileReader loaded, data length:', e.target.result.length);
+            var cropImg = document.getElementById('crop-image');
+            cropImg.src = e.target.result;
+            console.log('[Cropper] Showing cropModal...');
             $('#cropModal').modal('show');
-            currentCropTargetImg = targetImgId;
-            currentFileInput = inputId;
+        };
+        reader.onerror = function(e) {
+            console.error('[Cropper] FileReader ERROR:', e);
+            alert('Gagal membaca file. Coba file lain.');
         };
         reader.readAsDataURL(file);
     }
@@ -301,8 +309,8 @@ $(document).ready(function() {
     });
 
     $('#coverPhotoInput').on('change', function(e) {
+        console.log('[Cropper] coverPhotoInput change event fired, files:', e.target.files ? e.target.files.length : 0);
         if (e.target.files && e.target.files[0]) {
-            // Rasio sudah di-handle di event modal di bawah
             openCropper(e.target.files[0], '#coverPreview', '#coverPhotoInput');
         }
     });
