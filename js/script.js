@@ -505,8 +505,12 @@ $(document).ready(function() {
 
             // e. Jika Halaman Cerita Cinta
             if (flatData['story_title'] || flatData['love_story_enabled'] !== undefined) {
-                // Simpan status toggle
-                nestedSettings.love_story_enabled = flatData['love_story_enabled'] === 'true';
+                // Simpan status toggle (handle array dari hidden input + checkbox pattern)
+                let enabledVal = flatData['love_story_enabled'];
+                if (Array.isArray(enabledVal)) {
+                    enabledVal = enabledVal[enabledVal.length - 1]; // ambil nilai terakhir (checkbox)
+                }
+                nestedSettings.love_story_enabled = enabledVal === 'true';
                 
                 nestedSettings.love_story = [];
                 if (flatData['story_cover']) {
