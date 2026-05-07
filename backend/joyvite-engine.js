@@ -1248,6 +1248,89 @@ function compileTemplate(templateSlug, settings) {
   }
 
   // =========================================
+  // 12c. SLIDESHOW GALLERY DI SECTION SAVE THE DATE
+  // =========================================
+  {
+    const galeriPhotos = (settings.galeri && settings.galeri.photos) ? settings.galeri.photos : [];
+    
+    if (galeriPhotos.length > 0) {
+      // Cari heading "Save The Date"
+      let $saveTheDateContainer = null;
+      $('.elementor-heading-title').each(function() {
+        const text = $(this).text().trim().toLowerCase();
+        if (text === 'save the date') {
+          // Naik ke parent container yang punya background_background: classic
+          let $el = $(this).closest('.e-con.e-child');
+          // Cek apakah container ini atau parent-nya punya background
+          while ($el.length) {
+            const settingsStr = $el.attr('data-settings');
+            if (settingsStr && settingsStr.indexOf('background_background') > -1) {
+              $saveTheDateContainer = $el;
+              break;
+            }
+            $el = $el.parent().closest('.e-con.e-child');
+          }
+          return false;
+        }
+      });
+
+      if ($saveTheDateContainer && $saveTheDateContainer.length) {
+        // Pastikan container relative agar slideshow absolute bisa berfungsi
+        const existingStyle = $saveTheDateContainer.attr('style') || '';
+        $saveTheDateContainer.attr('style', existingStyle + ';position:relative;background-image:none!important;');
+
+        if (galeriPhotos.length >= 2) {
+          // === SLIDESHOW MODE (2+ foto) ===
+          let slideshowHtml = '<div class="joyvite-slideshow" style="position:absolute;inset:0;z-index:0;overflow:hidden;">';
+          galeriPhotos.forEach((url, i) => {
+            const activeClass = i === 0 ? ' active' : '';
+            slideshowHtml += `<img class="joyvite-slide${activeClass}" src="${url}" alt="Gallery ${i+1}" style="position:absolute;width:100%;height:100%;object-fit:cover;opacity:${i === 0 ? '1' : '0'};transition:opacity 1.5s ease-in-out;">`;
+          });
+          slideshowHtml += '</div>';
+          
+          // Inject slideshow sebagai child pertama
+          $saveTheDateContainer.prepend(slideshowHtml);
+          
+          // Tambahkan JS inline untuk animasi crossfade
+          const slideshowScript = `
+          <script>
+          (function() {
+            var slides = document.querySelectorAll('.joyvite-slide');
+            if (slides.length < 2) return;
+            var current = 0;
+            setInterval(function() {
+              slides[current].style.opacity = '0';
+              slides[current].classList.remove('active');
+              current = (current + 1) % slides.length;
+              slides[current].style.opacity = '1';
+              slides[current].classList.add('active');
+            }, 4000);
+          })();
+          </script>`;
+          $('body').append(slideshowScript);
+          
+          console.log('[Engine] Slideshow gallery diinjeksi ke Save The Date (' + galeriPhotos.length + ' foto).');
+        } else {
+          // === SINGLE PHOTO MODE (1 foto) ===
+          const singleSlideHtml = '<div class="joyvite-slideshow" style="position:absolute;inset:0;z-index:0;overflow:hidden;">' +
+            '<img src="' + galeriPhotos[0] + '" alt="Gallery" style="position:absolute;width:100%;height:100%;object-fit:cover;">' +
+            '</div>';
+          $saveTheDateContainer.prepend(singleSlideHtml);
+          console.log('[Engine] Single gallery photo diinjeksi ke Save The Date.');
+        }
+        
+        // Pastikan konten di atasnya (heading, countdown, dll) tetap di atas slideshow
+        $saveTheDateContainer.children().not('.joyvite-slideshow').each(function() {
+          const childStyle = $(this).attr('style') || '';
+          if (childStyle.indexOf('z-index') === -1) {
+            $(this).attr('style', childStyle + ';position:relative;z-index:1;');
+          }
+        });
+      }
+    }
+  }
+
+  // =========================================
   // 13. INJEKSI MUSIK BACKGROUND
   // =========================================
 
