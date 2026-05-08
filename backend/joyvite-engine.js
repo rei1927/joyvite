@@ -1393,11 +1393,12 @@ function compileTemplate(templateSlug, settings) {
   finalHtml = finalHtml.replace(/url\("\.\.\/wp-includes\//g, `url("/joyvite-assets/${templateSlug}/${domainFolder}/wp-includes/`);
   
   // Rewrite fonts & CDN relative paths (semua kedalaman ../../ dan ../../../)
-  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.googleapis\.com\//g, '$1="https://fonts.googleapis.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.gstatic\.com\//g, '$1="https://fonts.gstatic.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.cdnfonts\.com\//g, '$1="https://fonts.cdnfonts.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+cdnjs\.cloudflare\.com\//g, '$1="https://cdnjs.cloudflare.com/');
-  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+unpkg\.com\//g, '$1="https://unpkg.com/');
+  // Diubah menjadi memuat dari file lokal agar offline-capable dan menghindari error URL-encoding dari httrack
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.googleapis\.com\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/fonts.googleapis.com/`);
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.gstatic\.com\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/fonts.gstatic.com/`);
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+fonts\.cdnfonts\.com\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/fonts.cdnfonts.com/`);
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+cdnjs\.cloudflare\.com\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/cdnjs.cloudflare.com/`);
+  finalHtml = finalHtml.replace(/(href|src)=["'](\.\.\/)+unpkg\.com\//g, `$1="/joyvite-assets/${templateSlug}/${domainFolder}/unpkg.com/`);
   
   // Rewrite data-thumbnail untuk gallery (absolute ke localhost assets)
   finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, `data-thumbnail="/joyvite-assets/${templateSlug}/menujuacara.id/`);
