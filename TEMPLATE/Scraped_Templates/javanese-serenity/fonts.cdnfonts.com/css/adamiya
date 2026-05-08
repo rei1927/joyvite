@@ -1,0 +1,8 @@
+@font-face {
+    font-family: 'Adamiya';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Adamiya'), url('../s/113341/AdamiyaRegular-MAAep.woff') format('woff');
+}
+
+
