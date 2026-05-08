@@ -1354,7 +1354,7 @@ function compileTemplate(templateSlug, settings) {
     const $kontenS1a = $('#kontenS1a, [data-id="1351b293"]');
     if ($kontenS1a.length) {
       const existingStyle = $kontenS1a.attr('style') || '';
-      $kontenS1a.attr('style', existingStyle + ';transform:scale(1.5);transform-origin:top center;margin-top:-10%;margin-bottom:25%;');
+      $kontenS1a.attr('style', existingStyle + ';transform:scale(1.5);transform-origin:top center;margin-top:-25%;margin-bottom:25%;');
     }
   }
 
