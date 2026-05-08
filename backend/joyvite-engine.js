@@ -1355,6 +1355,9 @@ function compileTemplate(templateSlug, settings) {
     if ($kontenS1a.length) {
       const existingStyle = $kontenS1a.attr('style') || '';
       $kontenS1a.attr('style', existingStyle + ';transform:scale(1.5);transform-origin:top center;margin-top:-25%;margin-bottom:25%;');
+      
+      // Hapus class animasi scroll yang mungkin error (opacity 0) karena scale/margin ekstrem
+      $kontenS1a.find('.anim').removeClass('anim zoomOne').css('opacity', '1');
     }
   }
 
@@ -1399,6 +1402,9 @@ function compileTemplate(templateSlug, settings) {
   // Rewrite data-thumbnail untuk gallery (absolute ke localhost assets)
   finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/menujuacara\.id\//g, `data-thumbnail="/joyvite-assets/${templateSlug}/menujuacara.id/`);
   finalHtml = finalHtml.replace(/data-thumbnail=["']https:\/\/web\.menujuacara\.id\//g, `data-thumbnail="/joyvite-assets/${templateSlug}/web.menujuacara.id/`);
+
+  // Rewrite escaped JSON paths for background_video_link inside data-settings
+  finalHtml = finalHtml.replace(/(\.\.\\\/wp-content\\\/)/g, `\/joyvite-assets\/${templateSlug}\/${domainFolder}\/wp-content\/`);
 
   // Rewrite social media & external links (semua kedalaman relatif)
   finalHtml = finalHtml.replace(/(href)=["'](\.\.\/)+instagram\.com\//g, '$1="https://instagram.com/');
