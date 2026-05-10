@@ -279,7 +279,14 @@ app.use((req, res, next) => {
 
 app.use(express.static(dashboardPath, { extensions: ['html'] }));
 const templatesPath = process.env.TEMPLATES_DIR || path.join(__dirname, '../TEMPLATE/Scraped_Templates');
-app.use('/joyvite-assets', express.static(templatesPath));
+app.use('/joyvite-assets', express.static(templatesPath, {
+  setHeaders: (res, filePath) => {
+    // Force CSS MIME type for local font files that lack .css extension
+    if (filePath.includes('fonts.googleapis.com/css/')) {
+      res.setHeader('Content-Type', 'text/css');
+    }
+  }
+}));
 
 // GET /invitation/:slug
 // Flow: Ambil data dari DB → Compile template → Kirim HTML final
